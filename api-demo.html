@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blizzard API Integration - Example</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        h1 {
+            color: #00d4ff;
+            text-align: center;
+        }
+        .container {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        button {
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00a8cc;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .output {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .loading {
+            color: #ffeb3b;
+        }
+        .error {
+            color: #f44336;
+        }
+        .success {
+            color: #4caf50;
+        }
+        .raid-item {
+            background: #333;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .raid-item:hover {
+            background: #444;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Blizzard API Integration - Demo</h1>
+    
+    <div class="container">
+        <h2>Configuración del Servidor</h2>
+        <p>URL del servidor: <strong id="serverUrl">http://localhost:3000</strong></p>
+        <p>Estado: <span id="serverStatus" class="loading">Verificando...</span></p>
+        <button onclick="checkHealth()">Verificar Estado</button>
+    </div>
+
+    <div class="container">
+        <h2>1. Listar Raids Disponibles</h2>
+        <button onclick="loadRaids()">Cargar Raids</button>
+        <div id="raidsOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>2. Detalles de Raid</h2>
+        <p>Selecciona una raid de la lista anterior o ingresa un ID:</p>
+        <input type="number" id="raidId" placeholder="Raid ID (ej: 1279)" style="padding: 8px; width: 200px;">
+        <button onclick="loadRaidDetails()">Cargar Detalles</button>
+        <div id="raidDetailsOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>3. Loot de Encounter</h2>
+        <p>Selecciona un encounter de los detalles de raid o ingresa un ID:</p>
+        <input type="number" id="encounterId" placeholder="Encounter ID (ej: 2902)" style="padding: 8px; width: 200px;">
+        <button onclick="loadEncounterLoot()">Cargar Loot</button>
+        <div id="encounterLootOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>4. Detalles de Item</h2>
+        <p>Selecciona un item de la lista de loot o ingresa un ID:</p>
+        <input type="number" id="itemId" placeholder="Item ID (ej: 212405)" style="padding: 8px; width: 200px;">
+        <button onclick="loadItemDetails()">Cargar Item</button>
+        <div id="itemDetailsOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>5. Gestión de Caché</h2>
+        <button onclick="getCacheStats()">Ver Estadísticas</button>
+        <button onclick="clearCache()">Limpiar Caché</button>
+        <div id="cacheOutput" class="output"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        
+        async function checkHealth() {
+            const output = document.getElementById('serverStatus');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                output.className = 'success';
+                output.textContent = `✓ Conectado (${data.region.toUpperCase()} - ${data.locale})`;
+            } catch (error) {
+                output.className = 'error';
+                output.textContent = '✗ No se puede conectar al servidor';
+            }
+        }
+
+        async function loadRaids() {
+            const output = document.getElementById('raidsOutput');
+            output.innerHTML = '<span class="loading">Cargando raids...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/raids`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<div class="success">✓ ${data.count} raids encontradas</div><br>`;
+                    data.raids.forEach(raid => {
+                        html += `<div class="raid-item" onclick="document.getElementById('raidId').value=${raid.id}; loadRaidDetails()">
+                            <strong>${raid.name}</strong> (ID: ${raid.id})
+                        </div>`;
+                    });
+                    output.innerHTML = html;
+                } else {
+                    output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        async function loadRaidDetails() {
+            const raidId = document.getElementById('raidId').value;
+            if (!raidId) return alert('Por favor ingresa un Raid ID');
+            
+            const output = document.getElementById('raidDetailsOutput');
+            output.innerHTML = '<span class="loading">Cargando detalles...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/raids/${raidId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<div class="success">✓ Raid: ${data.raid.name}</div><br>`;
+                    html += `<strong>Descripción:</strong> ${data.raid.description || 'N/A'}<br>`;
+                    html += `<strong>Nivel mínimo:</strong> ${data.raid.minimum_level || 'N/A'}<br><br>`;
+                    html += `<strong>Encounters (${data.raid.encounters.length}):</strong><br>`;
+                    data.raid.encounters.forEach(encounter => {
+                        html += `<div class="raid-item" onclick="document.getElementById('encounterId').value=${encounter.id}; loadEncounterLoot()">
+                            ${encounter.name} (ID: ${encounter.id})
+                        </div>`;
+                    });
+                    output.innerHTML = html;
+                } else {
+                    output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        async function loadEncounterLoot() {
+            const encounterId = document.getElementById('encounterId').value;
+            if (!encounterId) return alert('Por favor ingresa un Encounter ID');
+            
+            const output = document.getElementById('encounterLootOutput');
+            output.innerHTML = '<span class="loading">Cargando loot...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/encounters/${encounterId}/loot`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<div class="success">✓ Encounter: ${data.encounter.name}</div><br>`;
+                    html += `<strong>Raid:</strong> ${data.encounter.instance?.name || 'N/A'}<br><br>`;
+                    html += `<strong>Loot (${data.loot.length} items):</strong><br>`;
+                    data.loot.forEach(item => {
+                        html += `<div class="raid-item" onclick="document.getElementById('itemId').value=${item.id}; loadItemDetails()">
+                            ${item.name} (ID: ${item.id}) - ${item.quality}
+                        </div>`;
+                    });
+                    output.innerHTML = html;
+                } else {
+                    output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        async function loadItemDetails() {
+            const itemId = document.getElementById('itemId').value;
+            if (!itemId) return alert('Por favor ingresa un Item ID');
+            
+            const output = document.getElementById('itemDetailsOutput');
+            output.innerHTML = '<span class="loading">Cargando item...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/items/${itemId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const item = data.item;
+                    let html = `<div class="success">✓ Item: ${item.name}</div><br>`;
+                    if (item.icon_url) {
+                        html += `<img src="${item.icon_url}" alt="${item.name}" style="width: 56px; height: 56px;"><br><br>`;
+                    }
+                    html += `<strong>Calidad:</strong> ${item.quality}<br>`;
+                    html += `<strong>Nivel:</strong> ${item.level}<br>`;
+                    html += `<strong>Tipo:</strong> ${item.item_class} - ${item.item_subclass}<br>`;
+                    html += `<strong>Slot:</strong> ${item.inventory_type}<br>`;
+                    html += `<strong>Equipable:</strong> ${item.is_equippable ? 'Sí' : 'No'}<br><br>`;
+                    html += `<strong>Clases que pueden equiparlo:</strong><br>`;
+                    html += `<div style="background: #1a1a1a; padding: 10px; border-radius: 4px;">`;
+                    item.equippable_classes.forEach(cls => {
+                        html += `<span style="background: #00d4ff; color: #000; padding: 2px 8px; border-radius: 3px; margin: 2px; display: inline-block;">${cls}</span> `;
+                    });
+                    html += `</div>`;
+                    output.innerHTML = html;
+                } else {
+                    output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        async function getCacheStats() {
+            const output = document.getElementById('cacheOutput');
+            output.innerHTML = '<span class="loading">Obteniendo estadísticas...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/cache/stats`);
+                const data = await response.json();
+                output.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        async function clearCache() {
+            const output = document.getElementById('cacheOutput');
+            output.innerHTML = '<span class="loading">Limpiando caché...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/cache`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                output.innerHTML = `<div class="success">${data.message}</div>`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Check server status on page load
+        checkHealth();
+    </script>
+</body>
+</html>
