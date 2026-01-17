@@ -658,6 +658,15 @@ function setupFirebaseListener() {
                 invalidateTableCache();
                 updateCharacterList();
                 updateTable();
+            } else {
+                // Data was cleared in Firebase, reset local data
+                characters = [];
+                assignments = [];
+                
+                // Update UI to reflect empty state
+                invalidateTableCache();
+                updateCharacterList();
+                updateTable();
             }
         }, (error) => {
             console.error('Error in Firebase listener:', error);
@@ -719,8 +728,10 @@ function exportToExcel() {
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
     // Wait for Firebase to be ready, then load data and set up listeners
+    const FIREBASE_INIT_TIMEOUT_MS = 5000; // 5 seconds timeout
+    const RETRY_INTERVAL_MS = 100; // Check every 100ms
+    const maxRetries = FIREBASE_INIT_TIMEOUT_MS / RETRY_INTERVAL_MS;
     let initRetries = 0;
-    const maxRetries = 50; // Max 5 seconds (50 * 100ms)
     
     const initializeApp = () => {
         if (isFirebaseReady()) {
@@ -743,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (initRetries < maxRetries) {
             // Firebase not ready yet, wait a bit and try again
             initRetries++;
-            setTimeout(initializeApp, 100);
+            setTimeout(initializeApp, RETRY_INTERVAL_MS);
         } else {
             // Firebase failed to load after max retries
             console.error('Firebase failed to initialize after maximum retries');

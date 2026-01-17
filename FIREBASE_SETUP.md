@@ -95,7 +95,33 @@ For development/testing, you can use permissive rules:
 }
 ```
 
-**Note:** For production use, implement proper authentication and authorization rules.
+**⚠️ IMPORTANT FOR PRODUCTION:** The current configuration allows any client to read and write all data. For production use, implement proper authentication and authorization rules:
+
+```json
+{
+  "rules": {
+    "lootData": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
+```
+
+Or for even more security, restrict writes to specific authenticated users:
+
+```json
+{
+  "rules": {
+    "lootData": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.uid === 'admin-uid-1' || auth.uid === 'admin-uid-2')"
+    }
+  }
+}
+```
+
+Consider implementing Firebase Authentication to control who can access and modify the data.
 
 ## How It Works
 
