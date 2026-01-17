@@ -7,6 +7,7 @@
     --verde-epico: #10b981;
     --rojo-legendario: #ff4500;
     --fondo-gradiente: linear-gradient(135deg, var(--azul-profundo-1), var(--azul-profundo-2));
+    --sidebar-mobile-max-height: 400px;
 }
 
 body {
@@ -294,14 +295,15 @@ ul:hover, table:hover {
 /* Responsive design */
 @media (max-width: 1024px) {
     .app-container {
-        flex-direction: column-reverse;
+        flex-direction: column;
     }
     
     .sidebar {
         width: 100%;
         border-left: none;
-        border-top: 2px solid var(--dorado);
-        max-height: 400px;
+        border-bottom: 2px solid var(--dorado);
+        max-height: var(--sidebar-mobile-max-height);
+        order: -1;
     }
     
     .main-content {
