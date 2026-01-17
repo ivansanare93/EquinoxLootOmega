@@ -1022,7 +1022,7 @@ function exportToExcel() {
     // Get the range of the worksheet
     const range = XLSX.utils.decode_range(worksheet['!ref']);
     
-    // Shift all rows down by 2 to make room for the header
+    // Add title and spacing rows at the top
     XLSX.utils.sheet_add_aoa(worksheet, [[`RAID EQUINOX - ${displayDate}`]], { origin: 0 });
     XLSX.utils.sheet_add_aoa(worksheet, [['']], { origin: 1 }); // Empty row for spacing
     
@@ -1040,7 +1040,7 @@ function exportToExcel() {
         right: { ...thinBorder, color: { rgb: color } }
     });
     
-    // Style the title header row (row 0)
+    // Style the title header row (row 0) - cell is created by sheet_add_aoa above
     const titleCell = worksheet['A1'];
     if (titleCell) {
         titleCell.s = {
