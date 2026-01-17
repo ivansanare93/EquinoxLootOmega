@@ -572,28 +572,37 @@ function generateCharacterRow(char, assigned) {
     const row = document.createElement('tr');
     
     // Generar HTML de items asignados con caching de búsquedas
-    const assignedHtml = assigned.map((a, assignIndex) => {
+    const assignedHtml = assigned.map((a) => {
         const item = itemIndexByName.get(a.item);
         const bossName = bossIndexById.get(a.boss)?.name || 'Unknown';
         const description = item ? item.description : 'Item no encontrado';
+        
+        // Find the global index of this assignment in the assignments array
+        const globalIndex = assignments.findIndex(assign => assign === a);
+        
+        console.log(`[generateCharacterRow] Assignment: ${a.item} for ${char.name}, global index: ${globalIndex}`);
+        
         return `
             <span class="tooltip">
                 ${a.item} (${a.dificultad}, ilvl ${a.ilvl})
                 <span class="tooltiptext">${description}</span>
             </span> (de ${bossName})
-            <button class="btn-delete-assign" data-index="${assignIndex}">Eliminar</button><br>
+            <button class="btn-delete-assign" data-index="${globalIndex}">Eliminar</button><br>
         `;
     }).join('');
     
     // Generar HTML de notas y tipo
-    const notesHtml = assigned.map((a, assignIndex) => {
+    const notesHtml = assigned.map((a) => {
+        // Find the global index of this assignment in the assignments array
+        const globalIndex = assignments.findIndex(assign => assign === a);
+        
         return `
             <div style="margin-bottom: 8px;">
-                <select class="tipo-select" data-index="${assignIndex}" style="padding: 4px; margin-right: 5px;">
+                <select class="tipo-select" data-index="${globalIndex}" style="padding: 4px; margin-right: 5px;">
                     <option value="Necesidad" ${a.tipo === 'Necesidad' ? 'selected' : ''}>Necesidad</option>
                     <option value="Codicia" ${a.tipo === 'Codicia' ? 'selected' : ''}>Codicia</option>
                 </select>
-                <input type="text" class="note-input" value="${a.note || ''}" placeholder="Nota adicional" data-index="${assignIndex}" maxlength="50" style="padding: 4px;">
+                <input type="text" class="note-input" value="${a.note || ''}" placeholder="Nota adicional" data-index="${globalIndex}" maxlength="50" style="padding: 4px;">
             </div>
         `;
     }).join('');
@@ -697,9 +706,13 @@ function updateNote(assignIndex, note) {
     }
     
     if (assignIndex >= 0 && assignIndex < assignments.length) {
+        const assignment = assignments[assignIndex];
+        console.log(`[updateNote] Updating note for assignment at index ${assignIndex}: ${assignment.character} - ${assignment.item}, new note: "${note}"`);
         assignments[assignIndex].note = note;
         // Solo guardar datos sin recrear tabla (optimización: nota es solo visual, sin impacto en filtros)
         saveData();
+    } else {
+        console.error(`[updateNote] Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
     }
     // No llamar a updateTable() aquí - la nota ya se actualiza en tiempo real en el input
 }
@@ -712,8 +725,12 @@ function updateTipo(assignIndex, tipo) {
     }
     
     if (assignIndex >= 0 && assignIndex < assignments.length) {
+        const assignment = assignments[assignIndex];
+        console.log(`[updateTipo] Updating tipo for assignment at index ${assignIndex}: ${assignment.character} - ${assignment.item}, new tipo: "${tipo}"`);
         assignments[assignIndex].tipo = tipo;
         saveData();
+    } else {
+        console.error(`[updateTipo] Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
     }
     // No llamar a updateTable() aquí - el tipo ya se actualiza en tiempo real en el select
 }
@@ -1164,10 +1181,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('tabla-asignaciones').addEventListener('change', (e) => {
         if (e.target.classList.contains('note-input')) {
             const index = parseInt(e.target.dataset.index);
+            console.log(`[Event Handler] Note input changed, data-index: ${index}`);
             updateNote(index, e.target.value);
         }
         if (e.target.classList.contains('tipo-select')) {
             const index = parseInt(e.target.dataset.index);
+            console.log(`[Event Handler] Tipo select changed, data-index: ${index}`);
             updateTipo(index, e.target.value);
         }
     });
