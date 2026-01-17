@@ -4,8 +4,9 @@
   "description": "WoW Retail Loot Manager with Blizzard API Integration",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run build && node server.js",
     "dev": "nodemon server.js",
+    "build": "mkdir -p public && cp LarancioOrtegaLoot.html style.css api-demo.html app.js data.js public/",
     "test": "echo \"No tests yet\" && exit 0",
     "test:api": "node test-api.js"
   },

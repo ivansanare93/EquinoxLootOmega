@@ -22,3 +22,6 @@ Thumbs.db
 # Build output
 dist/
 build/
+
+# Public directory (generated from source files)
+public/
