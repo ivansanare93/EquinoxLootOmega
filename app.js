@@ -7,11 +7,21 @@ let assignments = [];
 // ===== FIREBASE HELPERS =====
 
 /**
- * Check if Firebase is ready and initialized
+ * Extract data array from Firestore document snapshot
+ * Firestore documents store arrays in a 'data' field: { data: [...] }
+ * @param {DocumentSnapshot} docSnap - Firestore document snapshot
+ * @returns {Array} The data array or empty array if not found
+ */
+function extractDataArray(docSnap) {
+    return docSnap.exists() ? (docSnap.data().data || []) : [];
+}
+
+/**
+ * Check if Firebase Firestore is ready and initialized
  * @returns {boolean}
  */
 function isFirebaseReady() {
-    return !!(window.firebaseDB && window.firebaseRef && window.firebaseSet && window.firebaseGet && window.firebaseOnValue);
+    return !!(window.firestoreDB && window.firestoreDoc && window.firestoreSetDoc && window.firestoreGetDoc && window.firestoreOnSnapshot);
 }
 
 // ===== UTILIDADES Y HELPERS =====
@@ -595,84 +605,93 @@ function clearAllAssignments() {
     }
 }
 
-function saveData() {
-    // Save data to Firebase Realtime Database
+async function saveData() {
+    // Save data to Firebase Firestore
     if (isFirebaseReady()) {
-        const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
-        window.firebaseSet(dbRef, {
-            characters: characters,
-            assignments: assignments
-        }).catch((error) => {
-            console.error('Error saving data to Firebase:', error);
+        try {
+            // Run both writes in parallel for better performance
+            await Promise.all([
+                window.firestoreSetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments"), { data: assignments }),
+                window.firestoreSetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"), { data: characters })
+            ]);
+        } catch (error) {
+            console.error('Error saving data to Firestore:', error);
             alert('Error al guardar datos. Por favor, verifica tu conexión a internet e intenta de nuevo.');
-        });
+        }
     } else {
-        console.error('Firebase is not initialized yet');
-        alert('Firebase no está inicializado. Por favor, recarga la página.');
+        console.error('Firestore is not initialized yet');
+        alert('Firestore no está inicializado. Por favor, recarga la página.');
     }
 }
 
 /**
- * Load initial data from Firebase
+ * Load initial data from Firebase Firestore
  */
-function loadDataFromFirebase() {
-    return new Promise((resolve, reject) => {
+async function loadDataFromFirebase() {
+    try {
         if (isFirebaseReady()) {
-            const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
-            window.firebaseGet(dbRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    characters = data.characters || [];
-                    assignments = data.assignments || [];
-                } else {
-                    console.log('No data available in Firebase, using empty arrays');
-                    characters = [];
-                    assignments = [];
-                }
-                resolve();
-            }).catch((error) => {
-                console.error('Error loading data from Firebase:', error);
-                alert('Error al cargar datos desde Firebase. Usando datos vacíos.');
-                reject(error);
-            });
+            // Run both reads in parallel for better performance
+            const [assignmentsSnap, charactersSnap] = await Promise.all([
+                window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments")),
+                window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"))
+            ]);
+
+            // Extract data arrays from document snapshots
+            assignments = extractDataArray(assignmentsSnap);
+            characters = extractDataArray(charactersSnap);
+
+            if (!assignmentsSnap.exists()) {
+                console.log('No assignments data available in Firestore, using empty array');
+            }
+            if (!charactersSnap.exists()) {
+                console.log('No characters data available in Firestore, using empty array');
+            }
         } else {
-            console.error('Firebase is not initialized yet');
-            reject(new Error('Firebase not initialized'));
+            console.error('Firestore is not initialized yet');
+            throw new Error('Firestore not initialized');
         }
-    });
+    } catch (error) {
+        console.error('Error loading data from Firestore:', error);
+        alert('Error al cargar datos desde Firestore. Usando datos vacíos.');
+        throw error;
+    }
 }
 
 /**
- * Set up real-time listener for Firebase data changes
+ * Set up real-time listener for Firebase Firestore data changes
  */
 function setupFirebaseListener() {
     if (isFirebaseReady()) {
-        const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
-        window.firebaseOnValue(dbRef, (snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                characters = data.characters || [];
-                assignments = data.assignments || [];
-                
-                // Update UI when data changes
-                invalidateTableCache();
-                updateCharacterList();
-                updateTable();
-            } else {
-                // Data was cleared in Firebase, reset local data
-                characters = [];
-                assignments = [];
-                
-                // Update UI to reflect empty state
-                invalidateTableCache();
-                updateCharacterList();
-                updateTable();
-            }
+        // Store document references for reuse
+        const assignmentsDocRef = window.firestoreDoc(window.firestoreDB, "appData", "assignments");
+        const charactersDocRef = window.firestoreDoc(window.firestoreDB, "appData", "characters");
+
+        // Listen for changes to assignments
+        window.firestoreOnSnapshot(assignmentsDocRef, (docSnap) => {
+            // Update local data from Firestore
+            assignments = extractDataArray(docSnap);
+            
+            // Update UI when data changes
+            invalidateTableCache();
+            updateTable();
         }, (error) => {
-            console.error('Error in Firebase listener:', error);
+            console.error('Error in Firestore assignments listener:', error);
+        });
+
+        // Listen for changes to characters
+        window.firestoreOnSnapshot(charactersDocRef, (docSnap) => {
+            // Update local data from Firestore
+            characters = extractDataArray(docSnap);
+            
+            // Update UI when data changes
+            invalidateTableCache();
+            updateCharacterList();
+            updateTable();
+        }, (error) => {
+            console.error('Error in Firestore characters listener:', error);
         });
     } else {
-        console.error('Firebase is not initialized yet');
+        console.error('Firestore is not initialized yet');
     }
 }
 
@@ -733,10 +752,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxRetries = FIREBASE_INIT_TIMEOUT_MS / RETRY_INTERVAL_MS;
     let initRetries = 0;
     
-    const initializeApp = () => {
+    const initializeApp = async () => {
         if (isFirebaseReady()) {
-            // Load initial data from Firebase
-            loadDataFromFirebase().then(() => {
+            // Load initial data from Firestore
+            try {
+                await loadDataFromFirebase();
+                
                 // Initialize UI with loaded data
                 updateBossSelect();
                 updateCharacterList();
@@ -744,21 +765,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Set up real-time listener for future changes
                 setupFirebaseListener();
-            }).catch((error) => {
+            } catch (error) {
                 console.error('Failed to load initial data:', error);
-                // Initialize with empty data if Firebase fails
+                // Initialize with empty data if Firestore fails
                 updateBossSelect();
                 updateCharacterList();
                 updateTable();
-            });
+            }
         } else if (initRetries < maxRetries) {
-            // Firebase not ready yet, wait a bit and try again
+            // Firestore not ready yet, wait a bit and try again
             initRetries++;
             setTimeout(initializeApp, RETRY_INTERVAL_MS);
         } else {
-            // Firebase failed to load after max retries
-            console.error('Firebase failed to initialize after maximum retries');
-            alert('No se pudo conectar con Firebase. La aplicación funcionará sin sincronización en tiempo real.');
+            // Firestore failed to load after max retries
+            console.error('Firestore failed to initialize after maximum retries');
+            alert('No se pudo conectar con Firestore. La aplicación funcionará sin sincronización en tiempo real.');
             // Initialize with empty data
             updateBossSelect();
             updateCharacterList();
