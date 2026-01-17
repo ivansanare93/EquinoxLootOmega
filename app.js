@@ -580,8 +580,6 @@ function generateCharacterRow(char, assigned) {
         // Find the global index of this assignment in the assignments array
         const globalIndex = assignments.findIndex(assign => assign === a);
         
-        console.log(`[generateCharacterRow] Assignment: ${a.item} for ${char.name}, global index: ${globalIndex}`);
-        
         return `
             <span class="tooltip">
                 ${a.item} (${a.dificultad}, ilvl ${a.ilvl})
@@ -706,13 +704,11 @@ function updateNote(assignIndex, note) {
     }
     
     if (assignIndex >= 0 && assignIndex < assignments.length) {
-        const assignment = assignments[assignIndex];
-        console.log(`[updateNote] Updating note for assignment at index ${assignIndex}: ${assignment.character} - ${assignment.item}, new note: "${note}"`);
         assignments[assignIndex].note = note;
         // Solo guardar datos sin recrear tabla (optimización: nota es solo visual, sin impacto en filtros)
         saveData();
     } else {
-        console.error(`[updateNote] Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
+        console.error(`updateNote: Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
     }
     // No llamar a updateTable() aquí - la nota ya se actualiza en tiempo real en el input
 }
@@ -725,12 +721,10 @@ function updateTipo(assignIndex, tipo) {
     }
     
     if (assignIndex >= 0 && assignIndex < assignments.length) {
-        const assignment = assignments[assignIndex];
-        console.log(`[updateTipo] Updating tipo for assignment at index ${assignIndex}: ${assignment.character} - ${assignment.item}, new tipo: "${tipo}"`);
         assignments[assignIndex].tipo = tipo;
         saveData();
     } else {
-        console.error(`[updateTipo] Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
+        console.error(`updateTipo: Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
     }
     // No llamar a updateTable() aquí - el tipo ya se actualiza en tiempo real en el select
 }
@@ -1181,12 +1175,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('tabla-asignaciones').addEventListener('change', (e) => {
         if (e.target.classList.contains('note-input')) {
             const index = parseInt(e.target.dataset.index);
-            console.log(`[Event Handler] Note input changed, data-index: ${index}`);
             updateNote(index, e.target.value);
         }
         if (e.target.classList.contains('tipo-select')) {
             const index = parseInt(e.target.dataset.index);
-            console.log(`[Event Handler] Tipo select changed, data-index: ${index}`);
             updateTipo(index, e.target.value);
         }
     });
