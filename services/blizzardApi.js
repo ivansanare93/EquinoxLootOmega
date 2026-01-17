@@ -188,7 +188,7 @@ class BlizzardApiService {
       'Two-Handed Maces': ['Guerrero', 'Paladín', 'Chamán', 'Druida', 'Caballero de la Muerte'],
       'Polearms': ['Guerrero', 'Paladín', 'Cazador', 'Chamán', 'Monje', 'Druida', 'Caballero de la Muerte'],
       'Staves': ['Mago', 'Sacerdote', 'Brujo', 'Chamán', 'Monje', 'Druida', 'Evocador'],
-      'Daggers': ['Todos'],
+      'Daggers': allClasses,
       'Fist Weapons': ['Pícaro', 'Monje', 'Cazador', 'Chamán', 'Cazador de Demonios'],
       'Bows': ['Guerrero', 'Pícaro', 'Cazador'],
       'Guns': ['Guerrero', 'Pícaro', 'Cazador'],
@@ -207,7 +207,7 @@ class BlizzardApiService {
     // Check weapon types
     for (const [weaponType, classes] of Object.entries(weaponMappings)) {
       if (itemSubclass.includes(weaponType) || itemClass.includes(weaponType)) {
-        return classes === 'Todos' ? allClasses : classes;
+        return classes;
       }
     }
 
