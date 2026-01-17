@@ -571,14 +571,28 @@ function getFilterKey() {
 function generateCharacterRow(char, assigned) {
     const row = document.createElement('tr');
     
+    // Create a map of assignment to global index for O(1) lookups
+    // This prevents O(n²) complexity from repeated findIndex calls
+    const assignmentIndexMap = new Map();
+    assigned.forEach(a => {
+        const globalIndex = assignments.findIndex(assign => assign === a);
+        assignmentIndexMap.set(a, globalIndex);
+    });
+    
     // Generar HTML de items asignados con caching de búsquedas
     const assignedHtml = assigned.map((a) => {
         const item = itemIndexByName.get(a.item);
         const bossName = bossIndexById.get(a.boss)?.name || 'Unknown';
         const description = item ? item.description : 'Item no encontrado';
         
-        // Find the global index of this assignment in the assignments array
-        const globalIndex = assignments.findIndex(assign => assign === a);
+        // Get the pre-calculated global index
+        const globalIndex = assignmentIndexMap.get(a);
+        
+        // Validate that we found a valid index
+        if (globalIndex === undefined || globalIndex === -1) {
+            console.error(`generateCharacterRow: Could not find global index for assignment ${a.item} for ${char.name}`);
+            return ''; // Skip this assignment if index not found
+        }
         
         return `
             <span class="tooltip">
@@ -591,8 +605,14 @@ function generateCharacterRow(char, assigned) {
     
     // Generar HTML de notas y tipo
     const notesHtml = assigned.map((a) => {
-        // Find the global index of this assignment in the assignments array
-        const globalIndex = assignments.findIndex(assign => assign === a);
+        // Get the pre-calculated global index
+        const globalIndex = assignmentIndexMap.get(a);
+        
+        // Validate that we found a valid index
+        if (globalIndex === undefined || globalIndex === -1) {
+            console.error(`generateCharacterRow: Could not find global index for assignment ${a.item} for ${char.name}`);
+            return ''; // Skip this assignment if index not found
+        }
         
         return `
             <div style="margin-bottom: 8px;">
