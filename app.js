@@ -30,7 +30,7 @@ function extractDataArray(docSnap) {
         
         // Validate that the data field is actually an array
         if (!Array.isArray(dataField)) {
-            console.warn('extractDataArray: Invalid data format - expected array, got:', typeof dataField, dataField);
+            console.warn('extractDataArray: Invalid data format - expected array, got:', typeof dataField);
             return [];
         }
         
@@ -184,7 +184,7 @@ function updateCharacterList() {
     
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('updateCharacterList: characters is not an array:', typeof characters, characters);
+        console.error('updateCharacterList: characters is not an array, type:', typeof characters);
         characters = []; // Reset to empty array
         return;
     }
@@ -203,7 +203,7 @@ function updateCharacterList() {
 function editCharacter(index) {
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('editCharacter: characters is not an array:', typeof characters, characters);
+        console.error('editCharacter: characters is not an array, type:', typeof characters);
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
@@ -240,14 +240,14 @@ function editCharacter(index) {
 function deleteCharacter(index) {
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('deleteCharacter: characters is not an array:', typeof characters, characters);
+        console.error('deleteCharacter: characters is not an array, type:', typeof characters);
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
     
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
-        console.error('deleteCharacter: assignments is not an array, resetting to empty array');
+        console.error('deleteCharacter: assignments is not an array, type:', typeof assignments);
         assignments = [];
     }
     
@@ -268,7 +268,7 @@ function addCharacter(e) {
     
     // Validate that characters is an array before using .some()
     if (!Array.isArray(characters)) {
-        console.error('addCharacter: characters is not an array, resetting to empty array');
+        console.error('addCharacter: characters is not an array, type:', typeof characters);
         characters = [];
     }
     
@@ -330,7 +330,7 @@ function updateSelects() {
     
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('updateSelects: characters is not an array:', typeof characters, characters);
+        console.error('updateSelects: characters is not an array, type:', typeof characters);
         characters = []; // Reset to empty array
     }
     
@@ -409,7 +409,7 @@ function filterItemsByCharacter() {
     
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('filterItemsByCharacter: characters is not an array:', typeof characters, characters);
+        console.error('filterItemsByCharacter: characters is not an array, type:', typeof characters);
         selectItem.innerHTML = '<option value="">Error: Datos no disponibles</option>';
         selectItem.disabled = true;
         return;
@@ -449,7 +449,7 @@ function updateFilters() {
     
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('updateFilters: characters is not an array:', typeof characters, characters);
+        console.error('updateFilters: characters is not an array, type:', typeof characters);
         characters = []; // Reset to empty array
     }
     
@@ -477,14 +477,14 @@ function assignItem() {
     
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('assignItem: characters is not an array:', typeof characters, characters);
+        console.error('assignItem: characters is not an array, type:', typeof characters);
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
     
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
-        console.error('assignItem: assignments is not an array, resetting to empty array');
+        console.error('assignItem: assignments is not an array, type:', typeof assignments);
         assignments = [];
     }
     
@@ -619,7 +619,7 @@ function updateTable() {
     
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
-        console.error('updateTable: characters is not an array:', typeof characters, characters);
+        console.error('updateTable: characters is not an array, type:', typeof characters);
         characters = []; // Reset to empty array
         tbody.innerHTML = '';
         return;
@@ -627,7 +627,7 @@ function updateTable() {
     
     // Verify assignments is also an array
     if (!Array.isArray(assignments)) {
-        console.error('updateTable: assignments is not an array:', typeof assignments, assignments);
+        console.error('updateTable: assignments is not an array, type:', typeof assignments);
         assignments = []; // Reset to empty array
         tbody.innerHTML = '';
         return;
@@ -693,7 +693,7 @@ function updateTable() {
 function updateNote(assignIndex, note) {
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
-        console.error('updateNote: assignments is not an array:', typeof assignments, assignments);
+        console.error('updateNote: assignments is not an array, type:', typeof assignments);
         return;
     }
     
@@ -708,7 +708,7 @@ function updateNote(assignIndex, note) {
 function updateTipo(assignIndex, tipo) {
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
-        console.error('updateTipo: assignments is not an array:', typeof assignments, assignments);
+        console.error('updateTipo: assignments is not an array, type:', typeof assignments);
         return;
     }
     
@@ -722,7 +722,7 @@ function updateTipo(assignIndex, tipo) {
 function deleteAssignment(index) {
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
-        console.error('deleteAssignment: assignments is not an array:', typeof assignments, assignments);
+        console.error('deleteAssignment: assignments is not an array, type:', typeof assignments);
         alert('Error: Los datos de asignaciones no están disponibles.');
         return;
     }
@@ -736,7 +736,7 @@ function deleteAssignment(index) {
 function clearAllAssignments() {
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
-        console.error('clearAllAssignments: assignments is not an array, resetting to empty array');
+        console.error('clearAllAssignments: assignments is not an array, type:', typeof assignments);
         assignments = [];
         saveData();
         return;
@@ -913,13 +913,13 @@ function setupFirebaseListener() {
 function exportToExcel() {
     // Validate that characters and assignments are arrays
     if (!Array.isArray(characters)) {
-        console.error('exportToExcel: characters is not an array:', typeof characters, characters);
+        console.error('exportToExcel: characters is not an array, type:', typeof characters);
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
     
     if (!Array.isArray(assignments)) {
-        console.error('exportToExcel: assignments is not an array:', typeof assignments, assignments);
+        console.error('exportToExcel: assignments is not an array, type:', typeof assignments);
         alert('Error: Los datos de asignaciones no están disponibles.');
         return;
     }
