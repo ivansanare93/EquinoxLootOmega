@@ -4,6 +4,16 @@
 let characters = [];
 let assignments = [];
 
+// ===== FIREBASE HELPERS =====
+
+/**
+ * Check if Firebase is ready and initialized
+ * @returns {boolean}
+ */
+function isFirebaseReady() {
+    return !!(window.firebaseDB && window.firebaseRef && window.firebaseSet && window.firebaseGet && window.firebaseOnValue);
+}
+
 // ===== UTILIDADES Y HELPERS =====
 
 /**
@@ -587,16 +597,18 @@ function clearAllAssignments() {
 
 function saveData() {
     // Save data to Firebase Realtime Database
-    if (window.firebaseDB && window.firebaseRef && window.firebaseSet) {
+    if (isFirebaseReady()) {
         const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
         window.firebaseSet(dbRef, {
             characters: characters,
             assignments: assignments
         }).catch((error) => {
             console.error('Error saving data to Firebase:', error);
+            alert('Error al guardar datos. Por favor, verifica tu conexión a internet e intenta de nuevo.');
         });
     } else {
         console.error('Firebase is not initialized yet');
+        alert('Firebase no está inicializado. Por favor, recarga la página.');
     }
 }
 
@@ -605,7 +617,7 @@ function saveData() {
  */
 function loadDataFromFirebase() {
     return new Promise((resolve, reject) => {
-        if (window.firebaseDB && window.firebaseRef && window.firebaseGet) {
+        if (isFirebaseReady()) {
             const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
             window.firebaseGet(dbRef).then((snapshot) => {
                 if (snapshot.exists()) {
@@ -620,6 +632,7 @@ function loadDataFromFirebase() {
                 resolve();
             }).catch((error) => {
                 console.error('Error loading data from Firebase:', error);
+                alert('Error al cargar datos desde Firebase. Usando datos vacíos.');
                 reject(error);
             });
         } else {
@@ -633,7 +646,7 @@ function loadDataFromFirebase() {
  * Set up real-time listener for Firebase data changes
  */
 function setupFirebaseListener() {
-    if (window.firebaseDB && window.firebaseRef && window.firebaseOnValue) {
+    if (isFirebaseReady()) {
         const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
         window.firebaseOnValue(dbRef, (snapshot) => {
             if (snapshot.exists()) {
@@ -706,8 +719,11 @@ function exportToExcel() {
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
     // Wait for Firebase to be ready, then load data and set up listeners
+    let initRetries = 0;
+    const maxRetries = 50; // Max 5 seconds (50 * 100ms)
+    
     const initializeApp = () => {
-        if (window.firebaseDB && window.firebaseRef && window.firebaseGet && window.firebaseOnValue) {
+        if (isFirebaseReady()) {
             // Load initial data from Firebase
             loadDataFromFirebase().then(() => {
                 // Initialize UI with loaded data
@@ -724,9 +740,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateCharacterList();
                 updateTable();
             });
-        } else {
+        } else if (initRetries < maxRetries) {
             // Firebase not ready yet, wait a bit and try again
+            initRetries++;
             setTimeout(initializeApp, 100);
+        } else {
+            // Firebase failed to load after max retries
+            console.error('Firebase failed to initialize after maximum retries');
+            alert('No se pudo conectar con Firebase. La aplicación funcionará sin sincronización en tiempo real.');
+            // Initialize with empty data
+            updateBossSelect();
+            updateCharacterList();
+            updateTable();
         }
     };
     
