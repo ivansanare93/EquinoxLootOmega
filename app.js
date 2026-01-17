@@ -599,8 +599,11 @@ async function saveData() {
     // Save data to Firebase Firestore
     if (isFirebaseReady()) {
         try {
-            await window.firestoreSetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments"), { data: assignments });
-            await window.firestoreSetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"), { data: characters });
+            // Run both writes in parallel for better performance
+            await Promise.all([
+                window.firestoreSetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments"), { data: assignments }),
+                window.firestoreSetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"), { data: characters })
+            ]);
         } catch (error) {
             console.error('Error saving data to Firestore:', error);
             alert('Error al guardar datos. Por favor, verifica tu conexión a internet e intenta de nuevo.');
@@ -617,7 +620,12 @@ async function saveData() {
 async function loadDataFromFirebase() {
     try {
         if (isFirebaseReady()) {
-            const assignmentsSnap = await window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments"));
+            // Run both reads in parallel for better performance
+            const [assignmentsSnap, charactersSnap] = await Promise.all([
+                window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments")),
+                window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"))
+            ]);
+
             if (assignmentsSnap.exists()) {
                 assignments = assignmentsSnap.data().data || [];
             } else {
@@ -625,7 +633,6 @@ async function loadDataFromFirebase() {
                 assignments = [];
             }
 
-            const charactersSnap = await window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"));
             if (charactersSnap.exists()) {
                 characters = charactersSnap.data().data || [];
             } else {
@@ -648,8 +655,12 @@ async function loadDataFromFirebase() {
  */
 function setupFirebaseListener() {
     if (isFirebaseReady()) {
+        // Store document references for reuse
+        const assignmentsDocRef = window.firestoreDoc(window.firestoreDB, "appData", "assignments");
+        const charactersDocRef = window.firestoreDoc(window.firestoreDB, "appData", "characters");
+
         // Listen for changes to assignments
-        window.firestoreOnSnapshot(window.firestoreDoc(window.firestoreDB, "appData", "assignments"), (docSnap) => {
+        window.firestoreOnSnapshot(assignmentsDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 assignments = docSnap.data().data || [];
                 
@@ -669,7 +680,7 @@ function setupFirebaseListener() {
         });
 
         // Listen for changes to characters
-        window.firestoreOnSnapshot(window.firestoreDoc(window.firestoreDB, "appData", "characters"), (docSnap) => {
+        window.firestoreOnSnapshot(charactersDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 characters = docSnap.data().data || [];
                 
