@@ -7,6 +7,16 @@ let assignments = [];
 // ===== FIREBASE HELPERS =====
 
 /**
+ * Extract data array from Firestore document snapshot
+ * Firestore documents store arrays in a 'data' field: { data: [...] }
+ * @param {DocumentSnapshot} docSnap - Firestore document snapshot
+ * @returns {Array} The data array or empty array if not found
+ */
+function extractDataArray(docSnap) {
+    return docSnap.exists() ? (docSnap.data().data || []) : [];
+}
+
+/**
  * Check if Firebase Firestore is ready and initialized
  * @returns {boolean}
  */
@@ -626,18 +636,15 @@ async function loadDataFromFirebase() {
                 window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"))
             ]);
 
-            if (assignmentsSnap.exists()) {
-                assignments = assignmentsSnap.data().data || [];
-            } else {
-                console.log('No assignments data available in Firestore, using empty array');
-                assignments = [];
-            }
+            // Extract data arrays from document snapshots
+            assignments = extractDataArray(assignmentsSnap);
+            characters = extractDataArray(charactersSnap);
 
-            if (charactersSnap.exists()) {
-                characters = charactersSnap.data().data || [];
-            } else {
+            if (!assignmentsSnap.exists()) {
+                console.log('No assignments data available in Firestore, using empty array');
+            }
+            if (!charactersSnap.exists()) {
                 console.log('No characters data available in Firestore, using empty array');
-                characters = [];
             }
         } else {
             console.error('Firestore is not initialized yet');
@@ -661,42 +668,25 @@ function setupFirebaseListener() {
 
         // Listen for changes to assignments
         window.firestoreOnSnapshot(assignmentsDocRef, (docSnap) => {
-            if (docSnap.exists()) {
-                assignments = docSnap.data().data || [];
-                
-                // Update UI when data changes
-                invalidateTableCache();
-                updateTable();
-            } else {
-                // Data was cleared in Firestore, reset local data
-                assignments = [];
-                
-                // Update UI to reflect empty state
-                invalidateTableCache();
-                updateTable();
-            }
+            // Update local data from Firestore
+            assignments = extractDataArray(docSnap);
+            
+            // Update UI when data changes
+            invalidateTableCache();
+            updateTable();
         }, (error) => {
             console.error('Error in Firestore assignments listener:', error);
         });
 
         // Listen for changes to characters
         window.firestoreOnSnapshot(charactersDocRef, (docSnap) => {
-            if (docSnap.exists()) {
-                characters = docSnap.data().data || [];
-                
-                // Update UI when data changes
-                invalidateTableCache();
-                updateCharacterList();
-                updateTable();
-            } else {
-                // Data was cleared in Firestore, reset local data
-                characters = [];
-                
-                // Update UI to reflect empty state
-                invalidateTableCache();
-                updateCharacterList();
-                updateTable();
-            }
+            // Update local data from Firestore
+            characters = extractDataArray(docSnap);
+            
+            // Update UI when data changes
+            invalidateTableCache();
+            updateCharacterList();
+            updateTable();
         }, (error) => {
             console.error('Error in Firestore characters listener:', error);
         });
