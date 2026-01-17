@@ -123,6 +123,33 @@ table {
     overflow: hidden;
 }
 
+/* Column widths for assignments table */
+#tabla-asignaciones th:nth-child(1),
+#tabla-asignaciones td:nth-child(1) {
+    width: 18%;
+    min-width: 150px;
+}
+
+#tabla-asignaciones th:nth-child(2),
+#tabla-asignaciones td:nth-child(2) {
+    width: 15%;
+}
+
+#tabla-asignaciones th:nth-child(3),
+#tabla-asignaciones td:nth-child(3) {
+    width: 35%;
+}
+
+#tabla-asignaciones th:nth-child(4),
+#tabla-asignaciones td:nth-child(4) {
+    width: 12%;
+}
+
+#tabla-asignaciones th:nth-child(5),
+#tabla-asignaciones td:nth-child(5) {
+    width: 20%;
+}
+
 th, td {
     border: 1px solid var(--purpura);
     padding: 12px;
