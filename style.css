@@ -7,6 +7,7 @@
     --verde-epico: #10b981;
     --rojo-legendario: #ff4500;
     --fondo-gradiente: linear-gradient(135deg, var(--azul-profundo-1), var(--azul-profundo-2));
+    --sidebar-mobile-max-height: 400px;
 }
 
 body {
@@ -14,10 +15,7 @@ body {
     color: white;
     font-family: 'Inter', sans-serif;
     margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 0;
     min-height: 100vh;
     animation: fadeIn 1s ease-in-out;
 }
@@ -27,7 +25,48 @@ body {
     to { opacity: 1; }
 }
 
-h1, h2 {
+/* Main layout container */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    gap: 0;
+}
+
+/* Main content area */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Sidebar for character list */
+.sidebar {
+    width: 300px;
+    background-color: rgba(15, 23, 42, 0.95);
+    border-left: 2px solid var(--dorado);
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    font-size: 1.3em;
+    border-bottom: 2px solid var(--dorado);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+h1 {
+    color: var(--dorado);
+    text-align: center;
+    text-shadow: 0 0 10px var(--purpura);
+    width: 100%;
+}
+
+h2 {
     color: var(--dorado);
     text-align: center;
     text-shadow: 0 0 10px var(--purpura);
@@ -167,31 +206,101 @@ ul:hover, table:hover {
     box-shadow: 0 2px 8px var(--purpura);
 }
 
-/* Multi-column layout for character list */
+/* Character list in sidebar - clean simple list */
 #lista-personajes {
-    column-count: 3;
-    column-gap: 20px;
-    list-style-position: inside;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 #lista-personajes li {
-    break-inside: avoid;
-    margin-bottom: 10px;
-    padding: 8px;
-    background-color: rgba(15, 23, 42, 0.5);
-    border-radius: 6px;
-    border: 1px solid var(--purpura);
+    padding: 12px 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+    transition: background-color 0.2s ease;
+    font-size: 0.9em;
+    line-height: 1.4;
 }
 
-/* Responsive design for character list */
+#lista-personajes li:hover {
+    background-color: rgba(139, 92, 246, 0.1);
+}
+
+#lista-personajes li:last-child {
+    border-bottom: none;
+}
+
+#lista-personajes button {
+    font-size: 0.75em;
+    padding: 4px 8px;
+    margin-left: 5px;
+    margin-top: 5px;
+}
+
+/* Character form in sidebar */
+#gestion-personajes {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#gestion-personajes:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+#form-personaje {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+#form-personaje:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+#form-personaje label {
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    font-size: 0.85em;
+    color: var(--dorado);
+}
+
+#form-personaje input,
+#form-personaje select,
+#form-personaje button {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.9em;
+}
+
+#form-personaje button {
+    margin-top: 12px;
+}
+
+/* Responsive design */
 @media (max-width: 1024px) {
-    #lista-personajes {
-        column-count: 2;
+    .app-container {
+        flex-direction: column;
     }
-}
-
-@media (max-width: 640px) {
-    #lista-personajes {
-        column-count: 1;
+    
+    .sidebar {
+        width: 100%;
+        border-left: none;
+        border-bottom: 2px solid var(--dorado);
+        max-height: var(--sidebar-mobile-max-height);
+        /* Use order property to visually move sidebar to top while maintaining
+           proper source order for screen readers and keyboard navigation */
+        order: -1;
+    }
+    
+    .main-content {
+        width: 100%;
     }
 }

@@ -36,105 +36,112 @@
     </script>
 </head>
 <body>
-    <h1>Equinox's Loot Manager - Forja de Mana Omega</h1>
+    <div class="app-container">
+        <div class="main-content">
+            <h1>Equinox's Loot Manager - Forja de Mana Omega</h1>
 
-    <!-- Gestión de Personajes -->
-    <section id="gestion-personajes">
-        <h2>Gestión de Personajes</h2>
-        <form id="form-personaje">
-            <label>Nombre:</label><input type="text" id="nombre" required>
-            <label>Clase:</label>
-            <select id="clase" required>
-                <option value="">Selecciona</option>
-                <option>Guerrero</option>
-                <option>Mago</option>
-                <option>Sacerdote</option>
-                <option>Paladín</option>
-                <option>Cazador</option>
-                <option>Brujo</option>
-                <option>Chamán</option>
-                <option>Druida</option>
-                <option>Pícaro</option>
-                <option>Caballero de la Muerte</option>
-                <option>Monje</option>
-                <option>Cazador de Demonios</option>
-                <option>Evocador</option>
-            </select>
-            <label>Especialización:</label>
-            <select id="especializacion" required>
-                <option value="">Selecciona clase primero</option>
-            </select>
-            <button type="submit">Añadir/Editar Personaje</button>
-        </form>
-        <ul id="lista-personajes"></ul>
-    </section>
+            <!-- Sistema de Loot por Jefes (Interno, Oculta) -->
+            <section id="sistema-loot">
+                <h2>Sistema de Loot por Jefes (Datos Internos Optimizados)</h2>
+                <select id="select-jefe">
+                    <option value="">Selecciona un Jefe</option>
+                </select>
+                <select id="filtro-tipo-loot">
+                    <option value="">Todos los Tipos</option>
+                    <option>Cloth Armor</option>
+                    <option>Leather Armor</option>
+                    <option>Mail Armor</option>
+                    <option>Plate Armor</option>
+                    <option>Weapon</option>
+                    <option>Trinket</option>
+                    <option>Accessories</option>
+                    <option>Tier Set</option>
+                    <option>Cosmetic</option>
+                    <option>Material</option>
+                    <option>Pattern</option>
+                    <option>Plans</option>
+                    <option>Formula</option>
+                    <option>Consumable</option>
+                    <option>Currency</option>
+                    <option>Toy</option>
+                    <option>Mount</option>
+                </select>
+                <ul id="lista-loot"></ul>
+            </section>
 
-    <!-- Sistema de Loot por Jefes (Interno, Oculta) -->
-    <section id="sistema-loot">
-        <h2>Sistema de Loot por Jefes (Datos Internos Optimizados)</h2>
-        <select id="select-jefe">
-            <option value="">Selecciona un Jefe</option>
-        </select>
-        <select id="filtro-tipo-loot">
-            <option value="">Todos los Tipos</option>
-            <option>Cloth Armor</option>
-            <option>Leather Armor</option>
-            <option>Mail Armor</option>
-            <option>Plate Armor</option>
-            <option>Weapon</option>
-            <option>Trinket</option>
-            <option>Accessories</option>
-            <option>Tier Set</option>
-            <option>Cosmetic</option>
-            <option>Material</option>
-            <option>Pattern</option>
-            <option>Plans</option>
-            <option>Formula</option>
-            <option>Consumable</option>
-            <option>Currency</option>
-            <option>Toy</option>
-            <option>Mount</option>
-        </select>
-        <ul id="lista-loot"></ul>
-    </section>
+            <!-- Asignación de Objetos -->
+            <section id="asignacion-objetos">
+                <h2>Asignación de Objetos</h2>
+                <select id="select-personaje"></select>
+                <select id="select-jefe-asignacion"></select>
+                <select id="select-item"></select>
+                <select id="select-dificultad">
+                    <option value="Normal">Normal</option>
+                    <option value="Heroic">Heroico</option>
+                    <option value="Mythic">Mítico</option>
+                </select>
+                <button id="btn-asignar">Asignar</button>
+            </section>
 
-    <!-- Asignación de Objetos -->
-    <section id="asignacion-objetos">
-        <h2>Asignación de Objetos</h2>
-        <select id="select-personaje"></select>
-        <select id="select-jefe-asignacion"></select>
-        <select id="select-item"></select>
-        <select id="select-dificultad">
-            <option value="Normal">Normal</option>
-            <option value="Heroic">Heroico</option>
-            <option value="Mythic">Mítico</option>
-        </select>
-        <button id="btn-asignar">Asignar</button>
-    </section>
-
-    <!-- Visualización Intuitiva -->
-    <section id="visualizacion">
-        <h2>Visualización de Asignaciones</h2>
-        <div class="filters">
-            <label>Filtro por Clase:</label><select id="filtro-clase"><option value="">Todas</option></select>
-            <label>Por Jefe:</label><select id="filtro-jefe"><option value="">Todos</option></select>
-            <label>Por Dificultad:</label><select id="filtro-dificultad"><option value="">Todas</option><option value="Normal">Normal</option><option value="Heroic">Heroico</option><option value="Mythic">Mítico</option></select>
-            <button id="btn-exportar-excel" style="margin-left: 20px;">Exportar a Excel</button>
-            <button id="btn-limpiar-todo" class="btn-danger" style="margin-left: 20px;">🗑️ Limpiar Todo</button>
+            <!-- Visualización Intuitiva -->
+            <section id="visualizacion">
+                <h2>Visualización de Asignaciones</h2>
+                <div class="filters">
+                    <label>Filtro por Clase:</label><select id="filtro-clase"><option value="">Todas</option></select>
+                    <label>Por Jefe:</label><select id="filtro-jefe"><option value="">Todos</option></select>
+                    <label>Por Dificultad:</label><select id="filtro-dificultad"><option value="">Todas</option><option value="Normal">Normal</option><option value="Heroic">Heroico</option><option value="Mythic">Mítico</option></select>
+                    <button id="btn-exportar-excel" style="margin-left: 20px;">Exportar a Excel</button>
+                    <button id="btn-limpiar-todo" class="btn-danger" style="margin-left: 20px;">🗑️ Limpiar Todo</button>
+                </div>
+                <table id="tabla-asignaciones">
+                    <thead>
+                        <tr>
+                            <th>Personaje</th>
+                            <th>Clase/Espec</th>
+                            <th>Objetos Asignados (con Dificultad)</th>
+                            <th>Jefe</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
         </div>
-        <table id="tabla-asignaciones">
-            <thead>
-                <tr>
-                    <th>Personaje</th>
-                    <th>Clase/Espec</th>
-                    <th>Objetos Asignados (con Dificultad)</th>
-                    <th>Jefe</th>
-                    <th>Notas</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </section>
+
+        <!-- Sidebar with Character Management -->
+        <div class="sidebar">
+            <section id="gestion-personajes">
+                <h2>Personajes de la Raid</h2>
+                <form id="form-personaje">
+                    <label>Nombre:</label>
+                    <input type="text" id="nombre" required>
+                    <label>Clase:</label>
+                    <select id="clase" required>
+                        <option value="">Selecciona</option>
+                        <option>Guerrero</option>
+                        <option>Mago</option>
+                        <option>Sacerdote</option>
+                        <option>Paladín</option>
+                        <option>Cazador</option>
+                        <option>Brujo</option>
+                        <option>Chamán</option>
+                        <option>Druida</option>
+                        <option>Pícaro</option>
+                        <option>Caballero de la Muerte</option>
+                        <option>Monje</option>
+                        <option>Cazador de Demonios</option>
+                        <option>Evocador</option>
+                    </select>
+                    <label>Especialización:</label>
+                    <select id="especializacion" required>
+                        <option value="">Selecciona clase primero</option>
+                    </select>
+                    <button type="submit" id="btn-submit-personaje">Añadir Personaje</button>
+                </form>
+                <ul id="lista-personajes"></ul>
+            </section>
+        </div>
+    </div>
 
     <!-- Scripts: External - Cargar datos primero, luego la aplicación -->
     <script src="data.js"></script>

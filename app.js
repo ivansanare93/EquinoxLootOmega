@@ -221,6 +221,9 @@ function editCharacter(index) {
     updateSpecializationsForClass(char.class);
     document.getElementById('especializacion').value = char.specialization;
     
+    // Update button text to indicate edit mode
+    document.getElementById('btn-submit-personaje').textContent = 'Guardar Cambios';
+    
     document.getElementById('form-personaje').onsubmit = function(e) {
         e.preventDefault();
         const charData = getCharacterFormData();
@@ -234,6 +237,8 @@ function editCharacter(index) {
         updateTable();
         this.onsubmit = addCharacter;
         this.reset();
+        // Reset button text back to add mode
+        document.getElementById('btn-submit-personaje').textContent = 'Añadir Personaje';
     };
 }
 
