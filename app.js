@@ -961,11 +961,13 @@ function exportToExcel() {
     
     // 1. Get current date for header and filename
     const currentDate = new Date();
-    const dateStr = currentDate.toLocaleDateString('es-ES', { 
-        year: 'numeric', 
-        month: '2-digit', 
-        day: '2-digit' 
-    }).split('/').reverse().join('-'); // Format: YYYY-MM-DD
+    // Use robust date formatting for filename
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`; // Format: YYYY-MM-DD
+    
+    // Display date in Spanish format
     const displayDate = currentDate.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
@@ -1092,7 +1094,8 @@ function exportToExcel() {
     // Apply zebra striping and other cell styling (data starts at row 3)
     for (let row = 3; row <= newRange.e.r; row++) {
         // Determine if this is an even row (for zebra striping)
-        const isEvenRow = (row % 2) === 0;
+        // Adjust for offset since data starts at row 3
+        const isEvenRow = ((row - 3) % 2) === 0;
         
         for (let col = newRange.s.c; col <= newRange.e.c; col++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
