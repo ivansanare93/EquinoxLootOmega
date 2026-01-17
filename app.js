@@ -493,14 +493,13 @@ function assignItem() {
     
     // Validar que el personaje exista
     if (!char) {
-        console.error('Character not found:', charName);
+        console.error('assignItem: Character not found in characters array');
         return alert('Error: Personaje no encontrado. Por favor intenta de nuevo.');
     }
     
     // Validar que el item exista
     if (!item) {
-        console.error('Item no encontrado:', itemName);
-        console.error('Items disponibles:', Array.from(itemIndexByName.keys()));
+        console.error('assignItem: Item not found in itemIndexByName map');
         return alert('Error: Item no encontrado. Por favor intenta de nuevo.');
     }
     
