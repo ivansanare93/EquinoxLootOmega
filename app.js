@@ -972,6 +972,15 @@ function exportToExcel() {
     // Get the range of the worksheet
     const range = XLSX.utils.decode_range(worksheet['!ref']);
     
+    // Define reusable border styles
+    const thinBorder = { style: "thin" };
+    const createBorder = (color) => ({
+        top: { ...thinBorder, color: { rgb: color } },
+        bottom: { ...thinBorder, color: { rgb: color } },
+        left: { ...thinBorder, color: { rgb: color } },
+        right: { ...thinBorder, color: { rgb: color } }
+    });
+    
     // Define header row styling (row 0)
     const headerStyle = {
         font: { 
@@ -986,19 +995,15 @@ function exportToExcel() {
             horizontal: "center", 
             vertical: "center" 
         },
-        border: {
-            top: { style: "thin", color: { rgb: "000000" } },
-            bottom: { style: "thin", color: { rgb: "000000" } },
-            left: { style: "thin", color: { rgb: "000000" } },
-            right: { style: "thin", color: { rgb: "000000" } }
-        }
+        border: createBorder("000000")
     };
     
     // Apply header styling to first row
     for (let col = range.s.c; col <= range.e.c; col++) {
         const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-        if (!worksheet[cellAddress]) continue;
-        worksheet[cellAddress].s = headerStyle;
+        const cell = worksheet[cellAddress];
+        if (!cell) continue;
+        cell.s = headerStyle;
     }
     
     // Apply zebra striping and other cell styling
@@ -1008,7 +1013,8 @@ function exportToExcel() {
         
         for (let col = range.s.c; col <= range.e.c; col++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-            if (!worksheet[cellAddress]) continue;
+            const cell = worksheet[cellAddress];
+            if (!cell) continue;
             
             // Get column header to determine which column we're in
             const headerAddress = XLSX.utils.encode_cell({ r: 0, c: col });
@@ -1018,12 +1024,7 @@ function exportToExcel() {
             const cellStyle = {
                 font: {},
                 alignment: {},
-                border: {
-                    top: { style: "thin", color: { rgb: "D0D0D0" } },
-                    bottom: { style: "thin", color: { rgb: "D0D0D0" } },
-                    left: { style: "thin", color: { rgb: "D0D0D0" } },
-                    right: { style: "thin", color: { rgb: "D0D0D0" } }
-                }
+                border: createBorder("D0D0D0")
             };
             
             // Apply zebra striping (alternating gray for even rows)
@@ -1044,7 +1045,7 @@ function exportToExcel() {
                 cellStyle.alignment.vertical = "center";
             }
             
-            worksheet[cellAddress].s = cellStyle;
+            cell.s = cellStyle;
         }
     }
     
