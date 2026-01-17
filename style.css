@@ -166,3 +166,32 @@ ul:hover, table:hover {
     border-radius: 6px;
     box-shadow: 0 2px 8px var(--purpura);
 }
+
+/* Multi-column layout for character list */
+#lista-personajes {
+    column-count: 3;
+    column-gap: 20px;
+    list-style-position: inside;
+}
+
+#lista-personajes li {
+    break-inside: avoid;
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: rgba(15, 23, 42, 0.5);
+    border-radius: 6px;
+    border: 1px solid var(--purpura);
+}
+
+/* Responsive design for character list */
+@media (max-width: 1024px) {
+    #lista-personajes {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 640px) {
+    #lista-personajes {
+        column-count: 1;
+    }
+}
