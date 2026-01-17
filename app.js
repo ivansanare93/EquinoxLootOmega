@@ -1014,19 +1014,29 @@ function exportToExcel() {
     });
 
     // 4. Create worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
+    
+    // 5. Create worksheet with title header and data
+    // First, create an array with the title, empty row, and then the data
+    const titleRow = [`RAID EQUINOX - ${displayDate}`];
+    const emptyRow = [];
+    
+    // Create header row from the first data object keys
+    const headers = Object.keys(exportData[0] || {});
+    
+    // Build the complete data array with title, spacing, headers, and data rows
+    const worksheetData = [
+        titleRow,
+        emptyRow,
+        headers,
+        ...exportData.map(obj => headers.map(key => obj[key]))
+    ];
+    
+    // Create worksheet from the complete array
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
     XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
-
-    // 5. Insert header row with title and date
+    
     // Get the range of the worksheet
-    const range = XLSX.utils.decode_range(worksheet['!ref']);
-    
-    // Add title and spacing rows at the top
-    XLSX.utils.sheet_add_aoa(worksheet, [[`RAID EQUINOX - ${displayDate}`]], { origin: 0 });
-    XLSX.utils.sheet_add_aoa(worksheet, [['']], { origin: 1 }); // Empty row for spacing
-    
-    // Update the range to include new rows
     const newRange = XLSX.utils.decode_range(worksheet['!ref']);
     
     // 6. Apply styling to the worksheet
@@ -1040,7 +1050,7 @@ function exportToExcel() {
         right: { ...thinBorder, color: { rgb: color } }
     });
     
-    // Style the title header row (row 0) - cell is created by sheet_add_aoa above
+    // Style the title header row (row 0)
     const titleCell = worksheet['A1'];
     if (titleCell) {
         titleCell.s = {
