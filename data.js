@@ -231,10 +231,10 @@ const trinketSpecializationCompatibility = {
         'Guerrero': ['Armas', 'Protección', 'Furia'],
         'Druida': ['Guardián', 'Restauración'],
         'Caballero de la Muerte': ['Sangre', 'Escarcha', 'Sin-Muerto'],
-        'Cazador': ['Bestia', 'Puntería', 'Supervivencia'],
-        'Pícaro': ['Asesinato', 'Subterfugio', 'Combate'],
+        'Cazador': ['Bestias', 'Puntería', 'Supervivencia'],
+        'Pícaro': ['Asesinato', 'Subterfugio', 'Forajido'],
         'Chamán': ['Mejora'],
-        'Monje': ['Maestro Cervecero', 'Viento Sereno'],
+        'Monje': ['Maestro Cervecero', 'Viajero del viento'],
         'Cazador de Demonios': ['Venganza', 'Devastación']
     },
     'Latigazo místico de Naazindhri': {
@@ -245,14 +245,14 @@ const trinketSpecializationCompatibility = {
         'Chamán': ['Restauración', 'Elemental'],
         'Brujo': ['Afligión', 'Demonología', 'Destrucción'],
         'Monje': ['Tejedor de Niebla'],
-        'Evocador': ['Devastación', 'Preservación', 'Augmentación']
+        'Evocador': ['Devastación', 'Preservación', 'Aumento']
     },
     'Sigilo de la caza cósmica': {
         'Druida': ['Guardián', 'Feral'],
-        'Cazador': ['Bestia', 'Puntería', 'Supervivencia'],
-        'Pícaro': ['Asesinato', 'Subterfugio', 'Combate'],
+        'Cazador': ['Bestias', 'Puntería', 'Supervivencia'],
+        'Pícaro': ['Asesinato', 'Subterfugio', 'Forajido'],
         'Chamán': ['Mejora'],
-        'Monje': ['Maestro Cervecero', 'Viento Sereno'],
+        'Monje': ['Maestro Cervecero', 'Viajero del viento'],
         'Cazador de Demonios': ['Venganza', 'Devastación']
     },
     'Marca de ira incesante': {
@@ -271,7 +271,7 @@ const trinketSpecializationCompatibility = {
         'Chamán': ['Elemental', 'Restauración'],
         'Monje': ['Tejedor de Niebla'],
         'Paladín': ['Sagrado'],
-        'Evocador': ['Devastación', 'Preservación', 'Augmentación']
+        'Evocador': ['Devastación', 'Preservación', 'Aumento']
     },
     'Orden del rey-nexo': {
         'Evocador': ['Preservación'],
@@ -302,15 +302,15 @@ const classSpecializations = {
     'Mago': ['Fuego', 'Escarcha', 'Arcano'],
     'Sacerdote': ['Disciplina', 'Sagrado', 'Sombra'],
     'Paladín': ['Protección', 'Retribución', 'Sagrado'],
-    'Cazador': ['Bestialidad', 'Puntería', 'Supervivencia'],
+    'Cazador': ['Bestias', 'Puntería', 'Supervivencia'],
     'Brujo': ['Aflicción', 'Demonología', 'Destrucción'],
     'Chamán': ['Elemental', 'Mejora', 'Restauración'],
     'Druida': ['Feral', 'Guardián', 'Restauración', 'Equilibrio'],
-    'Pícaro': ['Asesinato', 'Sutileza', 'Combate'],
-    'Caballero de la Muerte': ['Sangre', 'Escarcha', 'Impío'],
-    'Monje': ['Maestro Cervecero', 'Viento Sereno', 'Tejedor de Niebla'],
+    'Pícaro': ['Asesinato', 'Sutileza', 'Forajido'],
+    'Caballero de la Muerte': ['Sangre', 'Escarcha', 'Profano'],
+    'Monje': ['Maestro Cervecero', 'Viajero del viento', 'Tejedor de Niebla'],
     'Cazador de Demonios': ['Venganza', 'Devastación'],
-    'Evocador': ['Devastación', 'Preservación', 'Augmentación']
+    'Evocador': ['Devastación', 'Preservación', 'Aumento']
 };
 
 // Índices de búsqueda para mejor rendimiento
