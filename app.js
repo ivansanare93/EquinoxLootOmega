@@ -793,11 +793,24 @@ async function loadDataFromFirebase() {
             console.log('  - Assignments exists:', assignmentsSnap.exists());
             console.log('  - Characters exists:', charactersSnap.exists());
             
+            // Log metadata only (not sensitive data)
             if (assignmentsSnap.exists()) {
-                console.log('  - Assignments data:', assignmentsSnap.data());
+                const assignmentsData = assignmentsSnap.data();
+                console.log('  - Assignments data structure:', {
+                    hasDataField: 'data' in assignmentsData,
+                    dataFieldType: typeof assignmentsData.data,
+                    isArray: Array.isArray(assignmentsData.data),
+                    length: Array.isArray(assignmentsData.data) ? assignmentsData.data.length : 'N/A'
+                });
             }
             if (charactersSnap.exists()) {
-                console.log('  - Characters data:', charactersSnap.data());
+                const charactersData = charactersSnap.data();
+                console.log('  - Characters data structure:', {
+                    hasDataField: 'data' in charactersData,
+                    dataFieldType: typeof charactersData.data,
+                    isArray: Array.isArray(charactersData.data),
+                    length: Array.isArray(charactersData.data) ? charactersData.data.length : 'N/A'
+                });
             }
 
             // Extract data arrays from document snapshots
@@ -841,8 +854,15 @@ function setupFirebaseListener() {
             console.log('setupFirebaseListener: Assignments snapshot received');
             console.log('  - Document exists:', docSnap.exists());
             
+            // Log metadata only (not sensitive data)
             if (docSnap.exists()) {
-                console.log('  - Document data:', docSnap.data());
+                const docData = docSnap.data();
+                console.log('  - Data structure:', {
+                    hasDataField: 'data' in docData,
+                    dataFieldType: typeof docData.data,
+                    isArray: Array.isArray(docData.data),
+                    length: Array.isArray(docData.data) ? docData.data.length : 'N/A'
+                });
             }
             
             // Update local data from Firestore
@@ -862,8 +882,15 @@ function setupFirebaseListener() {
             console.log('setupFirebaseListener: Characters snapshot received');
             console.log('  - Document exists:', docSnap.exists());
             
+            // Log metadata only (not sensitive data)
             if (docSnap.exists()) {
-                console.log('  - Document data:', docSnap.data());
+                const docData = docSnap.data();
+                console.log('  - Data structure:', {
+                    hasDataField: 'data' in docData,
+                    dataFieldType: typeof docData.data,
+                    isArray: Array.isArray(docData.data),
+                    length: Array.isArray(docData.data) ? docData.data.length : 'N/A'
+                });
             }
             
             // Update local data from Firestore
