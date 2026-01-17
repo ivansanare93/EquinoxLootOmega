@@ -1013,6 +1013,12 @@ function exportToExcel() {
         };
     });
 
+    // Additional safety check (should not be needed due to filteredAssignments check above)
+    if (exportData.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+    }
+
     // 4. Create worksheet and workbook
     const workbook = XLSX.utils.book_new();
     
