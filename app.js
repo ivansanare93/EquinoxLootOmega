@@ -967,8 +967,110 @@ function exportToExcel() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
 
-    // 4. Download the file
-    XLSX.writeFile(workbook, "asignaciones_loot.xlsx");
+    // 4. Apply styling to the worksheet
+    
+    // Get the range of the worksheet
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    
+    // Define header row styling (row 0)
+    const headerStyle = {
+        font: { 
+            bold: true, 
+            sz: 12,
+            color: { rgb: "FFFFFF" }
+        },
+        fill: { 
+            fgColor: { rgb: "4472C4" } // Blue background
+        },
+        alignment: { 
+            horizontal: "center", 
+            vertical: "center" 
+        },
+        border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } }
+        }
+    };
+    
+    // Apply header styling to first row
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!worksheet[cellAddress]) continue;
+        worksheet[cellAddress].s = headerStyle;
+    }
+    
+    // Apply zebra striping and other cell styling
+    for (let row = range.s.r + 1; row <= range.e.r; row++) {
+        // Determine if this is an even row (for zebra striping)
+        const isEvenRow = (row % 2) === 0;
+        
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!worksheet[cellAddress]) continue;
+            
+            // Get column header to determine which column we're in
+            const headerAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            const headerValue = worksheet[headerAddress]?.v || '';
+            
+            // Base style for data cells
+            const cellStyle = {
+                font: {},
+                alignment: {},
+                border: {
+                    top: { style: "thin", color: { rgb: "D0D0D0" } },
+                    bottom: { style: "thin", color: { rgb: "D0D0D0" } },
+                    left: { style: "thin", color: { rgb: "D0D0D0" } },
+                    right: { style: "thin", color: { rgb: "D0D0D0" } }
+                }
+            };
+            
+            // Apply zebra striping (alternating gray for even rows)
+            if (isEvenRow) {
+                cellStyle.fill = { fgColor: { rgb: "F2F2F2" } };
+            }
+            
+            // Apply bold to important columns (Personaje and Objeto)
+            if (headerValue === 'Personaje' || headerValue === 'Objeto') {
+                cellStyle.font.bold = true;
+            }
+            
+            // Center align specific columns (Dificultad and iLvl)
+            if (headerValue === 'Dificultad' || headerValue === 'iLvl') {
+                cellStyle.alignment.horizontal = "center";
+                cellStyle.alignment.vertical = "center";
+            } else {
+                cellStyle.alignment.vertical = "center";
+            }
+            
+            worksheet[cellAddress].s = cellStyle;
+        }
+    }
+    
+    // 5. Auto-adjust column widths based on content
+    const columnHeaders = ['Personaje', 'Clase', 'Especialización', 'Objeto', 'Dificultad', 'iLvl', 'Jefe', 'Tipo', 'Nota'];
+    const columnWidths = columnHeaders.map((header, idx) => {
+        // Calculate max width for this column
+        let maxWidth = header.length;
+        
+        for (let row = range.s.r + 1; row <= range.e.r; row++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: idx });
+            const cell = worksheet[cellAddress];
+            if (cell && cell.v) {
+                const cellLength = String(cell.v).length;
+                maxWidth = Math.max(maxWidth, cellLength);
+            }
+        }
+        
+        // Add some padding and cap at a reasonable maximum
+        return { wch: Math.min(maxWidth + 2, 50) };
+    });
+    
+    worksheet['!cols'] = columnWidths;
+
+    // 6. Download the file with styling support
+    XLSX.writeFile(workbook, "asignaciones_loot.xlsx", { cellStyles: true });
 }
 
 // ===== INICIALIZACIÓN =====
