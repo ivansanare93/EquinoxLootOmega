@@ -34,6 +34,8 @@ For detailed Firebase setup information, see [FIREBASE_SETUP.md](FIREBASE_SETUP.
 
 This application now includes a Node.js backend API that integrates with the official Blizzard WoW Retail Game Data API.
 
+**🚀 Quick Start**: See [QUICK_START.md](QUICK_START.md) to get up and running in 5 minutes!
+
 ### Backend Features
 
 - **OAuth Authentication**: Automatic token management using Battle.net Client Credentials Flow
@@ -44,6 +46,7 @@ This application now includes a Node.js backend API that integrates with the off
   - `/api/items/:id` - Get item details including equippable classes
 - **Caching**: Built-in caching to reduce API calls and improve performance
 - **Error Handling**: Comprehensive error handling for API failures
+- **Security**: Serves only public files to prevent sensitive data exposure
 
 ### Backend Setup
 
@@ -67,6 +70,10 @@ This application now includes a Node.js backend API that integrates with the off
    npm start
    ```
 
+5. **Access the Application**:
+   - API Demo: http://localhost:3000/api-demo.html
+   - Main App: http://localhost:3000/LarancioOrtegaLoot.html
+
 For detailed setup instructions, see [BLIZZARD_API_SETUP.md](BLIZZARD_API_SETUP.md).
 
 ## File Structure
@@ -87,8 +94,11 @@ For detailed setup instructions, see [BLIZZARD_API_SETUP.md](BLIZZARD_API_SETUP.
 
 ### Documentation
 - `README.md` - This file
+- `QUICK_START.md` - Quick start guide (5 minutes to get started!)
 - `FIREBASE_SETUP.md` - Detailed Firebase setup and configuration
 - `BLIZZARD_API_SETUP.md` - Blizzard API integration guide
+- `api-demo.html` - Interactive API demo page
+- `test-api.js` - API test script
 
 ## Migration from Realtime Database
 
