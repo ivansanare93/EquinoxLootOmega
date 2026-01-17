@@ -571,29 +571,56 @@ function getFilterKey() {
 function generateCharacterRow(char, assigned) {
     const row = document.createElement('tr');
     
+    // Create a map of assignment to global index for O(1) lookups
+    // This prevents O(n²) complexity from repeated findIndex calls
+    const assignmentIndexMap = new Map();
+    assigned.forEach(a => {
+        const globalIndex = assignments.findIndex(assign => assign === a);
+        assignmentIndexMap.set(a, globalIndex);
+    });
+    
     // Generar HTML de items asignados con caching de búsquedas
-    const assignedHtml = assigned.map((a, assignIndex) => {
+    const assignedHtml = assigned.map((a) => {
         const item = itemIndexByName.get(a.item);
         const bossName = bossIndexById.get(a.boss)?.name || 'Unknown';
         const description = item ? item.description : 'Item no encontrado';
+        
+        // Get the pre-calculated global index
+        const globalIndex = assignmentIndexMap.get(a);
+        
+        // Validate that we found a valid index
+        if (globalIndex === undefined || globalIndex === -1) {
+            console.error(`generateCharacterRow: Could not find global index for assignment ${a.item} for ${char.name}`);
+            return ''; // Skip this assignment if index not found
+        }
+        
         return `
             <span class="tooltip">
                 ${a.item} (${a.dificultad}, ilvl ${a.ilvl})
                 <span class="tooltiptext">${description}</span>
             </span> (de ${bossName})
-            <button class="btn-delete-assign" data-index="${assignIndex}">Eliminar</button><br>
+            <button class="btn-delete-assign" data-index="${globalIndex}">Eliminar</button><br>
         `;
     }).join('');
     
     // Generar HTML de notas y tipo
-    const notesHtml = assigned.map((a, assignIndex) => {
+    const notesHtml = assigned.map((a) => {
+        // Get the pre-calculated global index
+        const globalIndex = assignmentIndexMap.get(a);
+        
+        // Validate that we found a valid index
+        if (globalIndex === undefined || globalIndex === -1) {
+            console.error(`generateCharacterRow: Could not find global index for assignment ${a.item} for ${char.name}`);
+            return ''; // Skip this assignment if index not found
+        }
+        
         return `
             <div style="margin-bottom: 8px;">
-                <select class="tipo-select" data-index="${assignIndex}" style="padding: 4px; margin-right: 5px;">
+                <select class="tipo-select" data-index="${globalIndex}" style="padding: 4px; margin-right: 5px;">
                     <option value="Necesidad" ${a.tipo === 'Necesidad' ? 'selected' : ''}>Necesidad</option>
                     <option value="Codicia" ${a.tipo === 'Codicia' ? 'selected' : ''}>Codicia</option>
                 </select>
-                <input type="text" class="note-input" value="${a.note || ''}" placeholder="Nota adicional" data-index="${assignIndex}" maxlength="50" style="padding: 4px;">
+                <input type="text" class="note-input" value="${a.note || ''}" placeholder="Nota adicional" data-index="${globalIndex}" maxlength="50" style="padding: 4px;">
             </div>
         `;
     }).join('');
@@ -700,6 +727,8 @@ function updateNote(assignIndex, note) {
         assignments[assignIndex].note = note;
         // Solo guardar datos sin recrear tabla (optimización: nota es solo visual, sin impacto en filtros)
         saveData();
+    } else {
+        console.error(`updateNote: Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
     }
     // No llamar a updateTable() aquí - la nota ya se actualiza en tiempo real en el input
 }
@@ -714,6 +743,8 @@ function updateTipo(assignIndex, tipo) {
     if (assignIndex >= 0 && assignIndex < assignments.length) {
         assignments[assignIndex].tipo = tipo;
         saveData();
+    } else {
+        console.error(`updateTipo: Invalid index ${assignIndex}, assignments length: ${assignments.length}`);
     }
     // No llamar a updateTable() aquí - el tipo ya se actualiza en tiempo real en el select
 }
