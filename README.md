@@ -8,6 +8,7 @@ Repositorio para la aplicación que organiza Loot de la RAID de Equinox
 - **Real-time Synchronization**: Multiple users can view and update data simultaneously using Firebase Firestore
 - **Filtering**: Filter assignments by class, boss, and difficulty
 - **Excel Export**: Export assignment data to Excel spreadsheets
+- **Blizzard API Integration**: Direct integration with WoW Retail Game Data API for live raid and loot data
 
 ## Firebase Integration
 
@@ -29,13 +30,65 @@ For detailed Firebase setup information, see [FIREBASE_SETUP.md](FIREBASE_SETUP.
 4. View and filter assignments in the "Visualización de Asignaciones" table
 5. Export data to Excel if needed
 
+## Blizzard API Integration
+
+This application now includes a Node.js backend API that integrates with the official Blizzard WoW Retail Game Data API.
+
+### Backend Features
+
+- **OAuth Authentication**: Automatic token management using Battle.net Client Credentials Flow
+- **API Endpoints**:
+  - `/api/raids` - List all available raids (EU region, Spanish locale)
+  - `/api/raids/:id` - Get raid details with encounters
+  - `/api/encounters/:id/loot` - Get loot drops for a specific boss
+  - `/api/items/:id` - Get item details including equippable classes
+- **Caching**: Built-in caching to reduce API calls and improve performance
+- **Error Handling**: Comprehensive error handling for API failures
+
+### Backend Setup
+
+1. **Get Battle.net API Credentials**:
+   - Visit https://develop.battle.net/
+   - Create a new client to get your Client ID and Secret
+
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment**:
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your Blizzard API credentials
+   ```
+
+4. **Start the Server**:
+   ```bash
+   npm start
+   ```
+
+For detailed setup instructions, see [BLIZZARD_API_SETUP.md](BLIZZARD_API_SETUP.md).
+
 ## File Structure
 
+### Frontend
 - `LarancioOrtegaLoot.html` - Main HTML file with Firebase SDK integration
 - `app.js` - Application logic with Firebase Firestore integration
 - `data.js` - Raid boss and loot item data
 - `style.css` - Styling
-- `FIREBASE_SETUP.md` - Detailed Firebase setup and configuration documentation
+
+### Backend (Blizzard API)
+- `server.js` - Express server with API endpoints
+- `services/blizzardAuth.js` - OAuth authentication service
+- `services/blizzardApi.js` - Blizzard API client with caching
+- `routes/api.js` - API route definitions
+- `package.json` - Node.js dependencies and scripts
+- `.env.example` - Environment configuration template
+
+### Documentation
+- `README.md` - This file
+- `FIREBASE_SETUP.md` - Detailed Firebase setup and configuration
+- `BLIZZARD_API_SETUP.md` - Blizzard API integration guide
 
 ## Migration from Realtime Database
 
