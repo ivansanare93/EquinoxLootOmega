@@ -13,7 +13,32 @@ let assignments = [];
  * @returns {Array} The data array or empty array if not found
  */
 function extractDataArray(docSnap) {
-    return docSnap.exists() ? (docSnap.data().data || []) : [];
+    if (!docSnap || !docSnap.exists()) {
+        console.log('extractDataArray: Document does not exist or is null');
+        return [];
+    }
+    
+    try {
+        const docData = docSnap.data();
+        
+        if (!docData) {
+            console.warn('extractDataArray: Document exists but data() returned null/undefined');
+            return [];
+        }
+        
+        const dataField = docData.data;
+        
+        // Validate that the data field is actually an array
+        if (!Array.isArray(dataField)) {
+            console.warn('extractDataArray: Invalid data format - expected array, got:', typeof dataField);
+            return [];
+        }
+        
+        return dataField;
+    } catch (error) {
+        console.error('extractDataArray: Error extracting data array:', error);
+        return [];
+    }
 }
 
 /**
@@ -156,6 +181,14 @@ function updateSpecializationsForClass(className) {
 function updateCharacterList() {
     const lista = document.getElementById('lista-personajes');
     lista.innerHTML = '';
+    
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('updateCharacterList: characters is not an array, type:', typeof characters);
+        characters = []; // Reset to empty array
+        return;
+    }
+    
     characters.forEach((char, index) => {
         const li = document.createElement('li');
         li.innerHTML = `${char.name} - ${char.class} (${char.specialization}) 
@@ -168,7 +201,19 @@ function updateCharacterList() {
 }
 
 function editCharacter(index) {
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('editCharacter: characters is not an array, type:', typeof characters);
+        alert('Error: Los datos de personajes no están disponibles.');
+        return;
+    }
+    
     const char = characters[index];
+    if (!char) {
+        console.error('editCharacter: Character not found at index:', index);
+        return;
+    }
+    
     document.getElementById('nombre').value = char.name;
     document.getElementById('clase').value = char.class;
     
@@ -193,6 +238,19 @@ function editCharacter(index) {
 }
 
 function deleteCharacter(index) {
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('deleteCharacter: characters is not an array, type:', typeof characters);
+        alert('Error: Los datos de personajes no están disponibles.');
+        return;
+    }
+    
+    // Validate that assignments is an array
+    if (!Array.isArray(assignments)) {
+        console.error('deleteCharacter: assignments is not an array, type:', typeof assignments);
+        assignments = [];
+    }
+    
     const charName = characters[index]?.name;
     assignments = assignments.filter(a => a.character !== charName);
     characters.splice(index, 1);
@@ -207,6 +265,12 @@ function addCharacter(e) {
     const charData = getCharacterFormData();
     const error = validateCharacterData(charData);
     if (error) return alert(error);
+    
+    // Validate that characters is an array before using .some()
+    if (!Array.isArray(characters)) {
+        console.error('addCharacter: characters is not an array, type:', typeof characters);
+        characters = [];
+    }
     
     if (characters.some(c => c.name === charData.name)) {
         return alert('Nombre duplicado');
@@ -263,6 +327,13 @@ function updateSelects() {
     
     // Llenar selects de personajes
     selectPersonaje.innerHTML = '<option value="">Selecciona Personaje</option>';
+    
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('updateSelects: characters is not an array, type:', typeof characters);
+        characters = []; // Reset to empty array
+    }
+    
     characters.forEach(char => {
         selectPersonaje.appendChild(createOption(char.name, char.name));
     });
@@ -336,6 +407,14 @@ function filterItemsByCharacter() {
         return;
     }
     
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('filterItemsByCharacter: characters is not an array, type:', typeof characters);
+        selectItem.innerHTML = '<option value="">Error: Datos no disponibles</option>';
+        selectItem.disabled = true;
+        return;
+    }
+    
     const char = characters.find(c => c.name === charName);
     if (!char) return;
     
@@ -368,6 +447,12 @@ function updateFilters() {
     filtroClase.innerHTML = '<option value="">Todas</option>';
     filtroJefe.innerHTML = '<option value="">Todos</option>';
     
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('updateFilters: characters is not an array, type:', typeof characters);
+        characters = []; // Reset to empty array
+    }
+    
     // Agregar clases únicas
     const classes = [...new Set(characters.map(c => c.class))];
     classes.forEach(cl => {
@@ -390,13 +475,31 @@ function assignItem() {
         return alert('Selecciona todos los campos');
     }
     
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('assignItem: characters is not an array, type:', typeof characters);
+        alert('Error: Los datos de personajes no están disponibles.');
+        return;
+    }
+    
+    // Validate that assignments is an array
+    if (!Array.isArray(assignments)) {
+        console.error('assignItem: assignments is not an array, type:', typeof assignments);
+        assignments = [];
+    }
+    
     const item = itemIndexByName.get(itemName);
     const char = characters.find(c => c.name === charName);
     
+    // Validar que el personaje exista
+    if (!char) {
+        console.error('assignItem: Character not found in characters array');
+        return alert('Error: Personaje no encontrado. Por favor intenta de nuevo.');
+    }
+    
     // Validar que el item exista
     if (!item) {
-        console.error('Item no encontrado:', itemName);
-        console.error('Items disponibles:', Array.from(itemIndexByName.keys()));
+        console.error('assignItem: Item not found in itemIndexByName map');
         return alert('Error: Item no encontrado. Por favor intenta de nuevo.');
     }
     
@@ -513,6 +616,22 @@ function updateTable() {
     const filtroJefe = document.getElementById('filtro-jefe').value;
     const filtroDificultad = document.getElementById('filtro-dificultad').value;
     
+    // Validate that characters is an array
+    if (!Array.isArray(characters)) {
+        console.error('updateTable: characters is not an array, type:', typeof characters);
+        characters = []; // Reset to empty array
+        tbody.innerHTML = '';
+        return;
+    }
+    
+    // Verify assignments is also an array
+    if (!Array.isArray(assignments)) {
+        console.error('updateTable: assignments is not an array, type:', typeof assignments);
+        assignments = []; // Reset to empty array
+        tbody.innerHTML = '';
+        return;
+    }
+    
     // Verificar si la tabla necesita reconstrucción
     const filterChanged = tableCache.lastFilters !== currentFilterKey;
     const dataChanged = 
@@ -571,19 +690,42 @@ function updateTable() {
 }
 
 function updateNote(assignIndex, note) {
-    assignments[assignIndex].note = note;
-    // Solo guardar datos sin recrear tabla (optimización: nota es solo visual, sin impacto en filtros)
-    saveData();
+    // Validate that assignments is an array
+    if (!Array.isArray(assignments)) {
+        console.error('updateNote: assignments is not an array, type:', typeof assignments);
+        return;
+    }
+    
+    if (assignIndex >= 0 && assignIndex < assignments.length) {
+        assignments[assignIndex].note = note;
+        // Solo guardar datos sin recrear tabla (optimización: nota es solo visual, sin impacto en filtros)
+        saveData();
+    }
     // No llamar a updateTable() aquí - la nota ya se actualiza en tiempo real en el input
 }
 
 function updateTipo(assignIndex, tipo) {
-    assignments[assignIndex].tipo = tipo;
-    saveData();
+    // Validate that assignments is an array
+    if (!Array.isArray(assignments)) {
+        console.error('updateTipo: assignments is not an array, type:', typeof assignments);
+        return;
+    }
+    
+    if (assignIndex >= 0 && assignIndex < assignments.length) {
+        assignments[assignIndex].tipo = tipo;
+        saveData();
+    }
     // No llamar a updateTable() aquí - el tipo ya se actualiza en tiempo real en el select
 }
 
 function deleteAssignment(index) {
+    // Validate that assignments is an array
+    if (!Array.isArray(assignments)) {
+        console.error('deleteAssignment: assignments is not an array, type:', typeof assignments);
+        alert('Error: Los datos de asignaciones no están disponibles.');
+        return;
+    }
+    
     assignments.splice(index, 1);
     saveData();
     invalidateTableCache();
@@ -591,6 +733,14 @@ function deleteAssignment(index) {
 }
 
 function clearAllAssignments() {
+    // Validate that assignments is an array
+    if (!Array.isArray(assignments)) {
+        console.error('clearAllAssignments: assignments is not an array, type:', typeof assignments);
+        assignments = [];
+        saveData();
+        return;
+    }
+    
     if (assignments.length === 0) {
         alert('No hay asignaciones para limpiar');
         return;
@@ -630,15 +780,45 @@ async function saveData() {
 async function loadDataFromFirebase() {
     try {
         if (isFirebaseReady()) {
+            console.log('loadDataFromFirebase: Starting data load from Firestore...');
+            
             // Run both reads in parallel for better performance
             const [assignmentsSnap, charactersSnap] = await Promise.all([
                 window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments")),
                 window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "characters"))
             ]);
 
+            console.log('loadDataFromFirebase: Document snapshots retrieved');
+            console.log('  - Assignments exists:', assignmentsSnap.exists());
+            console.log('  - Characters exists:', charactersSnap.exists());
+            
+            // Log metadata only (not sensitive data)
+            if (assignmentsSnap.exists()) {
+                const assignmentsData = assignmentsSnap.data();
+                console.log('  - Assignments data structure:', {
+                    hasDataField: 'data' in assignmentsData,
+                    dataFieldType: typeof assignmentsData.data,
+                    isArray: Array.isArray(assignmentsData.data),
+                    length: Array.isArray(assignmentsData.data) ? assignmentsData.data.length : 'N/A'
+                });
+            }
+            if (charactersSnap.exists()) {
+                const charactersData = charactersSnap.data();
+                console.log('  - Characters data structure:', {
+                    hasDataField: 'data' in charactersData,
+                    dataFieldType: typeof charactersData.data,
+                    isArray: Array.isArray(charactersData.data),
+                    length: Array.isArray(charactersData.data) ? charactersData.data.length : 'N/A'
+                });
+            }
+
             // Extract data arrays from document snapshots
             assignments = extractDataArray(assignmentsSnap);
             characters = extractDataArray(charactersSnap);
+            
+            console.log('loadDataFromFirebase: Data extracted successfully');
+            console.log('  - Assignments count:', assignments.length);
+            console.log('  - Characters count:', characters.length);
 
             if (!assignmentsSnap.exists()) {
                 console.log('No assignments data available in Firestore, using empty array');
@@ -666,10 +846,28 @@ function setupFirebaseListener() {
         const assignmentsDocRef = window.firestoreDoc(window.firestoreDB, "appData", "assignments");
         const charactersDocRef = window.firestoreDoc(window.firestoreDB, "appData", "characters");
 
+        console.log('setupFirebaseListener: Setting up real-time listeners...');
+
         // Listen for changes to assignments
         window.firestoreOnSnapshot(assignmentsDocRef, (docSnap) => {
+            console.log('setupFirebaseListener: Assignments snapshot received');
+            console.log('  - Document exists:', docSnap.exists());
+            
+            // Log metadata only (not sensitive data)
+            if (docSnap.exists()) {
+                const docData = docSnap.data();
+                console.log('  - Data structure:', {
+                    hasDataField: 'data' in docData,
+                    dataFieldType: typeof docData.data,
+                    isArray: Array.isArray(docData.data),
+                    length: Array.isArray(docData.data) ? docData.data.length : 'N/A'
+                });
+            }
+            
             // Update local data from Firestore
             assignments = extractDataArray(docSnap);
+            
+            console.log('  - Extracted assignments count:', assignments.length);
             
             // Update UI when data changes
             invalidateTableCache();
@@ -680,8 +878,24 @@ function setupFirebaseListener() {
 
         // Listen for changes to characters
         window.firestoreOnSnapshot(charactersDocRef, (docSnap) => {
+            console.log('setupFirebaseListener: Characters snapshot received');
+            console.log('  - Document exists:', docSnap.exists());
+            
+            // Log metadata only (not sensitive data)
+            if (docSnap.exists()) {
+                const docData = docSnap.data();
+                console.log('  - Data structure:', {
+                    hasDataField: 'data' in docData,
+                    dataFieldType: typeof docData.data,
+                    isArray: Array.isArray(docData.data),
+                    length: Array.isArray(docData.data) ? docData.data.length : 'N/A'
+                });
+            }
+            
             // Update local data from Firestore
             characters = extractDataArray(docSnap);
+            
+            console.log('  - Extracted characters count:', characters.length);
             
             // Update UI when data changes
             invalidateTableCache();
@@ -696,6 +910,19 @@ function setupFirebaseListener() {
 }
 
 function exportToExcel() {
+    // Validate that characters and assignments are arrays
+    if (!Array.isArray(characters)) {
+        console.error('exportToExcel: characters is not an array, type:', typeof characters);
+        alert('Error: Los datos de personajes no están disponibles.');
+        return;
+    }
+    
+    if (!Array.isArray(assignments)) {
+        console.error('exportToExcel: assignments is not an array, type:', typeof assignments);
+        alert('Error: Los datos de asignaciones no están disponibles.');
+        return;
+    }
+    
     // 1. Get filtered data
     const filtroClase = document.getElementById('filtro-clase').value;
     const filtroJefe = document.getElementById('filtro-jefe').value;
