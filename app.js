@@ -1,8 +1,8 @@
 // DATOS CARGADOS DESDE data.js - Ver ese archivo para la definición de bosses, lootByBoss, armorCompatibility, etc.
 
-// Entidades
-let characters = JSON.parse(localStorage.getItem('characters')) || [];
-let assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+// Entidades (inicializadas vacías, se cargarán desde Firebase)
+let characters = [];
+let assignments = [];
 
 // ===== UTILIDADES Y HELPERS =====
 
@@ -586,8 +586,72 @@ function clearAllAssignments() {
 }
 
 function saveData() {
-    localStorage.setItem('characters', JSON.stringify(characters));
-    localStorage.setItem('assignments', JSON.stringify(assignments));
+    // Save data to Firebase Realtime Database
+    if (window.firebaseDB && window.firebaseRef && window.firebaseSet) {
+        const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
+        window.firebaseSet(dbRef, {
+            characters: characters,
+            assignments: assignments
+        }).catch((error) => {
+            console.error('Error saving data to Firebase:', error);
+        });
+    } else {
+        console.error('Firebase is not initialized yet');
+    }
+}
+
+/**
+ * Load initial data from Firebase
+ */
+function loadDataFromFirebase() {
+    return new Promise((resolve, reject) => {
+        if (window.firebaseDB && window.firebaseRef && window.firebaseGet) {
+            const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
+            window.firebaseGet(dbRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    characters = data.characters || [];
+                    assignments = data.assignments || [];
+                } else {
+                    console.log('No data available in Firebase, using empty arrays');
+                    characters = [];
+                    assignments = [];
+                }
+                resolve();
+            }).catch((error) => {
+                console.error('Error loading data from Firebase:', error);
+                reject(error);
+            });
+        } else {
+            console.error('Firebase is not initialized yet');
+            reject(new Error('Firebase not initialized'));
+        }
+    });
+}
+
+/**
+ * Set up real-time listener for Firebase data changes
+ */
+function setupFirebaseListener() {
+    if (window.firebaseDB && window.firebaseRef && window.firebaseOnValue) {
+        const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
+        window.firebaseOnValue(dbRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                characters = data.characters || [];
+                assignments = data.assignments || [];
+                
+                // Update UI when data changes
+                invalidateTableCache();
+                updateCharacterList();
+                updateTable();
+            }
+        }, (error) => {
+            console.error('Error in Firebase listener:', error);
+        });
+    } else {
+        console.error('Firebase is not initialized yet');
+    }
 }
 
 function exportToExcel() {
@@ -641,6 +705,31 @@ function exportToExcel() {
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Firebase to be ready, then load data and set up listeners
+    const initializeApp = () => {
+        if (window.firebaseDB && window.firebaseRef && window.firebaseGet && window.firebaseOnValue) {
+            // Load initial data from Firebase
+            loadDataFromFirebase().then(() => {
+                // Initialize UI with loaded data
+                updateBossSelect();
+                updateCharacterList();
+                updateTable();
+                
+                // Set up real-time listener for future changes
+                setupFirebaseListener();
+            }).catch((error) => {
+                console.error('Failed to load initial data:', error);
+                // Initialize with empty data if Firebase fails
+                updateBossSelect();
+                updateCharacterList();
+                updateTable();
+            });
+        } else {
+            // Firebase not ready yet, wait a bit and try again
+            setTimeout(initializeApp, 100);
+        }
+    };
+    
     // Registrar event listeners para elementos estáticos
     document.getElementById('form-personaje').onsubmit = addCharacter;
     document.getElementById('btn-asignar').onclick = assignItem;
@@ -692,7 +781,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Inicializar interfaz
-    updateBossSelect();
-    updateCharacterList();
-    updateTable();
+    initializeApp();
 });
