@@ -598,13 +598,14 @@ function clearAllAssignments() {
 function saveData() {
     // Save data to Firebase Realtime Database
     if (isFirebaseReady()) {
-        const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
-        window.firebaseSet(dbRef, {
-            characters: characters,
-            assignments: assignments
-        }).catch((error) => {
-            console.error('Error saving data to Firebase:', error);
-            alert('Error al guardar datos. Por favor, verifica tu conexión a internet e intenta de nuevo.');
+        const database = window.firebaseDB;
+        window.firebaseSet(window.firebaseRef(database, 'assignments'), assignments).catch((error) => {
+            console.error('Error saving assignments to Firebase:', error);
+            alert('Error al guardar asignaciones. Por favor, verifica tu conexión a internet e intenta de nuevo.');
+        });
+        window.firebaseSet(window.firebaseRef(database, 'characters'), characters).catch((error) => {
+            console.error('Error saving characters to Firebase:', error);
+            alert('Error al guardar personajes. Por favor, verifica tu conexión a internet e intenta de nuevo.');
         });
     } else {
         console.error('Firebase is not initialized yet');
@@ -613,63 +614,35 @@ function saveData() {
 }
 
 /**
- * Load initial data from Firebase
+ * Set up real-time listeners for Firebase data changes
  */
-function loadDataFromFirebase() {
-    return new Promise((resolve, reject) => {
-        if (isFirebaseReady()) {
-            const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
-            window.firebaseGet(dbRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    characters = data.characters || [];
-                    assignments = data.assignments || [];
-                } else {
-                    console.log('No data available in Firebase, using empty arrays');
-                    characters = [];
-                    assignments = [];
-                }
-                resolve();
-            }).catch((error) => {
-                console.error('Error loading data from Firebase:', error);
-                alert('Error al cargar datos desde Firebase. Usando datos vacíos.');
-                reject(error);
-            });
-        } else {
-            console.error('Firebase is not initialized yet');
-            reject(new Error('Firebase not initialized'));
-        }
-    });
-}
-
-/**
- * Set up real-time listener for Firebase data changes
- */
-function setupFirebaseListener() {
+function setupFirebaseListeners() {
     if (isFirebaseReady()) {
-        const dbRef = window.firebaseRef(window.firebaseDB, 'lootData');
-        window.firebaseOnValue(dbRef, (snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                characters = data.characters || [];
-                assignments = data.assignments || [];
-                
-                // Update UI when data changes
-                invalidateTableCache();
-                updateCharacterList();
-                updateTable();
-            } else {
-                // Data was cleared in Firebase, reset local data
-                characters = [];
-                assignments = [];
-                
-                // Update UI to reflect empty state
-                invalidateTableCache();
-                updateCharacterList();
-                updateTable();
-            }
+        const database = window.firebaseDB;
+        
+        // Listen for changes to assignments
+        const assignRef = window.firebaseRef(database, 'assignments');
+        window.firebaseOnValue(assignRef, (snapshot) => {
+            assignments = snapshot.val() || [];
+            
+            // Update UI when assignments change
+            invalidateTableCache();
+            updateTable();
         }, (error) => {
-            console.error('Error in Firebase listener:', error);
+            console.error('Error in Firebase assignments listener:', error);
+        });
+        
+        // Listen for changes to characters
+        const charRef = window.firebaseRef(database, 'characters');
+        window.firebaseOnValue(charRef, (snapshot) => {
+            characters = snapshot.val() || [];
+            
+            // Update UI when characters change
+            invalidateTableCache();
+            updateCharacterList();
+            updateTable();
+        }, (error) => {
+            console.error('Error in Firebase characters listener:', error);
         });
     } else {
         console.error('Firebase is not initialized yet');
@@ -735,22 +708,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const initializeApp = () => {
         if (isFirebaseReady()) {
-            // Load initial data from Firebase
-            loadDataFromFirebase().then(() => {
-                // Initialize UI with loaded data
-                updateBossSelect();
-                updateCharacterList();
-                updateTable();
-                
-                // Set up real-time listener for future changes
-                setupFirebaseListener();
-            }).catch((error) => {
-                console.error('Failed to load initial data:', error);
-                // Initialize with empty data if Firebase fails
-                updateBossSelect();
-                updateCharacterList();
-                updateTable();
-            });
+            // Initialize UI
+            updateBossSelect();
+            updateCharacterList();
+            updateTable();
+            
+            // Set up real-time listeners for Firebase data
+            // This will load initial data and keep it synchronized
+            setupFirebaseListeners();
         } else if (initRetries < maxRetries) {
             // Firebase not ready yet, wait a bit and try again
             initRetries++;
