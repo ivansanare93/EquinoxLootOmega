@@ -252,14 +252,6 @@ ul:hover, table:hover {
     box-shadow: none;
 }
 
-#gestion-personajes h2 {
-    margin-top: 0;
-    font-size: 1.3em;
-    border-bottom: 2px solid var(--dorado);
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
 #form-personaje {
     background-color: transparent;
     padding: 0;
@@ -303,6 +295,8 @@ ul:hover, table:hover {
         border-left: none;
         border-bottom: 2px solid var(--dorado);
         max-height: var(--sidebar-mobile-max-height);
+        /* Use order property to visually move sidebar to top while maintaining
+           proper source order for screen readers and keyboard navigation */
         order: -1;
     }
     
