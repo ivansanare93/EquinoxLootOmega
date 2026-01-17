@@ -1049,13 +1049,18 @@ function exportToExcel() {
     }
     
     // 5. Auto-adjust column widths based on content
-    const columnHeaders = ['Personaje', 'Clase', 'Especialización', 'Objeto', 'Dificultad', 'iLvl', 'Jefe', 'Tipo', 'Nota'];
-    const columnWidths = columnHeaders.map((header, idx) => {
+    const columnWidths = [];
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        // Get header for this column
+        const headerAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        const headerCell = worksheet[headerAddress];
+        const headerValue = headerCell?.v || '';
+        
         // Calculate max width for this column
-        let maxWidth = header.length;
+        let maxWidth = String(headerValue).length;
         
         for (let row = range.s.r + 1; row <= range.e.r; row++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: row, c: idx });
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
             const cell = worksheet[cellAddress];
             if (cell && cell.v) {
                 const cellLength = String(cell.v).length;
@@ -1064,8 +1069,8 @@ function exportToExcel() {
         }
         
         // Add some padding and cap at a reasonable maximum
-        return { wch: Math.min(maxWidth + 2, 50) };
-    });
+        columnWidths.push({ wch: Math.min(maxWidth + 2, 50) });
+    }
     
     worksheet['!cols'] = columnWidths;
 
