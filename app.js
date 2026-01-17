@@ -1069,8 +1069,8 @@ function exportToExcel() {
     
     worksheet['!cols'] = columnWidths;
 
-    // 6. Download the file with styling support
-    XLSX.writeFile(workbook, "asignaciones_loot.xlsx", { cellStyles: true });
+    // 6. Download the file
+    XLSX.writeFile(workbook, "asignaciones_loot.xlsx");
 }
 
 // ===== INICIALIZACIÓN =====
