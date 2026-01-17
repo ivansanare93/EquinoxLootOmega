@@ -959,7 +959,22 @@ function exportToExcel() {
         return;
     }
     
-    // 1. Get filtered data
+    // 1. Get current date for header and filename
+    const currentDate = new Date();
+    // Use robust date formatting for filename
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`; // Format: YYYY-MM-DD
+    
+    // Display date in Spanish format
+    const displayDate = currentDate.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }); // Format: DD de MMMM de YYYY
+    
+    // 2. Get filtered data
     const filtroClase = document.getElementById('filtro-clase').value;
     const filtroJefe = document.getElementById('filtro-jefe').value;
     const filtroDificultad = document.getElementById('filtro-dificultad').value;
@@ -980,7 +995,7 @@ function exportToExcel() {
         return;
     }
 
-    // 2. Create data for Excel export (one row per assignment)
+    // 3. Create data for Excel export (one row per assignment)
     const exportData = filteredAssignments.map(a => {
         const char = characters.find(c => c.name === a.character);
         const item = itemIndexByName.get(a.item);
@@ -998,15 +1013,39 @@ function exportToExcel() {
         };
     });
 
-    // 3. Create worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
+    // Additional safety check (should not be needed due to filteredAssignments check above)
+    if (exportData.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+    }
 
-    // 4. Apply styling to the worksheet
+    // 4. Create worksheet and workbook
+    const workbook = XLSX.utils.book_new();
+    
+    // 5. Create worksheet with title header and data
+    // First, create an array with the title, empty row, and then the data
+    const titleRow = [`RAID EQUINOX - ${displayDate}`];
+    const emptyRow = [];
+    
+    // Create header row from the first data object keys
+    const headers = Object.keys(exportData[0] || {});
+    
+    // Build the complete data array with title, spacing, headers, and data rows
+    const worksheetData = [
+        titleRow,
+        emptyRow,
+        headers,
+        ...exportData.map(obj => headers.map(key => obj[key]))
+    ];
+    
+    // Create worksheet from the complete array
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
     
     // Get the range of the worksheet
-    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    const newRange = XLSX.utils.decode_range(worksheet['!ref']);
+    
+    // 6. Apply styling to the worksheet
     
     // Define reusable border styles
     const thinBorder = { style: "thin" };
@@ -1017,7 +1056,33 @@ function exportToExcel() {
         right: { ...thinBorder, color: { rgb: color } }
     });
     
-    // Define header row styling (row 0)
+    // Style the title header row (row 0)
+    const titleCell = worksheet['A1'];
+    if (titleCell) {
+        titleCell.s = {
+            font: { 
+                bold: true, 
+                sz: 16,
+                color: { rgb: "FFFFFF" }
+            },
+            fill: { 
+                fgColor: { rgb: "1F4E78" } // Dark blue background
+            },
+            alignment: { 
+                horizontal: "center", 
+                vertical: "center" 
+            }
+        };
+    }
+    
+    // Merge cells for title header across all columns
+    worksheet['!merges'] = worksheet['!merges'] || [];
+    worksheet['!merges'].push({
+        s: { r: 0, c: 0 },
+        e: { r: 0, c: newRange.e.c }
+    });
+    
+    // Define column header row styling (row 2, after title and empty row)
     const headerStyle = {
         font: { 
             bold: true, 
@@ -1034,26 +1099,27 @@ function exportToExcel() {
         border: createBorder("000000")
     };
     
-    // Apply header styling to first row
-    for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+    // Apply header styling to column headers (row 2)
+    for (let col = newRange.s.c; col <= newRange.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 2, c: col });
         const cell = worksheet[cellAddress];
         if (!cell) continue;
         cell.s = headerStyle;
     }
     
-    // Apply zebra striping and other cell styling
-    for (let row = range.s.r + 1; row <= range.e.r; row++) {
+    // Apply zebra striping and other cell styling (data starts at row 3)
+    for (let row = 3; row <= newRange.e.r; row++) {
         // Determine if this is an even row (for zebra striping)
-        const isEvenRow = (row % 2) === 0;
+        // Adjust for offset since data starts at row 3
+        const isEvenRow = ((row - 3) % 2) === 0;
         
-        for (let col = range.s.c; col <= range.e.c; col++) {
+        for (let col = newRange.s.c; col <= newRange.e.c; col++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
             const cell = worksheet[cellAddress];
             if (!cell) continue;
             
-            // Get column header to determine which column we're in
-            const headerAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            // Get column header to determine which column we're in (headers are now at row 2)
+            const headerAddress = XLSX.utils.encode_cell({ r: 2, c: col });
             const headerValue = worksheet[headerAddress]?.v || '';
             
             // Base style for data cells
@@ -1085,18 +1151,19 @@ function exportToExcel() {
         }
     }
     
-    // 5. Auto-adjust column widths based on content
+    // 7. Auto-adjust column widths based on content
     const columnWidths = [];
-    for (let col = range.s.c; col <= range.e.c; col++) {
-        // Get header for this column
-        const headerAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+    for (let col = newRange.s.c; col <= newRange.e.c; col++) {
+        // Get header for this column (headers are now at row 2)
+        const headerAddress = XLSX.utils.encode_cell({ r: 2, c: col });
         const headerCell = worksheet[headerAddress];
         const headerValue = headerCell?.v || '';
         
         // Calculate max width for this column
         let maxWidth = String(headerValue).length;
         
-        for (let row = range.s.r + 1; row <= range.e.r; row++) {
+        // Check data rows (starting at row 3)
+        for (let row = 3; row <= newRange.e.r; row++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
             const cell = worksheet[cellAddress];
             if (cell && cell.v) {
@@ -1111,8 +1178,8 @@ function exportToExcel() {
     
     worksheet['!cols'] = columnWidths;
 
-    // 6. Download the file
-    XLSX.writeFile(workbook, "asignaciones_loot.xlsx");
+    // 8. Download the file with date in filename
+    XLSX.writeFile(workbook, `asignaciones_loot_${dateStr}.xlsx`);
 }
 
 // ===== INICIALIZACIÓN =====
