@@ -5,7 +5,7 @@ Repositorio para la aplicación que organiza Loot de la RAID de Equinox
 
 - **Character Management**: Add, edit, and delete raid characters with their class and specialization
 - **Loot Assignment**: Assign items from raid bosses to characters based on compatibility
-- **Real-time Synchronization**: Multiple users can view and update data simultaneously using Firebase Realtime Database
+- **Real-time Synchronization**: Multiple users can view and update data simultaneously using Firebase Firestore
 - **Filtering**: Filter assignments by class, boss, and difficulty
 - **Excel Export**: Export assignment data to Excel spreadsheets
 
