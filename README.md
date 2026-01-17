@@ -11,7 +11,7 @@ Repositorio para la aplicación que organiza Loot de la RAID de Equinox
 
 ## Firebase Integration
 
-This application uses Firebase Realtime Database for data storage and real-time synchronization across multiple users.
+This application uses Firebase Firestore for data storage and real-time synchronization across multiple users.
 
 ### Setup
 
@@ -32,12 +32,12 @@ For detailed Firebase setup information, see [FIREBASE_SETUP.md](FIREBASE_SETUP.
 ## File Structure
 
 - `LarancioOrtegaLoot.html` - Main HTML file with Firebase SDK integration
-- `app.js` - Application logic with Firebase Realtime Database integration
+- `app.js` - Application logic with Firebase Firestore integration
 - `data.js` - Raid boss and loot item data
 - `style.css` - Styling
 - `FIREBASE_SETUP.md` - Detailed Firebase setup and configuration documentation
 
-## Migration from localStorage
+## Migration from Realtime Database
 
-**Note**: This application previously used localStorage for data storage. The new version uses Firebase Realtime Database. Any data stored in localStorage will not be automatically migrated.
+**Note**: This application previously used Firebase Realtime Database for data storage. The new version uses Firebase Firestore. Data from Realtime Database should be manually migrated to Firestore if needed.
 
