@@ -43,7 +43,7 @@ body {
 
 /* Sidebar for character list */
 .sidebar {
-    width: 300px;
+    width: 500px;
     background-color: rgba(15, 23, 42, 0.95);
     border-left: 2px solid var(--dorado);
     padding: 20px;
