@@ -20,21 +20,22 @@ This application uses Firebase Firestore for data storage and real-time synchron
 2. **No Additional Setup**: The Firebase configuration is already included in the HTML file
 3. **Automatic Synchronization**: Changes made by any user are automatically visible to all connected users
 
-For detailed Firebase setup information, see [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
+For detailed Firebase setup information, see [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
 
 ## Usage
 
-1. Open `LarancioOrtegaLoot.html` in a web browser
-2. Add characters using the "Gestión de Personajes" form
-3. Assign loot items to characters using the "Asignación de Objetos" section
-4. View and filter assignments in the "Visualización de Asignaciones" table
-5. Export data to Excel if needed
+1. Start the server with `npm start`
+2. Open http://localhost:3000/LarancioOrtegaLoot.html in a web browser
+3. Add characters using the "Gestión de Personajes" form
+4. Assign loot items to characters using the "Asignación de Objetos" section
+5. View and filter assignments in the "Visualización de Asignaciones" table
+6. Export data to Excel if needed
 
 ## Blizzard API Integration
 
 This application now includes a Node.js backend API that integrates with the official Blizzard WoW Retail Game Data API.
 
-**🚀 Quick Start**: See [QUICK_START.md](QUICK_START.md) to get up and running in 5 minutes!
+**🚀 Quick Start**: See [docs/QUICK_START.md](docs/QUICK_START.md) to get up and running in 5 minutes!
 
 ### Backend Features
 
@@ -74,30 +75,37 @@ This application now includes a Node.js backend API that integrates with the off
    - API Demo: http://localhost:3000/api-demo.html
    - Main App: http://localhost:3000/LarancioOrtegaLoot.html
 
-For detailed setup instructions, see [BLIZZARD_API_SETUP.md](BLIZZARD_API_SETUP.md).
+For detailed setup instructions, see [docs/BLIZZARD_API_SETUP.md](docs/BLIZZARD_API_SETUP.md).
 
 ## File Structure
 
-### Frontend
+### Frontend (`client/`)
 - `LarancioOrtegaLoot.html` - Main HTML file with Firebase SDK integration
 - `app.js` - Application logic with Firebase Firestore integration
 - `data.js` - Raid boss and loot item data
 - `style.css` - Styling
+- `api-demo.html` - Interactive API demo page
 
-### Backend (Blizzard API)
+### Backend (`src/`)
 - `server.js` - Express server with API endpoints
 - `services/blizzardAuth.js` - OAuth authentication service
 - `services/blizzardApi.js` - Blizzard API client with caching
 - `routes/api.js` - API route definitions
+
+### Configuration
 - `package.json` - Node.js dependencies and scripts
 - `.env.example` - Environment configuration template
+- `.gitignore` - Git ignore rules
 
-### Documentation
-- `README.md` - This file
+### Documentation (`docs/`)
+- `README.md` - This file (project root)
 - `QUICK_START.md` - Quick start guide (5 minutes to get started!)
 - `FIREBASE_SETUP.md` - Detailed Firebase setup and configuration
 - `BLIZZARD_API_SETUP.md` - Blizzard API integration guide
-- `api-demo.html` - Interactive API demo page
+- `TESTING.md` - Testing documentation
+- `MIGRATION_SUMMARY.md` - Migration notes
+
+### Scripts (`scripts/`)
 - `test-api.js` - API test script
 
 ## Migration from Realtime Database
