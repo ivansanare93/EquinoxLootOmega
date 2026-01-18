@@ -52,14 +52,19 @@ class BlizzardApiService {
       const token = await this.authService.getAccessToken();
       const url = `${this.getApiUrl()}${endpoint}`;
       
+      const namespace = params.namespace || this.namespace;
+      
       const response = await axios.get(url, {
         params: {
-          namespace: params.namespace || this.namespace,
+          namespace: namespace,
           locale: this.locale,
           ...params
         },
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Battlenet-Namespace': namespace,
+          'Accept': 'application/json',
+          'Accept-Language': this.locale.replace('_', '-')
         }
       });
 
