@@ -64,6 +64,10 @@ async function runTests() {
       url: `${BASE_URL}/api`
     },
     {
+      name: 'List All Journal Instances',
+      url: `${BASE_URL}/api/journal-instances`
+    },
+    {
       name: 'List All Raids',
       url: `${BASE_URL}/api/raids`
     },

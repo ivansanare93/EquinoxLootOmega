@@ -75,6 +75,7 @@ app.get('/api', (req, res) => {
     region: config.region,
     locale: config.locale,
     endpoints: {
+      'GET /api/journal-instances': 'List all journal instances (raids and dungeons)',
       'GET /api/raids': 'List all available raids',
       'GET /api/raids/:id': 'Get raid details with encounters',
       'GET /api/encounters/:id/loot': 'Get loot drops for an encounter',
