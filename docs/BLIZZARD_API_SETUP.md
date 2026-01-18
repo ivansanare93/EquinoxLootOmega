@@ -310,6 +310,17 @@ The server uses **OAuth 2.0 Client Credentials Flow** to authenticate with Battl
 4. The server automatically refreshes the token when needed
 5. No user interaction is required
 
+### HTTP Headers Sent to Blizzard API
+
+All requests to the Blizzard Game Data API include the following headers:
+
+- **Authorization**: `Bearer <access_token>` - OAuth 2.0 access token
+- **Battlenet-Namespace**: `static-{region}` - Specifies the data namespace (also sent as query parameter)
+- **Accept**: `application/json` - Indicates we expect JSON responses
+- **Accept-Language**: `{locale}` - Specifies the preferred language (e.g., `es-ES`, `en-US`)
+
+These headers ensure proper authentication and data retrieval from the Blizzard API.
+
 ## Caching Strategy
 
 To minimize API calls to Blizzard and improve response times:
@@ -352,6 +363,15 @@ Common HTTP status codes:
 - Check that you're using the correct endpoint URL
 - Verify the server is running on the expected port
 - Ensure the ID parameter is a valid number
+- **Note**: If you get a 404 from the Blizzard API itself (not the local server), ensure:
+  - The correct namespace is being used for your region (e.g., `static-eu` for Europe)
+  - Required headers are being sent (`Battlenet-Namespace`, `Accept`, `Accept-Language`)
+  - The endpoint path is correct (e.g., `/data/wow/journal-instance/index`)
+
+### "CORS errors" when accessing from HTML
+- Ensure the HTML file is served from `http://localhost:3000` and not opened as `file://`
+- The server has CORS enabled for all origins by default
+- If needed, check browser console for specific CORS error details
 
 ### Cache not working
 - Check cache statistics at `/api/cache/stats`
