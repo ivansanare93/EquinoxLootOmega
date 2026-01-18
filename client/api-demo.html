@@ -89,13 +89,19 @@
     </div>
 
     <div class="container">
-        <h2>1. Listar Raids Disponibles</h2>
+        <h2>1. Listar Journal Instances (Raids y Dungeons)</h2>
+        <button onclick="loadJournalInstances()">Cargar Journal Instances</button>
+        <div id="journalInstancesOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>2. Listar Raids Disponibles</h2>
         <button onclick="loadRaids()">Cargar Raids</button>
         <div id="raidsOutput" class="output"></div>
     </div>
 
     <div class="container">
-        <h2>2. Detalles de Raid</h2>
+        <h2>3. Detalles de Raid</h2>
         <p>Selecciona una raid de la lista anterior o ingresa un ID:</p>
         <input type="number" id="raidId" placeholder="Raid ID (ej: 1279)" style="padding: 8px; width: 200px;">
         <button onclick="loadRaidDetails()">Cargar Detalles</button>
@@ -103,7 +109,7 @@
     </div>
 
     <div class="container">
-        <h2>3. Loot de Encounter</h2>
+        <h2>4. Loot de Encounter</h2>
         <p>Selecciona un encounter de los detalles de raid o ingresa un ID:</p>
         <input type="number" id="encounterId" placeholder="Encounter ID (ej: 2902)" style="padding: 8px; width: 200px;">
         <button onclick="loadEncounterLoot()">Cargar Loot</button>
@@ -111,7 +117,7 @@
     </div>
 
     <div class="container">
-        <h2>4. Detalles de Item</h2>
+        <h2>5. Detalles de Item</h2>
         <p>Selecciona un item de la lista de loot o ingresa un ID:</p>
         <input type="number" id="itemId" placeholder="Item ID (ej: 212405)" style="padding: 8px; width: 200px;">
         <button onclick="loadItemDetails()">Cargar Item</button>
@@ -119,7 +125,7 @@
     </div>
 
     <div class="container">
-        <h2>5. Gestión de Caché</h2>
+        <h2>6. Gestión de Caché</h2>
         <button onclick="getCacheStats()">Ver Estadísticas</button>
         <button onclick="clearCache()">Limpiar Caché</button>
         <div id="cacheOutput" class="output"></div>
@@ -138,6 +144,31 @@
             } catch (error) {
                 output.className = 'error';
                 output.textContent = '✗ No se puede conectar al servidor';
+            }
+        }
+
+        async function loadJournalInstances() {
+            const output = document.getElementById('journalInstancesOutput');
+            output.innerHTML = '<span class="loading">Cargando journal instances...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/journal-instances`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<div class="success">✓ ${data.count} journal instances encontradas</div><br>`;
+                    html += `<strong>Región:</strong> ${data.region.toUpperCase()} | <strong>Locale:</strong> ${data.locale}<br><br>`;
+                    data.instances.forEach(instance => {
+                        html += `<div class="raid-item" onclick="document.getElementById('raidId').value=${instance.id}; loadRaidDetails()">
+                            <strong>${instance.name}</strong> (ID: ${instance.id})
+                        </div>`;
+                    });
+                    output.innerHTML = html;
+                } else {
+                    output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
             }
         }
 
