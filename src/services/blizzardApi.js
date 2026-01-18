@@ -87,6 +87,8 @@ class BlizzardApiService {
 
   /**
    * Get list of all journal instances (raids and dungeons)
+   * Note: Uses same endpoint as getRaids() but different cache key since
+   * the /api/raids route filters results to raids only
    * @returns {Promise<Object>} Journal instances index
    */
   async getJournalInstances() {
@@ -99,6 +101,8 @@ class BlizzardApiService {
 
   /**
    * Get list of all raids
+   * Note: Uses same endpoint as getJournalInstances() but different cache key
+   * since this is used by /api/raids which filters to raids only
    * @returns {Promise<Object>} Raids index
    */
   async getRaids() {
