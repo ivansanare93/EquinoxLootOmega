@@ -7,6 +7,36 @@ const router = express.Router();
  */
 function initializeRoutes(apiService) {
   /**
+   * GET /api/journal-instances
+   * Get list of all journal instances (raids and dungeons)
+   */
+  router.get('/journal-instances', async (req, res) => {
+    try {
+      const data = await apiService.getJournalInstances();
+      
+      res.json({
+        success: true,
+        message: 'Journal instances fetched successfully',
+        region: apiService.region,
+        locale: apiService.locale,
+        count: data.instances ? data.instances.length : 0,
+        instances: data.instances ? data.instances.map(instance => ({
+          id: instance.id,
+          name: instance.name,
+          key: instance.key?.href
+        })) : []
+      });
+    } catch (error) {
+      console.error('Error fetching journal instances:', error);
+      res.status(error.status || 500).json({
+        success: false,
+        error: error.message || 'Failed to fetch journal instances',
+        endpoint: '/api/journal-instances'
+      });
+    }
+  });
+
+  /**
    * GET /api/raids
    * Get list of available raids in EU region
    */

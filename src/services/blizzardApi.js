@@ -86,6 +86,18 @@ class BlizzardApiService {
   }
 
   /**
+   * Get list of all journal instances (raids and dungeons)
+   * @returns {Promise<Object>} Journal instances index
+   */
+  async getJournalInstances() {
+    return this.request(
+      '/data/wow/journal-instance/index',
+      {},
+      'journal-instances-index'
+    );
+  }
+
+  /**
    * Get list of all raids
    * @returns {Promise<Object>} Raids index
    */
