@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run build && node src/server.js",
     "dev": "nodemon src/server.js",
-    "build": "mkdirp public && copyfiles -f client/LarancioOrtegaLoot.html client/style.css client/api-demo.html client/app.js client/data.js public",
+    "build": "rimraf public && mkdirp public && copyfiles -f client/LarancioOrtegaLoot.html client/style.css client/api-demo.html client/app.js client/data.js public",
     "test": "echo \"No tests yet\" && exit 0",
     "test:api": "node scripts/test-api.js",
     "test:filtered-loot": "node scripts/test-filtered-loot.js"
@@ -30,7 +30,8 @@
   "devDependencies": {
     "copyfiles": "^2.4.1",
     "mkdirp": "^3.0.1",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "rimraf": "^6.1.2"
   },
   "engines": {
     "node": ">=14.0.0"
