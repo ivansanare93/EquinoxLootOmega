@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "build": "mkdir -p public && cp client/LarancioOrtegaLoot.html client/style.css client/api-demo.html client/app.js client/data.js public/",
     "test": "echo \"No tests yet\" && exit 0",
-    "test:api": "node scripts/test-api.js"
+    "test:api": "node scripts/test-api.js",
+    "test:filtered-loot": "node scripts/test-filtered-loot.js"
   },
   "keywords": [
     "wow",

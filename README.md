@@ -44,6 +44,7 @@ This application now includes a Node.js backend API that integrates with the off
   - `/api/raids` - List all available raids (EU region, Spanish locale)
   - `/api/raids/:id` - Get raid details with encounters
   - `/api/encounters/:id/loot` - Get loot drops for a specific boss
+  - `/api/encounters/:id/loot/filtered` - Get filtered loot by player class and specialization
   - `/api/items/:id` - Get item details including equippable classes
 - **Caching**: Built-in caching to reduce API calls and improve performance
 - **Error Handling**: Comprehensive error handling for API failures
@@ -102,6 +103,7 @@ For detailed setup instructions, see [docs/BLIZZARD_API_SETUP.md](docs/BLIZZARD_
 - `QUICK_START.md` - Quick start guide (5 minutes to get started!)
 - `FIREBASE_SETUP.md` - Detailed Firebase setup and configuration
 - `BLIZZARD_API_SETUP.md` - Blizzard API integration guide
+- `FILTERED_LOOT_API.md` - Filtered loot API documentation
 - `TESTING.md` - Testing documentation
 - `MIGRATION_SUMMARY.md` - Migration notes
 

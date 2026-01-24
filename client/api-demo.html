@@ -117,6 +117,33 @@
     </div>
 
     <div class="container">
+        <h2>4.1. Loot Filtrado por Clase y Especialización</h2>
+        <p>Obtén el loot de un boss filtrado por tu clase y especialización:</p>
+        <div style="margin: 10px 0;">
+            <input type="number" id="filteredEncounterId" placeholder="Encounter ID (ej: 2902)" style="padding: 8px; width: 200px; margin-right: 10px;">
+            <select id="playerClass" style="padding: 8px; margin-right: 10px;">
+                <option value="">-- Selecciona Clase --</option>
+                <option value="Guerrero">Guerrero</option>
+                <option value="Paladín">Paladín</option>
+                <option value="Cazador">Cazador</option>
+                <option value="Pícaro">Pícaro</option>
+                <option value="Sacerdote">Sacerdote</option>
+                <option value="Caballero de la Muerte">Caballero de la Muerte</option>
+                <option value="Chamán">Chamán</option>
+                <option value="Mago">Mago</option>
+                <option value="Brujo">Brujo</option>
+                <option value="Monje">Monje</option>
+                <option value="Druida">Druida</option>
+                <option value="Cazador de Demonios">Cazador de Demonios</option>
+                <option value="Evocador">Evocador</option>
+            </select>
+            <input type="text" id="specialization" placeholder="Especialización (opcional)" style="padding: 8px; width: 200px; margin-right: 10px;">
+        </div>
+        <button onclick="loadFilteredLoot()">Cargar Loot Filtrado</button>
+        <div id="filteredLootOutput" class="output"></div>
+    </div>
+
+    <div class="container">
         <h2>5. Detalles de Item</h2>
         <p>Selecciona un item de la lista de loot o ingresa un ID:</p>
         <input type="number" id="itemId" placeholder="Item ID (ej: 212405)" style="padding: 8px; width: 200px;">
@@ -246,6 +273,59 @@
                             ${item.name} (ID: ${item.id}) - ${item.quality}
                         </div>`;
                     });
+                    output.innerHTML = html;
+                } else {
+                    output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        async function loadFilteredLoot() {
+            const encounterId = document.getElementById('filteredEncounterId').value;
+            const playerClass = document.getElementById('playerClass').value;
+            const specialization = document.getElementById('specialization').value;
+            
+            if (!encounterId) return alert('Por favor ingresa un Encounter ID');
+            if (!playerClass) return alert('Por favor selecciona una clase');
+            
+            const output = document.getElementById('filteredLootOutput');
+            output.innerHTML = '<span class="loading">Cargando loot filtrado...</span>';
+            
+            try {
+                let url = `${API_BASE}/api/encounters/${encounterId}/loot/filtered?playerClass=${encodeURIComponent(playerClass)}`;
+                if (specialization) {
+                    url += `&specialization=${encodeURIComponent(specialization)}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<div class="success">✓ Encounter: ${data.encounter.name}</div><br>`;
+                    html += `<strong>Raid:</strong> ${data.encounter.instance?.name || 'N/A'}<br>`;
+                    html += `<strong>Filtrado por:</strong> ${data.filter.playerClass}`;
+                    if (data.filter.specialization && data.filter.specialization !== 'All') {
+                        html += ` (${data.filter.specialization})`;
+                    }
+                    html += `<br>`;
+                    html += `<strong>Items totales:</strong> ${data.total_items} | <strong>Items disponibles para tu clase:</strong> ${data.filtered_items}<br><br>`;
+                    
+                    if (data.loot.length > 0) {
+                        html += `<strong>Loot Disponible (${data.loot.length} items):</strong><br>`;
+                        data.loot.forEach(item => {
+                            html += `<div class="raid-item" onclick="document.getElementById('itemId').value=${item.id}; loadItemDetails()">`;
+                            if (item.icon_url) {
+                                html += `<img src="${item.icon_url}" alt="${item.name}" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;">`;
+                            }
+                            html += `<strong>${item.name}</strong> (ID: ${item.id})<br>`;
+                            html += `<small>Tipo: ${item.item_subclass || item.item_class} | Calidad: ${item.quality} | Nivel: ${item.level}</small>`;
+                            html += `</div>`;
+                        });
+                    } else {
+                        html += `<div class="error">No hay items disponibles para ${data.filter.playerClass} en este encounter.</div>`;
+                    }
                     output.innerHTML = html;
                 } else {
                     output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
