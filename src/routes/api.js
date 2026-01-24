@@ -190,7 +190,8 @@ function initializeRoutes(apiService) {
       const encounterData = await apiService.getEncounter(encounterId);
 
       // Get all items with their details
-      const itemPromises = encounterData.items ? encounterData.items.map(async (encounterItem) => {
+      const itemPromises = encounterData.items && Array.isArray(encounterData.items) 
+        ? encounterData.items.map(async (encounterItem) => {
         if (!encounterItem.item?.id) return null;
         
         try {
