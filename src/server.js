@@ -79,6 +79,7 @@ app.get('/api', (req, res) => {
       'GET /api/raids': 'List all available raids',
       'GET /api/raids/:id': 'Get raid details with encounters',
       'GET /api/encounters/:id/loot': 'Get loot drops for an encounter',
+      'GET /api/encounters/:id/loot/filtered?playerClass=&specialization=': 'Get filtered loot by class and spec',
       'GET /api/items/:id': 'Get item details with equippable classes',
       'GET /api/cache/stats': 'Get cache statistics',
       'DELETE /api/cache': 'Clear API cache',
