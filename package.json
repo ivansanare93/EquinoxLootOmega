@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run build && node src/server.js",
     "dev": "nodemon src/server.js",
-    "build": "mkdir -p public && cp client/LarancioOrtegaLoot.html client/style.css client/api-demo.html client/app.js client/data.js public/",
+    "build": "mkdirp public && copyfiles -f client/LarancioOrtegaLoot.html client/style.css client/api-demo.html client/app.js client/data.js public",
     "test": "echo \"No tests yet\" && exit 0",
     "test:api": "node scripts/test-api.js",
     "test:filtered-loot": "node scripts/test-filtered-loot.js"
@@ -21,13 +21,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
     "axios": "^1.6.0",
-    "dotenv": "^16.3.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
+    "copyfiles": "^2.4.1",
+    "mkdirp": "^3.0.1",
     "nodemon": "^3.0.1"
   },
   "engines": {
