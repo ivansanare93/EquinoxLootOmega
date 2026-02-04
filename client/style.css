@@ -331,3 +331,21 @@ ul:hover, table:hover {
         width: 100%;
     }
 }
+
+/* Back to Home button */
+.back-to-home {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--dorado);
+    color: var(--azul-profundo-1);
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.back-to-home:hover {
+    background-color: var(--purpura);
+    color: white;
+    transform: scale(1.05);
+}
