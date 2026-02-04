@@ -7,7 +7,7 @@
     "start": "npm run build:local && node src/server.js",
     "dev": "nodemon src/server.js",
     "build": "npm run build:static && npm run build:firebase-config",
-    "build:static": "rimraf public && mkdirp public && copyfiles -f client/index.html client/LarancioOrtegaLoot.html client/roster-signup.html client/style.css client/api-demo.html client/app.js client/data.js public",
+    "build:static": "rimraf public && mkdirp public && copyfiles -f client/index.html client/LarancioOrtegaLoot.html client/roster-signup.html client/style.css client/api-demo.html client/app.js client/data.js client/.nojekyll public",
     "build:firebase-config": "node scripts/generate-firebase-config.js",
     "build:local": "npm run build:static && copyfiles -f client/firebase-config.js public",
     "test": "echo \"No tests yet\" && exit 0",
