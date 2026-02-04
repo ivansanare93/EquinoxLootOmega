@@ -44,7 +44,7 @@ Después de revisar el fichero `scripts/generate-firebase-config.js` y el workfl
 1. Ve a [Firebase Console](https://console.firebase.google.com/)
 2. Selecciona tu proyecto
 3. Haz clic en el ícono de configuración (⚙️) → Project settings
-4. En la sección "Your apps", selecciona tu Web app o crea una nueva
+4. En la sección "Your apps", selecciona tu Web app o crea una nueva (ícono `</>`)
 5. Encontrarás el objeto `firebaseConfig` con todos los valores necesarios
 
 #### 2. GitHub Pages NO Habilitado ⚠️
@@ -84,7 +84,7 @@ service cloud.firestore {
 **c) Web App Registrada:**
 En Firebase Console, debe existir una Web app en tu proyecto. Si no existe:
 1. Ve a Project settings
-2. En "Your apps", haz clic en el ícono Web (</> )
+2. En "Your apps", haz clic en el ícono Web (`</>`)
 3. Registra una nueva app
 4. Copia las credenciales del objeto `firebaseConfig`
 

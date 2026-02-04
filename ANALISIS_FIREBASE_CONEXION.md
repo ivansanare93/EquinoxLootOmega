@@ -31,7 +31,7 @@ Sin embargo, encontré áreas clave que podrían causar errores de conexión si 
 Si los GitHub Secrets no están configurados, el build generará un archivo `firebase-config.js` con valores vacíos, causando errores de conexión.
 
 **Solución:**
-1. Ve a: `Settings` → `Secrets and variables` → `Actions`
+1. Ve a `Settings` → `Secrets and variables` → `Actions`
 2. Crea estos 6 secrets con tus credenciales reales de Firebase:
    - `FIREBASE_API_KEY`
    - `FIREBASE_AUTH_DOMAIN`
@@ -41,7 +41,7 @@ Si los GitHub Secrets no están configurados, el build generará un archivo `fir
    - `FIREBASE_APP_ID`
 
 **¿Dónde obtener estos valores?**
-- Firebase Console → Tu proyecto → ⚙️ Project settings → Your apps → Web app
+- `Firebase Console` → `Tu proyecto` → `⚙️ Project settings` → `Your apps` → `Web app`
 
 ### 2. Firestore Database No Creado
 Si el proyecto Firebase no tiene Firestore habilitado, la app no podrá conectarse.
