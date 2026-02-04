@@ -3,12 +3,20 @@ Repositorio para la aplicación que organiza Loot de la RAID de Equinox
 
 ## Features
 
+### Loot Manager
 - **Character Management**: Add, edit, and delete raid characters with their class and specialization
 - **Loot Assignment**: Assign items from raid bosses to characters based on compatibility
 - **Real-time Synchronization**: Multiple users can view and update data simultaneously using Firebase Firestore
 - **Filtering**: Filter assignments by class, boss, and difficulty
 - **Excel Export**: Export assignment data to Excel spreadsheets
 - **Blizzard API Integration**: Direct integration with WoW Retail Game Data API for live raid and loot data
+
+### Roster Signup Tool (NEW!)
+- **Class & Role Registration**: Guild members can sign up their class, specialization, and preferred roles for the next expansion
+- **Multi-Role Support**: Players can indicate if they can Tank, Heal, or DPS
+- **Live Statistics**: Officers can see real-time counts of Tanks, Healers, and DPS signups
+- **Filtering & Export**: Filter by class or role, and export roster data to Excel for planning
+- **Real-time Sync**: All signups are synchronized in real-time via Firebase Firestore
 
 ## Firebase Integration
 
@@ -24,12 +32,25 @@ For detailed Firebase setup information, see [docs/FIREBASE_SETUP.md](docs/FIREB
 
 ## Usage
 
+### Main Tools Dashboard
 1. Start the server with `npm start`
-2. Open http://localhost:3000/LarancioOrtegaLoot.html in a web browser
-3. Add characters using the "Gestión de Personajes" form
-4. Assign loot items to characters using the "Asignación de Objetos" section
-5. View and filter assignments in the "Visualización de Asignaciones" table
-6. Export data to Excel if needed
+2. Open http://localhost:3000/ or http://localhost:3000/index.html in a web browser
+3. Select the tool you need:
+   - **Loot Manager**: For current raid loot management
+   - **Roster Signup**: For expansion roster planning
+   - **API Demo**: To explore Blizzard API integration
+
+### Loot Manager
+1. Add characters using the "Gestión de Personajes" form
+2. Assign loot items to characters using the "Asignación de Objetos" section
+3. View and filter assignments in the "Visualización de Asignaciones" table
+4. Export data to Excel if needed
+
+### Roster Signup Tool
+1. Fill out the registration form with character name, class, and specialization
+2. Select which roles you can play (Tank, Healer, DPS)
+3. Add any additional notes (optional)
+4. Officers can view all signups, filter by class/role, and export to Excel
 
 ## Blizzard API Integration
 
@@ -73,19 +94,23 @@ This application now includes a Node.js backend API that integrates with the off
    ```
 
 5. **Access the Application**:
+   - Main Dashboard: http://localhost:3000/ or http://localhost:3000/index.html
+   - Roster Signup: http://localhost:3000/roster-signup.html
+   - Loot Manager: http://localhost:3000/LarancioOrtegaLoot.html
    - API Demo: http://localhost:3000/api-demo.html
-   - Main App: http://localhost:3000/LarancioOrtegaLoot.html
 
 For detailed setup instructions, see [docs/BLIZZARD_API_SETUP.md](docs/BLIZZARD_API_SETUP.md).
 
 ## File Structure
 
 ### Frontend (`client/`)
-- `LarancioOrtegaLoot.html` - Main HTML file with Firebase SDK integration
+- `index.html` - Main dashboard with navigation to all tools
+- `roster-signup.html` - Roster signup tool for expansion planning
+- `LarancioOrtegaLoot.html` - Loot manager with Firebase SDK integration
+- `api-demo.html` - Interactive API demo page
 - `app.js` - Application logic with Firebase Firestore integration
 - `data.js` - Raid boss and loot item data
 - `style.css` - Styling
-- `api-demo.html` - Interactive API demo page
 
 ### Backend (`src/`)
 - `server.js` - Express server with API endpoints

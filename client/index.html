@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equinox - Herramientas de Gestión</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tools-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header-section h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .header-section p {
+            font-size: 1.2em;
+            color: #a78bfa;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .tool-card {
+            background-color: rgba(30, 41, 59, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid var(--dorado);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(133, 77, 255, 0.5);
+        }
+
+        .tool-card h2 {
+            color: var(--dorado);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .tool-card .icon {
+            font-size: 4em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .tool-card p {
+            color: #e5e7eb;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .tool-card .features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 25px;
+        }
+
+        .tool-card .features li {
+            padding: 8px 0;
+            color: #d1d5db;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .tool-card .features li:before {
+            content: "✓ ";
+            color: var(--verde-epico);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .tool-card a {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--dorado);
+            color: var(--azul-profundo-1);
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .tool-card a:hover {
+            background-color: var(--purpura);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--purpura);
+        }
+
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tools-container">
+        <div class="header-section">
+            <h1>⚔️ Equinox - Herramientas de Gestión ⚔️</h1>
+            <p>Selecciona la herramienta que necesitas</p>
+        </div>
+
+        <div class="tools-grid">
+            <!-- Loot Manager Tool -->
+            <div class="tool-card">
+                <div class="icon">📦</div>
+                <h2>Loot Manager</h2>
+                <p>Sistema de gestión de botín para raids actuales</p>
+                <ul class="features">
+                    <li>Asignación de objetos por jefe</li>
+                    <li>Gestión de personajes de raid</li>
+                    <li>Filtrado por clase y dificultad</li>
+                    <li>Exportación a Excel</li>
+                    <li>Sincronización en tiempo real</li>
+                </ul>
+                <a href="LarancioOrtegaLoot.html">Abrir Loot Manager →</a>
+            </div>
+
+            <!-- Roster Signup Tool -->
+            <div class="tool-card">
+                <div class="icon">🛡️</div>
+                <h2>Registro de Roster</h2>
+                <p>Herramienta de planificación para la próxima expansión</p>
+                <ul class="features">
+                    <li>Registro de clase y especialización</li>
+                    <li>Selección de roles disponibles</li>
+                    <li>Estadísticas de composición</li>
+                    <li>Filtrado por clase y rol</li>
+                    <li>Exportación para oficiales</li>
+                </ul>
+                <a href="roster-signup.html">Abrir Registro de Roster →</a>
+            </div>
+
+            <!-- API Demo Tool -->
+            <div class="tool-card">
+                <div class="icon">🔌</div>
+                <h2>API Demo</h2>
+                <p>Demostración de la integración con Blizzard API</p>
+                <ul class="features">
+                    <li>Consulta de raids disponibles</li>
+                    <li>Información de encuentros</li>
+                    <li>Loot por boss</li>
+                    <li>Filtrado por clase/spec</li>
+                    <li>Datos en tiempo real</li>
+                </ul>
+                <a href="api-demo.html">Abrir API Demo →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

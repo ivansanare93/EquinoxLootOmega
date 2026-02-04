@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equinox - Registro de Roster para Nueva Expansión</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcscqKXw5rWd3YpqTHH7Lss2sUFKblBKk",
+            authDomain: "basedatos-57052.firebaseapp.com",
+            databaseURL: "https://basedatos-57052-default-rtdb.firebaseio.com",
+            projectId: "basedatos-57052",
+            storageBucket: "basedatos-57052.firebasestorage.app",
+            messagingSenderId: "1041816516368",
+            appId: "1:1041816516368:web:69073d4862859f75d95795"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Make Firebase Firestore functions globally accessible
+        window.firestoreDB = db;
+        window.firestoreDoc = doc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreGetDoc = getDoc;
+        window.firestoreOnSnapshot = onSnapshot;
+    </script>
+
+    <style>
+        .roster-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-section h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            font-size: 1.2em;
+            color: #a78bfa;
+        }
+
+        .content-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .signup-section, .roster-section {
+            background-color: rgba(30, 41, 59, 0.8);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--dorado);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .signup-section h2, .roster-section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--dorado);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--dorado);
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .role-selection {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .role-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .role-checkbox input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .role-checkbox label {
+            margin: 0;
+            font-weight: normal;
+            color: white;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .filters {
+            margin-bottom: 20px;
+        }
+
+        .roster-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .roster-table table {
+            width: 100%;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .role-tank {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .role-healer {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .role-dps {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dc2626;
+            padding: 5px 10px;
+            font-size: 0.85em;
+        }
+
+        .delete-btn:hover {
+            background-color: #991b1b;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: rgba(30, 41, 59, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid var(--purpura);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--dorado);
+            font-size: 1.1em;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--verde-epico);
+        }
+
+        @media (max-width: 1024px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="roster-container">
+        <div class="header-section">
+            <h1>🛡️ Registro de Roster - Próxima Expansión 🛡️</h1>
+            <p>Apunta tu clase y rol para ayudar a los oficiales a organizar el roster</p>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="summary-stats">
+            <div class="stat-card">
+                <h3>Total Inscritos</h3>
+                <div class="stat-value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Tanks</h3>
+                <div class="stat-value" id="stat-tanks">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Healers</h3>
+                <div class="stat-value" id="stat-healers">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>DPS</h3>
+                <div class="stat-value" id="stat-dps">0</div>
+            </div>
+        </div>
+
+        <div class="content-layout">
+            <!-- Signup Form Section -->
+            <div class="signup-section">
+                <h2>📝 Registrar Personaje</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="player-name">Nombre del Personaje *</label>
+                        <input type="text" id="player-name" required placeholder="Nombre del personaje">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="player-class">Clase *</label>
+                        <select id="player-class" required>
+                            <option value="">Selecciona tu clase</option>
+                            <option value="Guerrero">Guerrero</option>
+                            <option value="Mago">Mago</option>
+                            <option value="Sacerdote">Sacerdote</option>
+                            <option value="Paladín">Paladín</option>
+                            <option value="Cazador">Cazador</option>
+                            <option value="Brujo">Brujo</option>
+                            <option value="Chamán">Chamán</option>
+                            <option value="Druida">Druida</option>
+                            <option value="Pícaro">Pícaro</option>
+                            <option value="Caballero de la Muerte">Caballero de la Muerte</option>
+                            <option value="Monje">Monje</option>
+                            <option value="Cazador de Demonios">Cazador de Demonios</option>
+                            <option value="Evocador">Evocador</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="player-spec">Especialización *</label>
+                        <select id="player-spec" required>
+                            <option value="">Selecciona clase primero</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Roles que puedes desempeñar *</label>
+                        <div class="role-selection">
+                            <div class="role-checkbox">
+                                <input type="checkbox" id="role-tank" value="Tank">
+                                <label for="role-tank">Tank</label>
+                            </div>
+                            <div class="role-checkbox">
+                                <input type="checkbox" id="role-healer" value="Healer">
+                                <label for="role-healer">Healer</label>
+                            </div>
+                            <div class="role-checkbox">
+                                <input type="checkbox" id="role-dps" value="DPS">
+                                <label for="role-dps">DPS</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="player-notes">Notas Adicionales (opcional)</label>
+                        <input type="text" id="player-notes" placeholder="Ej: Prefiero Main Tank, tengo alts, etc.">
+                    </div>
+
+                    <button type="submit" class="btn-submit">✅ Registrar</button>
+                </form>
+            </div>
+
+            <!-- Roster Display Section -->
+            <div class="roster-section">
+                <h2>📊 Roster Actual</h2>
+                
+                <div class="filters">
+                    <label>Filtrar por Clase:</label>
+                    <select id="filter-class">
+                        <option value="">Todas las Clases</option>
+                        <option value="Guerrero">Guerrero</option>
+                        <option value="Mago">Mago</option>
+                        <option value="Sacerdote">Sacerdote</option>
+                        <option value="Paladín">Paladín</option>
+                        <option value="Cazador">Cazador</option>
+                        <option value="Brujo">Brujo</option>
+                        <option value="Chamán">Chamán</option>
+                        <option value="Druida">Druida</option>
+                        <option value="Pícaro">Pícaro</option>
+                        <option value="Caballero de la Muerte">Caballero de la Muerte</option>
+                        <option value="Monje">Monje</option>
+                        <option value="Cazador de Demonios">Cazador de Demonios</option>
+                        <option value="Evocador">Evocador</option>
+                    </select>
+
+                    <label style="margin-left: 15px;">Filtrar por Rol:</label>
+                    <select id="filter-role">
+                        <option value="">Todos los Roles</option>
+                        <option value="Tank">Tank</option>
+                        <option value="Healer">Healer</option>
+                        <option value="DPS">DPS</option>
+                    </select>
+
+                    <button id="btn-export-excel" style="margin-left: 20px;">📥 Exportar a Excel</button>
+                </div>
+
+                <div class="roster-table">
+                    <table id="roster-table">
+                        <thead>
+                            <tr>
+                                <th>Personaje</th>
+                                <th>Clase</th>
+                                <th>Especialización</th>
+                                <th>Roles</th>
+                                <th>Notas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roster-tbody">
+                            <!-- Roster entries will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Specialization data for each class
+        const classSpecializations = {
+            'Guerrero': ['Armas', 'Furia', 'Protección'],
+            'Mago': ['Arcano', 'Fuego', 'Escarcha'],
+            'Sacerdote': ['Disciplina', 'Sagrado', 'Sombra'],
+            'Paladín': ['Sagrado', 'Protección', 'Represión'],
+            'Cazador': ['Bestias', 'Puntería', 'Supervivencia'],
+            'Brujo': ['Aflicción', 'Demonología', 'Destrucción'],
+            'Chamán': ['Elemental', 'Mejora', 'Restauración'],
+            'Druida': ['Equilibrio', 'Feral', 'Guardián', 'Restauración'],
+            'Pícaro': ['Asesinato', 'Forajido', 'Sutileza'],
+            'Caballero de la Muerte': ['Sangre', 'Escarcha', 'Profano'],
+            'Monje': ['Maestro Cervecero', 'Tejedor de Niebla', 'Viajero del Viento'],
+            'Cazador de Demonios': ['Devastación', 'Venganza'],
+            'Evocador': ['Devastación', 'Preservación', 'Aumento']
+        };
+
+        // Global roster data
+        let rosterSignups = [];
+
+        // Initialize Firebase listeners
+        function initializeFirebase() {
+            if (!window.firestoreDB) {
+                console.error('Firebase not initialized');
+                return;
+            }
+
+            // Listen to roster signups in real-time
+            const rosterDoc = window.firestoreDoc(window.firestoreDB, 'rosterSignups', 'expansion');
+            window.firestoreOnSnapshot(rosterDoc, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    rosterSignups = data.signups || [];
+                } else {
+                    rosterSignups = [];
+                }
+                renderRoster();
+                updateStatistics();
+            });
+        }
+
+        // Save roster to Firebase
+        async function saveRosterToFirebase() {
+            try {
+                const rosterDoc = window.firestoreDoc(window.firestoreDB, 'rosterSignups', 'expansion');
+                await window.firestoreSetDoc(rosterDoc, { signups: rosterSignups });
+                console.log('Roster saved successfully');
+            } catch (error) {
+                console.error('Error saving roster:', error);
+                alert('Error al guardar. Por favor, intenta de nuevo.');
+            }
+        }
+
+        // Update class specialization dropdown when class is selected
+        document.getElementById('player-class').addEventListener('change', function() {
+            const selectedClass = this.value;
+            const specSelect = document.getElementById('player-spec');
+            specSelect.innerHTML = '<option value="">Selecciona especialización</option>';
+
+            if (selectedClass && classSpecializations[selectedClass]) {
+                classSpecializations[selectedClass].forEach(spec => {
+                    const option = document.createElement('option');
+                    option.value = spec;
+                    option.textContent = spec;
+                    specSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const playerName = document.getElementById('player-name').value.trim();
+            const playerClass = document.getElementById('player-class').value;
+            const playerSpec = document.getElementById('player-spec').value;
+            const playerNotes = document.getElementById('player-notes').value.trim();
+
+            // Get selected roles
+            const roles = [];
+            if (document.getElementById('role-tank').checked) roles.push('Tank');
+            if (document.getElementById('role-healer').checked) roles.push('Healer');
+            if (document.getElementById('role-dps').checked) roles.push('DPS');
+
+            // Validation
+            if (!playerName || !playerClass || !playerSpec) {
+                alert('Por favor, completa todos los campos obligatorios.');
+                return;
+            }
+
+            if (roles.length === 0) {
+                alert('Por favor, selecciona al menos un rol.');
+                return;
+            }
+
+            // Check if player already exists
+            const existingIndex = rosterSignups.findIndex(signup => 
+                signup.name.toLowerCase() === playerName.toLowerCase()
+            );
+
+            const newSignup = {
+                name: playerName,
+                class: playerClass,
+                specialization: playerSpec,
+                roles: roles,
+                notes: playerNotes,
+                timestamp: new Date().toISOString()
+            };
+
+            if (existingIndex >= 0) {
+                // Update existing signup
+                if (confirm(`${playerName} ya está registrado. ¿Quieres actualizar su información?`)) {
+                    rosterSignups[existingIndex] = newSignup;
+                } else {
+                    return;
+                }
+            } else {
+                // Add new signup
+                rosterSignups.push(newSignup);
+            }
+
+            await saveRosterToFirebase();
+
+            // Reset form
+            this.reset();
+            alert('¡Registro completado con éxito!');
+        });
+
+        // Render roster table
+        function renderRoster() {
+            const tbody = document.getElementById('roster-tbody');
+            const filterClass = document.getElementById('filter-class').value;
+            const filterRole = document.getElementById('filter-role').value;
+
+            // Filter signups
+            let filteredSignups = rosterSignups;
+            if (filterClass) {
+                filteredSignups = filteredSignups.filter(s => s.class === filterClass);
+            }
+            if (filterRole) {
+                filteredSignups = filteredSignups.filter(s => s.roles.includes(filterRole));
+            }
+
+            tbody.innerHTML = '';
+
+            if (filteredSignups.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay registros aún</td></tr>';
+                return;
+            }
+
+            filteredSignups.forEach((signup, index) => {
+                const row = document.createElement('tr');
+                
+                // Roles badges
+                const rolesBadges = signup.roles.map(role => {
+                    const roleClass = role.toLowerCase();
+                    return `<span class="role-badge role-${roleClass}">${role}</span>`;
+                }).join('');
+
+                row.innerHTML = `
+                    <td>${signup.name}</td>
+                    <td>${signup.class}</td>
+                    <td>${signup.specialization}</td>
+                    <td>${rolesBadges}</td>
+                    <td>${signup.notes || '-'}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteSignup('${signup.name}')">🗑️ Borrar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Delete signup
+        window.deleteSignup = async function(playerName) {
+            if (!confirm(`¿Estás seguro de que quieres eliminar a ${playerName}?`)) {
+                return;
+            }
+
+            rosterSignups = rosterSignups.filter(s => s.name !== playerName);
+            await saveRosterToFirebase();
+        };
+
+        // Update statistics
+        function updateStatistics() {
+            document.getElementById('stat-total').textContent = rosterSignups.length;
+            
+            const tanks = rosterSignups.filter(s => s.roles.includes('Tank')).length;
+            const healers = rosterSignups.filter(s => s.roles.includes('Healer')).length;
+            const dps = rosterSignups.filter(s => s.roles.includes('DPS')).length;
+
+            document.getElementById('stat-tanks').textContent = tanks;
+            document.getElementById('stat-healers').textContent = healers;
+            document.getElementById('stat-dps').textContent = dps;
+        }
+
+        // Filter change listeners
+        document.getElementById('filter-class').addEventListener('change', renderRoster);
+        document.getElementById('filter-role').addEventListener('change', renderRoster);
+
+        // Export to Excel
+        document.getElementById('btn-export-excel').addEventListener('click', function() {
+            if (rosterSignups.length === 0) {
+                alert('No hay datos para exportar.');
+                return;
+            }
+
+            // Prepare data for Excel
+            const exportData = rosterSignups.map(signup => ({
+                'Personaje': signup.name,
+                'Clase': signup.class,
+                'Especialización': signup.specialization,
+                'Roles': signup.roles.join(', '),
+                'Notas': signup.notes || '',
+                'Fecha Registro': new Date(signup.timestamp).toLocaleString('es-ES')
+            }));
+
+            // Create workbook
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Roster');
+
+            // Auto-size columns
+            const colWidths = [
+                { wch: 20 }, // Personaje
+                { wch: 25 }, // Clase
+                { wch: 20 }, // Especialización
+                { wch: 20 }, // Roles
+                { wch: 40 }, // Notas
+                { wch: 20 }  // Fecha
+            ];
+            ws['!cols'] = colWidths;
+
+            // Save file
+            const fileName = `Roster_Expansion_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        });
+
+        // Initialize when DOM is ready
+        window.addEventListener('load', function() {
+            // Wait a bit for Firebase to initialize
+            setTimeout(() => {
+                if (window.firestoreDB) {
+                    initializeFirebase();
+                } else {
+                    console.error('Firebase not available');
+                    alert('Error: No se pudo conectar con la base de datos. Por favor, recarga la página.');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
