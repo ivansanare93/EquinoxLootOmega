@@ -18,6 +18,7 @@ The application requires Firebase credentials to function. After the security fi
 - GitHub Actions workflow builds the application
 - Build process generates `firebase-config.js` from environment variables
 - Generated file is included in the deployment to GitHub Pages
+- `.nojekyll` file disables Jekyll processing to ensure proper ES module support
 
 ## Setup Instructions
 
@@ -188,6 +189,15 @@ This means the build process didn't generate the file:
 1. Check that all GitHub Secrets are configured
 2. Review the workflow logs for errors in the "Build static files" step
 3. Ensure the `build:firebase-config` script is working
+
+### MIME Type Error: "text/html" instead of JavaScript
+
+If you see an error like "Se bloqueó la carga de un módulo... debido a un tipo MIME no permitido ("text/html")", this is caused by GitHub Pages using Jekyll to process files, which can interfere with JavaScript modules.
+
+**Solution**: The repository includes a `.nojekyll` file that disables Jekyll processing. This file is automatically copied to the `public/` directory during the build process. If you still encounter this issue:
+1. Verify that `.nojekyll` exists in the `client/` directory
+2. Check that the build script includes `client/.nojekyll` in the copyfiles command
+3. Ensure the deployed site has `.nojekyll` in the root directory
 
 ## Rollback
 
