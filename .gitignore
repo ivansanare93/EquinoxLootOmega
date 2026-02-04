@@ -5,6 +5,9 @@ package-lock.json
 # Environment variables
 .env
 
+# Firebase configuration (contains sensitive credentials)
+client/firebase-config.js
+
 # Logs
 *.log
 npm-debug.log*

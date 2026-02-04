@@ -12,17 +12,50 @@ The application has been migrated from Firebase Realtime Database to Firebase Fi
 
 ## Firebase Configuration
 
-The application uses the following Firebase project:
+**IMPORTANT SECURITY NOTE:** Firebase credentials should never be committed to version control. Follow the setup instructions below to configure your credentials securely.
 
+### Configuration Setup
+
+1. **Create the Firebase configuration file:**
+   ```bash
+   cd client
+   cp firebase-config.js.example firebase-config.js
+   ```
+
+2. **Get your Firebase credentials:**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Select your project
+   - Click on the gear icon (Settings) → Project settings
+   - Scroll down to "Your apps" section
+   - Click on the Web app (</>) icon
+   - Copy the `firebaseConfig` object
+
+3. **Update `client/firebase-config.js` with your credentials:**
+   ```javascript
+   const firebaseConfig = {
+       apiKey: "YOUR_ACTUAL_API_KEY",
+       authDomain: "your-project-id.firebaseapp.com",
+       databaseURL: "https://your-project-id-default-rtdb.firebaseio.com",
+       projectId: "your-project-id",
+       storageBucket: "your-project-id.firebasestorage.app",
+       messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+       appId: "YOUR_APP_ID"
+   };
+   ```
+
+4. **Verify the file is gitignored:**
+   The `.gitignore` file already includes `client/firebase-config.js` to prevent accidental commits.
+
+**Example configuration structure** (with placeholder values):
 ```javascript
 const firebaseConfig = {
-    apiKey: "AIzaSyAcscqKXw5rWd3YpqTHH7Lss2sUFKblBKk",
-    authDomain: "basedatos-57052.firebaseapp.com",
-    databaseURL: "https://basedatos-57052-default-rtdb.firebaseio.com",
-    projectId: "basedatos-57052",
-    storageBucket: "basedatos-57052.firebasestorage.app",
-    messagingSenderId: "1041816516368",
-    appId: "1:1041816516368:web:69073d4862859f75d95795"
+    apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    authDomain: "your-project.firebaseapp.com",
+    databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project.firebasestorage.app",
+    messagingSenderId: "123456789012",
+    appId: "1:123456789012:web:abcdef1234567890"
 };
 ```
 
@@ -76,16 +109,17 @@ The application requires Firebase SDK version 9.22.0 or higher. The SDK is loade
 
 ### 2. Firebase Project Configuration
 
-Ensure the Firebase project has:
+Before using the application, ensure your Firebase project has:
 - **Firestore Database** enabled (not Realtime Database)
 - Firestore database created in your Firebase console
 - Security rules configured to allow read/write access (see Security Rules section below)
+- The `firebase-config.js` file created with your credentials (see Firebase Configuration section above)
 
 ### 3. Firestore Database Setup
 
 To set up Firestore for this application:
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project (basedatos-57052)
+2. Select your Firebase project
 3. Click on "Firestore Database" in the left menu
 4. If Firestore is not enabled, click "Create database"
 5. Choose a location for your database (use the default or select one close to your users)
@@ -237,8 +271,10 @@ To test the Firebase integration:
 
 ## Development Notes
 
-- The Firebase configuration includes the API key in the client-side code, which is normal for Firebase web apps
-- For production, consider implementing Firebase Authentication to control access
+- Firebase credentials are stored in `client/firebase-config.js` which is gitignored to prevent exposure
+- The `client/firebase-config.js.example` file serves as a template for creating your own configuration
+- Firebase web API keys are safe to include in client-side code when protected by security rules
+- For production, implement Firebase Authentication to control access and strengthen security rules
 - The current implementation stores data in two separate documents for better organization and query performance
 - Firestore provides better scalability than Realtime Database for this use case
 - Error handling is implemented with console logging and user-facing alerts
