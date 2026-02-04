@@ -595,30 +595,27 @@
 
         // Initialize when DOM is ready
         window.addEventListener('load', function() {
+            // Setup instructions constant
+            const FIREBASE_SETUP_INSTRUCTIONS = '\n\nPara configurar Firebase:\n\n' +
+                '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
+                '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
+                '3. Recarga la página\n\n' +
+                'Para más información, consulta docs/FIREBASE_SETUP.md';
+            
             // Wait a bit for Firebase to initialize
             setTimeout(() => {
                 // Check if Firebase configuration was attempted and failed
                 if (window.firebaseConfigured === false) {
                     console.error('Firebase configuration not found');
-                    const setupInstructions = '\n\nPara configurar Firebase:\n\n' +
-                        '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
-                        '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
-                        '3. Recarga la página\n\n' +
-                        'Para más información, consulta docs/FIREBASE_SETUP.md';
-                    alert('Error: No se pudo conectar con la base de datos.' + setupInstructions);
+                    alert('Error: No se pudo conectar con la base de datos.' + FIREBASE_SETUP_INSTRUCTIONS);
                 } else if (window.firestoreDB) {
                     initializeFirebase();
                 } else {
                     // Firebase SDK failed to load or config is missing
                     console.error('Firebase not available');
                     if (window.firebaseConfigured === undefined) {
-                        // SDK failed to load entirely
-                        const setupInstructions = '\n\nPara configurar Firebase:\n\n' +
-                            '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
-                            '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
-                            '3. Recarga la página\n\n' +
-                            'Para más información, consulta docs/FIREBASE_SETUP.md';
-                        alert('Error: No se pudo conectar con la base de datos.' + setupInstructions);
+                        // SDK failed to load entirely - likely missing config
+                        alert('Error: No se pudo conectar con la base de datos.' + FIREBASE_SETUP_INSTRUCTIONS);
                     } else {
                         alert('Error: No se pudo conectar con la base de datos. Por favor, verifica tu conexión a internet.');
                     }
