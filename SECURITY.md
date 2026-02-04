@@ -48,6 +48,13 @@ After cloning the repository:
 2. Add your Firebase credentials to the new file
 3. Never commit `client/firebase-config.js` to version control
 
+#### GitHub Pages Deployment
+For secure deployment to GitHub Pages:
+1. Store Firebase credentials as GitHub Secrets (never in the repository)
+2. Use the provided GitHub Actions workflow for automated deployment
+3. The build process generates `firebase-config.js` from environment variables
+4. See [docs/GITHUB_PAGES_DEPLOYMENT.md](docs/GITHUB_PAGES_DEPLOYMENT.md) for detailed instructions
+
 ### Best Practices Going Forward
 
 1. **Never commit credentials** to version control

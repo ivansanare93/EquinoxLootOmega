@@ -67,6 +67,14 @@ When setting up the project:
 2. Add your Firebase credentials to the new file
 3. Never commit `client/firebase-config.js` to version control
 
+### For GitHub Pages Deployment
+To deploy this application to GitHub Pages while keeping credentials secure:
+1. Configure Firebase credentials as GitHub Secrets (see [docs/GITHUB_PAGES_DEPLOYMENT.md](GITHUB_PAGES_DEPLOYMENT.md))
+2. The GitHub Actions workflow will automatically generate `firebase-config.js` from these secrets during build
+3. The generated file is included in the deployment but never committed to the repository
+
+See [docs/GITHUB_PAGES_DEPLOYMENT.md](GITHUB_PAGES_DEPLOYMENT.md) for detailed deployment instructions.
+
 ## Lessons Learned
 1. Never hardcode credentials in source code
 2. Use configuration files that are gitignored
