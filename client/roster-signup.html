@@ -674,9 +674,12 @@
                 }
             }
             
-            // Apply zebra striping and cell styling to data rows (starting at row 3)
-            for (let row = 3; row <= range.e.r; row++) {
-                const isEvenRow = ((row - 3) % 2) === 0;
+            // Apply zebra striping and cell styling to data rows
+            // Row 0: Title, Row 1: Empty, Row 2: Headers, Row 3+: Data
+            const DATA_START_ROW = 3;
+            for (let row = DATA_START_ROW; row <= range.e.r; row++) {
+                // Calculate even/odd for zebra striping (relative to data rows)
+                const isEvenRow = ((row - DATA_START_ROW) % 2) === 0;
                 
                 for (let col = range.s.c; col <= range.e.c; col++) {
                     const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
