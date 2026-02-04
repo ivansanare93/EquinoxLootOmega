@@ -1184,6 +1184,13 @@ function exportToExcel() {
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
+    // Firebase setup instructions constant
+    const FIREBASE_SETUP_INSTRUCTIONS = 'Para configurar Firebase:\n\n' +
+        '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
+        '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
+        '3. Recarga la página\n\n' +
+        'Para más información, consulta docs/FIREBASE_SETUP.md';
+    
     // Wait for Firebase to be ready, then load data and set up listeners
     const FIREBASE_INIT_TIMEOUT_MS = 5000; // 5 seconds timeout
     const RETRY_INTERVAL_MS = 100; // Check every 100ms
@@ -1191,6 +1198,17 @@ document.addEventListener('DOMContentLoaded', function() {
     let initRetries = 0;
     
     const initializeApp = async () => {
+        // Check if Firebase configuration failed
+        if (window.firebaseConfigured === false) {
+            console.error('Firebase configuration not found');
+            alert('Error: No se pudo conectar con la base de datos.\n\n' + FIREBASE_SETUP_INSTRUCTIONS);
+            // Initialize with empty data (local mode)
+            updateBossSelect();
+            updateCharacterList();
+            updateTable();
+            return;
+        }
+        
         if (isFirebaseReady()) {
             // Load initial data from Firestore
             try {
