@@ -41,6 +41,19 @@ This application uses Firebase Firestore for data storage and real-time synchron
 
 For detailed Firebase setup information, see [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
 
+## Deployment
+
+### GitHub Pages Deployment
+
+This application can be deployed to GitHub Pages with automatic builds via GitHub Actions. The deployment process securely injects Firebase credentials from GitHub Secrets during the build, ensuring credentials are never committed to the repository.
+
+**Quick Setup:**
+1. Configure Firebase credentials as GitHub Secrets (7 required secrets)
+2. Enable GitHub Pages with "GitHub Actions" as the source
+3. Push to `main` branch or manually trigger deployment
+
+For detailed deployment instructions, see [docs/GITHUB_PAGES_DEPLOYMENT.md](docs/GITHUB_PAGES_DEPLOYMENT.md).
+
 ## Usage
 
 ### Main Tools Dashboard
@@ -138,10 +151,12 @@ For detailed setup instructions, see [docs/BLIZZARD_API_SETUP.md](docs/BLIZZARD_
 - `README.md` - This file (project root)
 - `QUICK_START.md` - Quick start guide (5 minutes to get started!)
 - `FIREBASE_SETUP.md` - Detailed Firebase setup and configuration
+- `GITHUB_PAGES_DEPLOYMENT.md` - GitHub Pages deployment guide with secure credentials
 - `BLIZZARD_API_SETUP.md` - Blizzard API integration guide
 - `FILTERED_LOOT_API.md` - Filtered loot API documentation
 - `TESTING.md` - Testing documentation
 - `MIGRATION_SUMMARY.md` - Migration notes
+- `SECURITY_FIX_SUMMARY.md` - Security vulnerability remediation summary
 
 ### Scripts (`scripts/`)
 - `test-api.js` - API test script
