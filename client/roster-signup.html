@@ -210,6 +210,9 @@
 </head>
 <body>
     <div class="roster-container">
+        <div style="text-align: right; margin-bottom: 10px;">
+            <a href="index.html" style="display: inline-block; padding: 10px 20px; background-color: var(--dorado); color: var(--azul-profundo-1); text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;">← Volver al Inicio</a>
+        </div>
         <div class="header-section">
             <h1>🛡️ Registro de Roster - Próxima Expansión 🛡️</h1>
             <p>Apunta tu clase y rol para ayudar a los oficiales a organizar el roster</p>
@@ -562,6 +565,19 @@
                 return;
             }
 
+            // Get current date for header and filename
+            const currentDate = new Date();
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            
+            const displayDate = currentDate.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
             // Prepare data for Excel
             const exportData = rosterSignups.map(signup => ({
                 'Personaje': signup.name,
@@ -573,24 +589,154 @@
             }));
 
             // Create workbook
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Roster');
-
-            // Auto-size columns
+            const workbook = XLSX.utils.book_new();
+            
+            // Create worksheet with title header
+            const titleRow = [`EQUINOX - REGISTRO DE ROSTER - ${displayDate}`];
+            const emptyRow = [];
+            
+            // Get headers from first data object
+            const headers = Object.keys(exportData[0] || {});
+            
+            // Build complete data array with title, spacing, headers, and data rows
+            const worksheetData = [
+                titleRow,
+                emptyRow,
+                headers,
+                ...exportData.map(obj => headers.map(key => obj[key]))
+            ];
+            
+            // Create worksheet from array
+            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Roster');
+            
+            // Get range of worksheet
+            const range = XLSX.utils.decode_range(worksheet['!ref']);
+            
+            // Define border styles
+            const thinBorder = { style: "thin" };
+            const createBorder = (color) => ({
+                top: { ...thinBorder, color: { rgb: color } },
+                bottom: { ...thinBorder, color: { rgb: color } },
+                left: { ...thinBorder, color: { rgb: color } },
+                right: { ...thinBorder, color: { rgb: color } }
+            });
+            
+            // Style title header (row 0)
+            const titleCell = worksheet['A1'];
+            if (titleCell) {
+                titleCell.s = {
+                    font: { 
+                        bold: true, 
+                        sz: 16,
+                        color: { rgb: "FFFFFF" }
+                    },
+                    fill: { 
+                        fgColor: { rgb: "1F4E78" } // Dark blue
+                    },
+                    alignment: { 
+                        horizontal: "center", 
+                        vertical: "center" 
+                    }
+                };
+            }
+            
+            // Merge cells for title header
+            worksheet['!merges'] = worksheet['!merges'] || [];
+            worksheet['!merges'].push({
+                s: { r: 0, c: 0 },
+                e: { r: 0, c: range.e.c }
+            });
+            
+            // Style column headers (row 2)
+            const headerStyle = {
+                font: { 
+                    bold: true, 
+                    sz: 12,
+                    color: { rgb: "FFFFFF" }
+                },
+                fill: { 
+                    fgColor: { rgb: "4472C4" } // Blue
+                },
+                alignment: { 
+                    horizontal: "center", 
+                    vertical: "center" 
+                },
+                border: createBorder("000000")
+            };
+            
+            // Apply header styling
+            for (let col = range.s.c; col <= range.e.c; col++) {
+                const cellAddress = XLSX.utils.encode_cell({ r: 2, c: col });
+                const cell = worksheet[cellAddress];
+                if (cell) {
+                    cell.s = headerStyle;
+                }
+            }
+            
+            // Apply zebra striping and cell styling to data rows (starting at row 3)
+            for (let row = 3; row <= range.e.r; row++) {
+                const isEvenRow = ((row - 3) % 2) === 0;
+                
+                for (let col = range.s.c; col <= range.e.c; col++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                    const cell = worksheet[cellAddress];
+                    if (!cell) continue;
+                    
+                    // Base style for data cells
+                    const cellStyle = {
+                        font: { sz: 11 },
+                        alignment: { 
+                            vertical: "center",
+                            horizontal: "left"
+                        },
+                        border: createBorder("D3D3D3")
+                    };
+                    
+                    // Zebra striping
+                    if (isEvenRow) {
+                        cellStyle.fill = { fgColor: { rgb: "F2F2F2" } }; // Light gray
+                    } else {
+                        cellStyle.fill = { fgColor: { rgb: "FFFFFF" } }; // White
+                    }
+                    
+                    // Get column header to determine column
+                    const headerAddress = XLSX.utils.encode_cell({ r: 2, c: col });
+                    const headerValue = worksheet[headerAddress]?.v || '';
+                    
+                    // Center align certain columns
+                    if (headerValue === 'Roles' || headerValue === 'Clase') {
+                        cellStyle.alignment.horizontal = "center";
+                    }
+                    
+                    // Special styling for Roles column
+                    if (headerValue === 'Roles') {
+                        cellStyle.font.bold = true;
+                        cellStyle.font.color = { rgb: "1F4E78" };
+                    }
+                    
+                    cell.s = cellStyle;
+                }
+            }
+            
+            // Set column widths
             const colWidths = [
                 { wch: 20 }, // Personaje
                 { wch: 25 }, // Clase
                 { wch: 20 }, // Especialización
-                { wch: 20 }, // Roles
+                { wch: 25 }, // Roles
                 { wch: 40 }, // Notas
-                { wch: 20 }  // Fecha
+                { wch: 22 }  // Fecha Registro
             ];
-            ws['!cols'] = colWidths;
+            worksheet['!cols'] = colWidths;
+            
+            // Set row heights
+            worksheet['!rows'] = [];
+            worksheet['!rows'][0] = { hpt: 30 }; // Title row height
 
             // Save file
-            const fileName = `Roster_Expansion_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(wb, fileName);
+            const fileName = `Roster_Expansion_${dateStr}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
         });
 
         // Initialize when DOM is ready
