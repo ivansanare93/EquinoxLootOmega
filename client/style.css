@@ -332,6 +332,12 @@ ul:hover, table:hover {
     }
 }
 
+/* Back to Home button wrapper */
+.back-to-home-wrapper {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
 /* Back to Home button */
 .back-to-home {
     display: inline-block;
