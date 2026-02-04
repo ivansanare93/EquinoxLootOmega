@@ -12,20 +12,27 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
         
-        // Import Firebase configuration from external file
-        // To set up: Copy firebase-config.js.example to firebase-config.js and add your credentials
-        import { firebaseConfig } from './firebase-config.js';
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // Make Firebase Firestore functions globally accessible
-        window.firestoreDB = db;
-        window.firestoreDoc = doc;
-        window.firestoreSetDoc = setDoc;
-        window.firestoreGetDoc = getDoc;
-        window.firestoreOnSnapshot = onSnapshot;
+        try {
+            // Import Firebase configuration from external file
+            // To set up: Copy firebase-config.js.example to firebase-config.js and add your credentials
+            const { firebaseConfig } = await import('./firebase-config.js');
+            
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            
+            // Make Firebase Firestore functions globally accessible
+            window.firestoreDB = db;
+            window.firestoreDoc = doc;
+            window.firestoreSetDoc = setDoc;
+            window.firestoreGetDoc = getDoc;
+            window.firestoreOnSnapshot = onSnapshot;
+            window.firebaseConfigured = true;
+        } catch (error) {
+            console.error('Firebase configuration error:', error);
+            window.firebaseConfigured = false;
+            window.firebaseConfigError = error.message;
+        }
     </script>
 </head>
 <body>

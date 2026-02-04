@@ -1191,6 +1191,22 @@ document.addEventListener('DOMContentLoaded', function() {
     let initRetries = 0;
     
     const initializeApp = async () => {
+        // Check if Firebase configuration failed
+        if (window.firebaseConfigured === false) {
+            console.error('Firebase configuration not found');
+            const setupInstructions = 'Para configurar Firebase:\n\n' +
+                '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
+                '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
+                '3. Recarga la página\n\n' +
+                'Para más información, consulta docs/FIREBASE_SETUP.md';
+            alert('Error: No se pudo conectar con la base de datos.\n\n' + setupInstructions);
+            // Initialize with empty data (local mode)
+            updateBossSelect();
+            updateCharacterList();
+            updateTable();
+            return;
+        }
+        
         if (isFirebaseReady()) {
             // Load initial data from Firestore
             try {

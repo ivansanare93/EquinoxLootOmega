@@ -12,20 +12,27 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
         
-        // Import Firebase configuration from external file
-        // To set up: Copy firebase-config.js.example to firebase-config.js and add your credentials
-        import { firebaseConfig } from './firebase-config.js';
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // Make Firebase Firestore functions globally accessible
-        window.firestoreDB = db;
-        window.firestoreDoc = doc;
-        window.firestoreSetDoc = setDoc;
-        window.firestoreGetDoc = getDoc;
-        window.firestoreOnSnapshot = onSnapshot;
+        try {
+            // Import Firebase configuration from external file
+            // To set up: Copy firebase-config.js.example to firebase-config.js and add your credentials
+            const { firebaseConfig } = await import('./firebase-config.js');
+            
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            
+            // Make Firebase Firestore functions globally accessible
+            window.firestoreDB = db;
+            window.firestoreDoc = doc;
+            window.firestoreSetDoc = setDoc;
+            window.firestoreGetDoc = getDoc;
+            window.firestoreOnSnapshot = onSnapshot;
+            window.firebaseConfigured = true;
+        } catch (error) {
+            console.error('Firebase configuration error:', error);
+            window.firebaseConfigured = false;
+            window.firebaseConfigError = error.message;
+        }
     </script>
 
     <style>
@@ -590,11 +597,31 @@
         window.addEventListener('load', function() {
             // Wait a bit for Firebase to initialize
             setTimeout(() => {
-                if (window.firestoreDB) {
+                // Check if Firebase configuration was attempted and failed
+                if (window.firebaseConfigured === false) {
+                    console.error('Firebase configuration not found');
+                    const setupInstructions = '\n\nPara configurar Firebase:\n\n' +
+                        '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
+                        '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
+                        '3. Recarga la página\n\n' +
+                        'Para más información, consulta docs/FIREBASE_SETUP.md';
+                    alert('Error: No se pudo conectar con la base de datos.' + setupInstructions);
+                } else if (window.firestoreDB) {
                     initializeFirebase();
                 } else {
+                    // Firebase SDK failed to load or config is missing
                     console.error('Firebase not available');
-                    alert('Error: No se pudo conectar con la base de datos. Por favor, recarga la página.');
+                    if (window.firebaseConfigured === undefined) {
+                        // SDK failed to load entirely
+                        const setupInstructions = '\n\nPara configurar Firebase:\n\n' +
+                            '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
+                            '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
+                            '3. Recarga la página\n\n' +
+                            'Para más información, consulta docs/FIREBASE_SETUP.md';
+                        alert('Error: No se pudo conectar con la base de datos.' + setupInstructions);
+                    } else {
+                        alert('Error: No se pudo conectar con la base de datos. Por favor, verifica tu conexión a internet.');
+                    }
                 }
             }, 1000);
         });
