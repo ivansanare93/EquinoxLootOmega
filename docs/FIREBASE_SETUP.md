@@ -35,7 +35,6 @@ The application has been migrated from Firebase Realtime Database to Firebase Fi
    const firebaseConfig = {
        apiKey: "YOUR_ACTUAL_API_KEY",
        authDomain: "your-project-id.firebaseapp.com",
-       databaseURL: "https://your-project-id-default-rtdb.firebaseio.com",
        projectId: "your-project-id",
        storageBucket: "your-project-id.firebasestorage.app",
        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
@@ -51,7 +50,6 @@ The application has been migrated from Firebase Realtime Database to Firebase Fi
 const firebaseConfig = {
     apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     authDomain: "your-project.firebaseapp.com",
-    databaseURL: "https://your-project-default-rtdb.firebaseio.com",
     projectId: "your-project-id",
     storageBucket: "your-project.firebasestorage.app",
     messagingSenderId: "123456789012",

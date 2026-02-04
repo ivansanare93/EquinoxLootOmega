@@ -47,10 +47,9 @@ npm start
 #### Despliegue a GitHub Pages
 1. **Configurar GitHub Secrets** (una sola vez):
    - Ve a Settings → Secrets and variables → Actions
-   - Añade 7 secretos con tus credenciales de Firebase:
+   - Añade 6 secretos con tus credenciales de Firebase:
      - FIREBASE_API_KEY
      - FIREBASE_AUTH_DOMAIN
-     - FIREBASE_DATABASE_URL
      - FIREBASE_PROJECT_ID
      - FIREBASE_STORAGE_BUCKET
      - FIREBASE_MESSAGING_SENDER_ID
