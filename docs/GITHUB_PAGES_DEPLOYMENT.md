@@ -129,11 +129,18 @@ To test the build process locally:
 
 ### Firebase Web API Keys
 
-Firebase web API keys are **designed to be public** in client-side applications. However, security is maintained through:
+Firebase web API keys are **included in client-side code** by design, but this doesn't mean they should be publicly shared or committed to repositories without proper security measures. Security is maintained through multiple layers:
 
-- **Firebase Security Rules**: Control who can read/write data
-- **Firebase App Check**: Verify requests come from your app
+- **Firebase Security Rules**: Control who can read/write data (primary security mechanism)
+- **Firebase App Check**: Verify requests come from your legitimate app
 - **Domain Restrictions**: Limit which domains can use your API key (configure in Firebase Console)
+- **Rate Limiting**: Prevent abuse through quota management
+
+**Important**: Even though these keys appear in client code, you should still:
+- Avoid committing them to public repositories when possible
+- Use environment variables and build-time injection (as this solution does)
+- Implement proper Firebase Security Rules (this is your main line of defense)
+- Monitor usage patterns for anomalies
 
 ### Additional Security Steps
 
