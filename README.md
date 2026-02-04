@@ -24,9 +24,20 @@ This application uses Firebase Firestore for data storage and real-time synchron
 
 ### Setup
 
-1. **Internet Connection Required**: The application needs internet access to connect to Firebase services
-2. **No Additional Setup**: The Firebase configuration is already included in the HTML file
+1. **Configure Firebase Credentials** (First time setup):
+   ```bash
+   cd client
+   cp firebase-config.js.example firebase-config.js
+   ```
+   Then edit `client/firebase-config.js` with your Firebase project credentials.
+   
+   See [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) for detailed instructions.
+
+2. **Internet Connection Required**: The application needs internet access to connect to Firebase services
+
 3. **Automatic Synchronization**: Changes made by any user are automatically visible to all connected users
+
+**Important**: Never commit `client/firebase-config.js` to version control (it's already in `.gitignore`)
 
 For detailed Firebase setup information, see [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
 
