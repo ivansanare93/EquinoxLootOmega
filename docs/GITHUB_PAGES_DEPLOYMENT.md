@@ -31,7 +31,6 @@ The application requires Firebase credentials to function. After the security fi
    |------------|-------------|---------------|
    | `FIREBASE_API_KEY` | Your Firebase API key | `AIzaSyAbc123...` |
    | `FIREBASE_AUTH_DOMAIN` | Firebase auth domain | `your-project.firebaseapp.com` |
-   | `FIREBASE_DATABASE_URL` | Realtime Database URL | `https://your-project-default-rtdb.firebaseio.com` |
    | `FIREBASE_PROJECT_ID` | Firebase project ID | `your-project-id` |
    | `FIREBASE_STORAGE_BUCKET` | Storage bucket | `your-project.firebasestorage.app` |
    | `FIREBASE_MESSAGING_SENDER_ID` | Messaging sender ID | `1234567890` |
@@ -104,7 +103,6 @@ To test the build process locally:
    ```bash
    export FIREBASE_API_KEY="your-api-key"
    export FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
-   export FIREBASE_DATABASE_URL="https://your-project-default-rtdb.firebaseio.com"
    export FIREBASE_PROJECT_ID="your-project-id"
    export FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
    export FIREBASE_MESSAGING_SENDER_ID="1234567890"
@@ -169,7 +167,7 @@ After deployment:
 3. Review the error messages
 
 **Common issues:**
-- Missing GitHub Secrets (check all 7 secrets are configured)
+- Missing GitHub Secrets (check all 6 secrets are configured)
 - Incorrect secret values (verify against Firebase Console)
 - Node.js version mismatch (workflow uses Node 18)
 
