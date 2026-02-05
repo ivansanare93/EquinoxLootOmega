@@ -535,26 +535,34 @@
                     <td>${rolesBadges}</td>
                     <td>${signup.notes || '-'}</td>
                     <td>
-                        <button class="edit-btn" onclick="editSignup('${signup.name}')">✏️ Editar</button>
-                        <button class="delete-btn" onclick="deleteSignup('${signup.name}')">🗑️ Borrar</button>
+                        <button class="edit-btn" data-player-name="${signup.name}">✏️ Editar</button>
+                        <button class="delete-btn" data-player-name="${signup.name}">🗑️ Borrar</button>
                     </td>
                 `;
+                
+                // Add event listeners to buttons
+                const editBtn = row.querySelector('.edit-btn');
+                const deleteBtn = row.querySelector('.delete-btn');
+                
+                editBtn.addEventListener('click', () => editSignup(signup.name));
+                deleteBtn.addEventListener('click', () => deleteSignup(signup.name));
+                
                 tbody.appendChild(row);
             });
         }
 
         // Delete signup
-        window.deleteSignup = async function(playerName) {
+        function deleteSignup(playerName) {
             if (!confirm(`¿Estás seguro de que quieres eliminar a ${playerName}?`)) {
                 return;
             }
 
             rosterSignups = rosterSignups.filter(s => s.name !== playerName);
-            await saveRosterToFirebase();
-        };
+            saveRosterToFirebase();
+        }
 
         // Edit signup
-        window.editSignup = function(playerName) {
+        function editSignup(playerName) {
             const signup = rosterSignups.find(s => s.name === playerName);
             if (!signup) {
                 alert('No se encontró el registro.');
@@ -569,10 +577,13 @@
             const event = new Event('change');
             document.getElementById('player-class').dispatchEvent(event);
 
-            // Wait for specializations to populate, then set the spec
+            // Set spec after specializations populate (wait for dropdown to be populated)
             setTimeout(() => {
-                document.getElementById('player-spec').value = signup.specialization;
-            }, 100);
+                const specSelect = document.getElementById('player-spec');
+                if (specSelect.options.length > 1) {
+                    specSelect.value = signup.specialization;
+                }
+            }, 150);
 
             // Set role checkboxes
             document.getElementById('role-tank').checked = signup.roles.includes('Tank');
@@ -584,7 +595,7 @@
 
             // Scroll to form
             document.getElementById('signup-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
+        }
 
         // Update statistics
         function updateStatistics() {
