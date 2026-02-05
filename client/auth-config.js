@@ -10,7 +10,18 @@ const AUTH_CONFIG = {
 
 // Función para verificar contraseña
 function verifyOfficerPassword(inputPassword) {
-    return inputPassword === AUTH_CONFIG.password;
+    // Trim whitespace to handle accidental spaces
+    const trimmedPassword = inputPassword ? inputPassword.trim() : '';
+    const isValid = trimmedPassword === AUTH_CONFIG.password;
+    
+    // Debug logging to help troubleshoot
+    console.log('Password verification:', {
+        inputLength: trimmedPassword.length,
+        expectedLength: AUTH_CONFIG.password.length,
+        isValid: isValid
+    });
+    
+    return isValid;
 }
 
 // Exportar para uso en otros archivos
