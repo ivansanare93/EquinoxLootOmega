@@ -39,7 +39,6 @@
     <script>
         window.addEventListener('DOMContentLoaded', function() {
             console.log('🔒 Authentication check started');
-            console.log('Expected password length:', AUTH_CONFIG.password.length);
             
             const isAuthenticated = sessionStorage.getItem(AUTH_CONFIG.sessionKey);
             
@@ -60,8 +59,6 @@
                     return;
                 }
                 
-                console.log('🔍 Verifying password attempt', attempts + 1);
-                
                 // Usar la función del archivo externo
                 if (verifyOfficerPassword(userPassword)) {
                     sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
@@ -70,7 +67,6 @@
                     return;
                 } else {
                     attempts++;
-                    console.log('❌ Authentication failed, attempt', attempts);
                     if (attempts < AUTH_CONFIG.maxAttempts) {
                         alert(`❌ Contraseña incorrecta.\nVerifica que no incluyas comillas ni espacios.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
                     } else {
