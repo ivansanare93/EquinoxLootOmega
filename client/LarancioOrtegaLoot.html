@@ -46,7 +46,7 @@
                 <div class="password-modal-content">
                     <h2>🔒 ACCESO RESTRINGIDO A OFICIALES</h2>
                     <p>Introduce la contraseña para acceder al Loot Manager:</p>
-                    <p style="font-size: 0.85em; color: #94a3b8;">(NO incluyas comillas ni espacios adicionales)</p>
+                    <p class="password-modal-hint">(NO incluyas comillas ni espacios adicionales)</p>
                     <input type="password" id="passwordInput" class="password-modal-input" placeholder="Contraseña..." autocomplete="off">
                     <div class="password-error" id="passwordError"></div>
                     <div class="password-modal-buttons">
@@ -82,26 +82,41 @@
                 // Handle submit
                 const handleSubmit = () => {
                     const password = passwordInput.value;
-                    if (password) {
-                        modal.style.display = 'none';
-                        resolve(password);
+                    if (!password || password.trim() === '') {
+                        errorDiv.textContent = 'Por favor, introduce la contraseña';
+                        errorDiv.style.display = 'block';
+                        return;
                     }
+                    cleanup();
+                    modal.style.display = 'none';
+                    resolve(password);
                 };
                 
                 // Handle cancel
                 const handleCancel = () => {
+                    cleanup();
                     modal.style.display = 'none';
                     reject(new Error('User cancelled'));
                 };
                 
-                // Event listeners
-                submitButton.onclick = handleSubmit;
-                cancelButton.onclick = handleCancel;
-                passwordInput.onkeypress = (e) => {
+                // Handle Enter key
+                const handleKeyPress = (e) => {
                     if (e.key === 'Enter') {
                         handleSubmit();
                     }
                 };
+                
+                // Cleanup function to remove event listeners
+                const cleanup = () => {
+                    submitButton.removeEventListener('click', handleSubmit);
+                    cancelButton.removeEventListener('click', handleCancel);
+                    passwordInput.removeEventListener('keypress', handleKeyPress);
+                };
+                
+                // Event listeners
+                submitButton.addEventListener('click', handleSubmit);
+                cancelButton.addEventListener('click', handleCancel);
+                passwordInput.addEventListener('keypress', handleKeyPress);
             });
         }
 
