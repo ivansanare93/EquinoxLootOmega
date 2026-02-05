@@ -37,7 +37,92 @@
     </script>
         <!-- 🔒 PROTECCIÓN DE ACCESO PARA OFICIALES -->
     <script>
-        window.addEventListener('DOMContentLoaded', function() {
+        // Create password modal function
+        function createPasswordModal() {
+            const modal = document.createElement('div');
+            modal.className = 'password-modal';
+            modal.id = 'passwordModal';
+            modal.innerHTML = `
+                <div class="password-modal-content">
+                    <h2>🔒 ACCESO RESTRINGIDO A OFICIALES</h2>
+                    <p>Introduce la contraseña para acceder al Loot Manager:</p>
+                    <p class="password-modal-hint">(NO incluyas comillas ni espacios adicionales)</p>
+                    <input type="password" id="passwordInput" class="password-modal-input" placeholder="Contraseña..." autocomplete="new-password" aria-label="Contraseña de acceso">
+                    <div class="password-error" id="passwordError"></div>
+                    <div class="password-modal-buttons">
+                        <button class="password-modal-button secondary" id="cancelButton">Cancelar</button>
+                        <button class="password-modal-button primary" id="submitButton">Acceder</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return modal;
+        }
+
+        // Show password modal
+        function showPasswordModal(attempts, maxAttempts) {
+            return new Promise((resolve, reject) => {
+                const modal = document.getElementById('passwordModal') || createPasswordModal();
+                const passwordInput = document.getElementById('passwordInput');
+                const submitButton = document.getElementById('submitButton');
+                const cancelButton = document.getElementById('cancelButton');
+                const errorDiv = document.getElementById('passwordError');
+                
+                // Clear previous input and error
+                passwordInput.value = '';
+                errorDiv.style.display = 'none';
+                errorDiv.textContent = '';
+                
+                // Show modal
+                modal.style.display = 'block';
+                
+                // Focus on input
+                setTimeout(() => passwordInput.focus(), 100);
+                
+                // Handle submit
+                const handleSubmit = () => {
+                    const password = passwordInput.value;
+                    if (!password || password.trim() === '') {
+                        errorDiv.textContent = 'Por favor, introduce la contraseña';
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
+                    cleanup();
+                    modal.style.display = 'none';
+                    resolve(password);
+                };
+                
+                // Handle cancel
+                const handleCancel = () => {
+                    cleanup();
+                    modal.style.display = 'none';
+                    reject(new Error('User cancelled'));
+                };
+                
+                // Handle keyboard events
+                const handleKeyPress = (e) => {
+                    if (e.key === 'Enter') {
+                        handleSubmit();
+                    } else if (e.key === 'Escape') {
+                        handleCancel();
+                    }
+                };
+                
+                // Cleanup function to remove event listeners
+                const cleanup = () => {
+                    submitButton.removeEventListener('click', handleSubmit);
+                    cancelButton.removeEventListener('click', handleCancel);
+                    passwordInput.removeEventListener('keydown', handleKeyPress);
+                };
+                
+                // Event listeners
+                submitButton.addEventListener('click', handleSubmit);
+                cancelButton.addEventListener('click', handleCancel);
+                passwordInput.addEventListener('keydown', handleKeyPress);
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', async function() {
             console.log('🔒 Authentication check started');
             
             const isAuthenticated = sessionStorage.getItem(AUTH_CONFIG.sessionKey);
@@ -50,31 +135,31 @@
             let attempts = 0;
             
             while (attempts < AUTH_CONFIG.maxAttempts) {
-                const userPassword = prompt("🔒 ACCESO RESTRINGIDO A OFICIALES\n\nIntroduce la contraseña para acceder al Loot Manager:\n(NO incluyas comillas ni espacios adicionales)");
-                
-                if (userPassword === null) {
+                try {
+                    const userPassword = await showPasswordModal(attempts, AUTH_CONFIG.maxAttempts);
+                    
+                    // Usar la función del archivo externo
+                    if (verifyOfficerPassword(userPassword)) {
+                        sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
+                        console.log('✅ Authentication successful');
+                        alert("✅ Acceso concedido. Bienvenido, oficial!");
+                        return;
+                    } else {
+                        attempts++;
+                        if (attempts < AUTH_CONFIG.maxAttempts) {
+                            alert(`❌ Contraseña incorrecta.\nVerifica que no incluyas comillas ni espacios.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
+                        } else {
+                            console.log('❌ Max attempts reached, redirecting');
+                            alert("❌ Demasiados intentos fallidos. Serás redirigido al inicio.");
+                            window.location.href = "index.html";
+                            return;
+                        }
+                    }
+                } catch (error) {
                     console.log('❌ User cancelled authentication');
                     alert("❌ Acceso cancelado. Serás redirigido al inicio.");
                     window.location.href = "index.html";
                     return;
-                }
-                
-                // Usar la función del archivo externo
-                if (verifyOfficerPassword(userPassword)) {
-                    sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
-                    console.log('✅ Authentication successful');
-                    alert("✅ Acceso concedido. Bienvenido, oficial!");
-                    return;
-                } else {
-                    attempts++;
-                    if (attempts < AUTH_CONFIG.maxAttempts) {
-                        alert(`❌ Contraseña incorrecta.\nVerifica que no incluyas comillas ni espacios.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
-                    } else {
-                        console.log('❌ Max attempts reached, redirecting');
-                        alert("❌ Demasiados intentos fallidos. Serás redirigido al inicio.");
-                        window.location.href = "index.html";
-                        return;
-                    }
                 }
             }
         });
