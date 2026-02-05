@@ -6,7 +6,8 @@
     <title>Larancio Loot Manager</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-    
+     <!-- 🔒 Configuración de autenticación (archivo externo) -->
+    <script src="auth-config.js"></script>
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
@@ -33,6 +34,44 @@
             window.firebaseConfigured = false;
             window.firebaseConfigError = error.message;
         }
+    </script>
+        <!-- 🔒 PROTECCIÓN DE ACCESO PARA OFICIALES -->
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            const isAuthenticated = sessionStorage.getItem(AUTH_CONFIG.sessionKey);
+            
+            if (isAuthenticated === 'true') {
+                return;
+            }
+            
+            let attempts = 0;
+            
+            while (attempts < AUTH_CONFIG.maxAttempts) {
+                const userPassword = prompt("🔒 ACCESO RESTRINGIDO A OFICIALES\n\nIntroduce la contraseña para acceder al Loot Manager:");
+                
+                if (userPassword === null) {
+                    alert("❌ Acceso cancelado. Serás redirigido al inicio.");
+                    window.location.href = "index.html";
+                    return;
+                }
+                
+                // Usar la función del archivo externo
+                if (verifyOfficerPassword(userPassword)) {
+                    sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
+                    alert("✅ Acceso concedido. Bienvenido, oficial!");
+                    return;
+                } else {
+                    attempts++;
+                    if (attempts < AUTH_CONFIG.maxAttempts) {
+                        alert(`❌ Contraseña incorrecta.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
+                    } else {
+                        alert("❌ Demasiados intentos fallidos. Serás redirigido al inicio.");
+                        window.location.href = "index.html";
+                        return;
+                    }
+                }
+            }
+        });
     </script>
 </head>
 <body>
