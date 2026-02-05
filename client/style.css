@@ -355,3 +355,120 @@ ul:hover, table:hover {
     color: white;
     transform: scale(1.05);
 }
+
+/* Password Modal Styles */
+.password-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    animation: fadeIn 0.3s ease;
+}
+
+.password-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--azul-profundo-1), var(--azul-profundo-2));
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid var(--dorado);
+    box-shadow: 0 8px 40px rgba(133, 77, 255, 0.6);
+    min-width: 400px;
+    max-width: 90%;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translate(-50%, -60%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+.password-modal h2 {
+    margin-top: 0;
+    color: var(--dorado);
+    text-shadow: 0 0 10px var(--purpura);
+    font-size: 1.5em;
+}
+
+.password-modal p {
+    color: #e2e8f0;
+    margin: 15px 0;
+    font-size: 0.95em;
+}
+
+.password-modal-input {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    background-color: var(--azul-profundo-1);
+    color: white;
+    border: 1px solid var(--purpura);
+    border-radius: 6px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.password-modal-input:focus {
+    outline: none;
+    border-color: var(--dorado);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.password-modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.password-modal-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s;
+}
+
+.password-modal-button.primary {
+    background-color: var(--dorado);
+    border-color: var(--dorado);
+    color: var(--azul-profundo-1);
+}
+
+.password-modal-button.primary:hover {
+    background-color: #fbbf24;
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.password-modal-button.secondary {
+    background-color: transparent;
+    border-color: var(--purpura);
+    color: white;
+}
+
+.password-modal-button.secondary:hover {
+    background-color: var(--purpura);
+    transform: scale(1.05);
+}
+
+.password-error {
+    color: var(--rojo-legendario);
+    font-size: 0.9em;
+    margin-top: 10px;
+    display: none;
+}
