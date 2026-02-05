@@ -174,6 +174,17 @@
             background-color: #991b1b;
         }
 
+        .edit-btn {
+            background-color: #3b82f6;
+            padding: 5px 10px;
+            font-size: 0.85em;
+            margin-right: 5px;
+        }
+
+        .edit-btn:hover {
+            background-color: #1d4ed8;
+        }
+
         .summary-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -524,22 +535,67 @@
                     <td>${rolesBadges}</td>
                     <td>${signup.notes || '-'}</td>
                     <td>
-                        <button class="delete-btn" onclick="deleteSignup('${signup.name}')">🗑️ Borrar</button>
+                        <button class="edit-btn" data-player-name="${signup.name}">✏️ Editar</button>
+                        <button class="delete-btn" data-player-name="${signup.name}">🗑️ Borrar</button>
                     </td>
                 `;
+                
+                // Add event listeners to buttons
+                const editBtn = row.querySelector('.edit-btn');
+                const deleteBtn = row.querySelector('.delete-btn');
+                
+                editBtn.addEventListener('click', () => editSignup(signup.name));
+                deleteBtn.addEventListener('click', () => deleteSignup(signup.name));
+                
                 tbody.appendChild(row);
             });
         }
 
         // Delete signup
-        window.deleteSignup = async function(playerName) {
+        function deleteSignup(playerName) {
             if (!confirm(`¿Estás seguro de que quieres eliminar a ${playerName}?`)) {
                 return;
             }
 
             rosterSignups = rosterSignups.filter(s => s.name !== playerName);
-            await saveRosterToFirebase();
-        };
+            saveRosterToFirebase();
+        }
+
+        // Edit signup
+        function editSignup(playerName) {
+            const signup = rosterSignups.find(s => s.name === playerName);
+            if (!signup) {
+                alert('No se encontró el registro.');
+                return;
+            }
+
+            // Populate form with existing data
+            document.getElementById('player-name').value = signup.name;
+            document.getElementById('player-class').value = signup.class;
+
+            // Trigger class change event to populate specializations
+            const event = new Event('change');
+            document.getElementById('player-class').dispatchEvent(event);
+
+            // Set spec after specializations populate (wait for dropdown to be populated)
+            setTimeout(() => {
+                const specSelect = document.getElementById('player-spec');
+                if (specSelect.options.length > 1) {
+                    specSelect.value = signup.specialization;
+                }
+            }, 150);
+
+            // Set role checkboxes
+            document.getElementById('role-tank').checked = signup.roles.includes('Tank');
+            document.getElementById('role-healer').checked = signup.roles.includes('Healer');
+            document.getElementById('role-dps').checked = signup.roles.includes('DPS');
+
+            // Set notes
+            document.getElementById('player-notes').value = signup.notes || '';
+
+            // Scroll to form
+            document.getElementById('signup-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
         // Update statistics
         function updateStatistics() {
