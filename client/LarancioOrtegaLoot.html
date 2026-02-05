@@ -38,18 +38,22 @@
         <!-- 🔒 PROTECCIÓN DE ACCESO PARA OFICIALES -->
     <script>
         window.addEventListener('DOMContentLoaded', function() {
+            console.log('🔒 Authentication check started');
+            
             const isAuthenticated = sessionStorage.getItem(AUTH_CONFIG.sessionKey);
             
             if (isAuthenticated === 'true') {
+                console.log('✅ User already authenticated via session');
                 return;
             }
             
             let attempts = 0;
             
             while (attempts < AUTH_CONFIG.maxAttempts) {
-                const userPassword = prompt("🔒 ACCESO RESTRINGIDO A OFICIALES\n\nIntroduce la contraseña para acceder al Loot Manager:");
+                const userPassword = prompt("🔒 ACCESO RESTRINGIDO A OFICIALES\n\nIntroduce la contraseña para acceder al Loot Manager:\n(NO incluyas comillas ni espacios adicionales)");
                 
                 if (userPassword === null) {
+                    console.log('❌ User cancelled authentication');
                     alert("❌ Acceso cancelado. Serás redirigido al inicio.");
                     window.location.href = "index.html";
                     return;
@@ -58,13 +62,15 @@
                 // Usar la función del archivo externo
                 if (verifyOfficerPassword(userPassword)) {
                     sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
+                    console.log('✅ Authentication successful');
                     alert("✅ Acceso concedido. Bienvenido, oficial!");
                     return;
                 } else {
                     attempts++;
                     if (attempts < AUTH_CONFIG.maxAttempts) {
-                        alert(`❌ Contraseña incorrecta.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
+                        alert(`❌ Contraseña incorrecta.\nVerifica que no incluyas comillas ni espacios.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
                     } else {
+                        console.log('❌ Max attempts reached, redirecting');
                         alert("❌ Demasiados intentos fallidos. Serás redirigido al inicio.");
                         window.location.href = "index.html";
                         return;
