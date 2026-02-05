@@ -153,23 +153,25 @@
         window.addEventListener('DOMContentLoaded', async function() {
             console.log('🔒 Authentication check started');
             
-            // Wait for Firebase to be ready
-            while (!window.firebaseAuth) {
+            // Wait for Firebase to be ready (with timeout)
+            let retries = 0;
+            const maxRetries = 50; // 5 seconds maximum wait
+            while (!window.firebaseAuth && retries < maxRetries) {
                 await new Promise(resolve => setTimeout(resolve, 100));
+                retries++;
+            }
+            
+            if (!window.firebaseAuth) {
+                console.error('❌ Firebase Auth failed to initialize');
+                alert("Error de configuración. Por favor, contacta al administrador.");
+                window.location.href = "index.html";
+                return;
             }
             
             // Check if user is already authenticated (Firebase session)
             if (window.isOfficerAuthenticated()) {
                 console.log('✅ User already authenticated via Firebase');
                 sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
-                return;
-            }
-            
-            // Check session storage for backward compatibility
-            const isAuthenticated = sessionStorage.getItem(AUTH_CONFIG.sessionKey);
-            
-            if (isAuthenticated === 'true' && window.isOfficerAuthenticated()) {
-                console.log('✅ User already authenticated via session');
                 return;
             }
             
