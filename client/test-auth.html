@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Auth</title>
+    <script src="auth-config.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('AUTH_CONFIG:', AUTH_CONFIG);
+            console.log('verifyOfficerPassword:', typeof verifyOfficerPassword);
+            console.log('Password from config:', AUTH_CONFIG.password);
+            console.log('Test with exact password:', verifyOfficerPassword('Aquinoex'));
+            console.log('Test with wrong password:', verifyOfficerPassword('wrong'));
+            
+            // Show results on page
+            document.body.innerHTML = `
+                <h1>Auth Test Results</h1>
+                <p>AUTH_CONFIG exists: ${typeof AUTH_CONFIG !== 'undefined'}</p>
+                <p>Password in config: "${AUTH_CONFIG.password}"</p>
+                <p>Password length: ${AUTH_CONFIG.password.length}</p>
+                <p>verifyOfficerPassword exists: ${typeof verifyOfficerPassword === 'function'}</p>
+                <p>Test "Aquinoex": ${verifyOfficerPassword('Aquinoex')}</p>
+                <p>Test "wrong": ${verifyOfficerPassword('wrong')}</p>
+            `;
+        });
+    </script>
+</head>
+<body>
+    Loading...
+</body>
+</html>
