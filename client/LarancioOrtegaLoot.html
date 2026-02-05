@@ -10,6 +10,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
         
         try {
             // Import Firebase configuration from external file
@@ -19,6 +20,10 @@
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
+            const auth = getAuth(app);
+            
+            // Officer email constant
+            const OFFICER_EMAIL = 'oficiales@equinox.com';
             
             // Make Firebase Firestore functions globally accessible
             window.firestoreDB = db;
@@ -27,6 +32,25 @@
             window.firestoreGetDoc = getDoc;
             window.firestoreOnSnapshot = onSnapshot;
             window.firebaseConfigured = true;
+            
+            // Make Firebase Auth globally accessible
+            window.firebaseAuth = auth;
+            
+            // Global function to verify officer password using Firebase Auth
+            window.verifyOfficerPassword = async function(password) {
+                try {
+                    await signInWithEmailAndPassword(auth, OFFICER_EMAIL, password);
+                    return true;
+                } catch (error) {
+                    console.error('Error de autenticación:', error.code);
+                    return false;
+                }
+            };
+            
+            // Global function to check if officer is authenticated
+            window.isOfficerAuthenticated = function() {
+                return auth.currentUser !== null;
+            };
         } catch (error) {
             console.error('Firebase configuration error:', error);
             window.firebaseConfigured = false;
@@ -35,6 +59,12 @@
     </script>
         <!-- 🔒 PROTECCIÓN DE ACCESO PARA OFICIALES -->
     <script>
+        // Authentication configuration
+        const AUTH_CONFIG = {
+            maxAttempts: 3,
+            sessionKey: 'officer_authenticated'
+        };
+        
         // Create password modal function
         function createPasswordModal() {
             const modal = document.createElement('div');
@@ -123,9 +153,22 @@
         window.addEventListener('DOMContentLoaded', async function() {
             console.log('🔒 Authentication check started');
             
+            // Wait for Firebase to be ready
+            while (!window.firebaseAuth) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            // Check if user is already authenticated (Firebase session)
+            if (window.isOfficerAuthenticated()) {
+                console.log('✅ User already authenticated via Firebase');
+                sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
+                return;
+            }
+            
+            // Check session storage for backward compatibility
             const isAuthenticated = sessionStorage.getItem(AUTH_CONFIG.sessionKey);
             
-            if (isAuthenticated === 'true') {
+            if (isAuthenticated === 'true' && window.isOfficerAuthenticated()) {
                 console.log('✅ User already authenticated via session');
                 return;
             }
@@ -136,8 +179,10 @@
                 try {
                     const userPassword = await showPasswordModal(attempts, AUTH_CONFIG.maxAttempts);
                     
-                    // Usar la función del archivo externo
-                    if (verifyOfficerPassword(userPassword)) {
+                    // Use Firebase Authentication
+                    const authResult = await window.verifyOfficerPassword(userPassword);
+                    
+                    if (authResult) {
                         sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
                         console.log('✅ Authentication successful');
                         alert("✅ Acceso concedido. Bienvenido, oficial!");
