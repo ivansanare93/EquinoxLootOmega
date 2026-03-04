@@ -803,6 +803,112 @@
             worksheet['!rows'] = [];
             worksheet['!rows'][0] = { hpt: 30 }; // Title row height
 
+            // Add "Resumen de Roster" summary sheet with class counts
+            const allClasses = Object.keys(classSpecializations);
+            const classCount = allClasses.reduce((acc, cls) => { acc[cls] = 0; return acc; }, {});
+            rosterSignups.forEach(signup => {
+                if (signup.class && classCount[signup.class] !== undefined) {
+                    classCount[signup.class]++;
+                }
+            });
+
+            const presentClasses = allClasses.filter(cls => classCount[cls] > 0);
+            const missingClasses = allClasses.filter(cls => classCount[cls] === 0);
+            const allPresent = missingClasses.length === 0;
+            const totalRosterCount = allClasses.reduce((sum, cls) => sum + classCount[cls], 0);
+
+            const summaryTitle = [`RESUMEN DE ROSTER - ${displayDate}`];
+            const summaryStatusRow = [allPresent
+                ? '✓ Todas las clases están representadas en el roster'
+                : `⚠ Faltan ${missingClasses.length} clase(s): ${missingClasses.join(', ')}`];
+            const summaryEmpty = [];
+            const summaryHeaders = ['Clase', 'Cantidad', 'Estado'];
+            const summaryRows = allClasses.map(cls => [
+                cls,
+                classCount[cls],
+                classCount[cls] > 0 ? '✓ Presente' : '✗ Ausente'
+            ]);
+            const summaryTotalRow = ['TOTAL', totalRosterCount, `${presentClasses.length} / ${allClasses.length} clases`];
+
+            const summaryData = [
+                summaryTitle,
+                summaryStatusRow,
+                summaryEmpty,
+                summaryHeaders,
+                ...summaryRows,
+                summaryEmpty,
+                summaryTotalRow
+            ];
+
+            const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(workbook, summarySheet, 'Resumen de Roster');
+
+            // Style the summary sheet
+            summarySheet['!merges'] = summarySheet['!merges'] || [];
+            summarySheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } });
+            summarySheet['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 2 } });
+
+            const sTitleCell = summarySheet['A1'];
+            if (sTitleCell) {
+                sTitleCell.s = {
+                    font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+                    fill: { fgColor: { rgb: "1F4E78" } },
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            }
+
+            const sStatusCell = summarySheet['A2'];
+            if (sStatusCell) {
+                sStatusCell.s = {
+                    font: { bold: true, sz: 11, color: { rgb: allPresent ? "1F6E2E" : "7B2D00" } },
+                    fill: { fgColor: { rgb: allPresent ? "C6EFCE" : "FFEB9C" } },
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            }
+
+            const summaryHeaderStyle = {
+                font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "4472C4" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: createBorder("000000")
+            };
+            for (let col = 0; col <= 2; col++) {
+                const addr = XLSX.utils.encode_cell({ r: 3, c: col });
+                if (summarySheet[addr]) summarySheet[addr].s = summaryHeaderStyle;
+            }
+
+            const dataRowCount = allClasses.length;
+            for (let row = 4; row < 4 + dataRowCount; row++) {
+                const className = summarySheet[XLSX.utils.encode_cell({ r: row, c: 0 })]?.v;
+                const count = classCount[className] || 0;
+                const isPresent = count > 0;
+                const isEvenRow = ((row - 4) % 2) === 0;
+                for (let col = 0; col <= 2; col++) {
+                    const addr = XLSX.utils.encode_cell({ r: row, c: col });
+                    if (!summarySheet[addr]) continue;
+                    summarySheet[addr].s = {
+                        font: { color: { rgb: isPresent ? "000000" : "9C0006" } },
+                        fill: { fgColor: { rgb: isPresent ? (isEvenRow ? "F2F2F2" : "FFFFFF") : "FFC7CE" } },
+                        alignment: { horizontal: col === 1 ? "center" : "left", vertical: "center" },
+                        border: createBorder("D0D0D0")
+                    };
+                }
+            }
+
+            const totalRowIndex = 4 + dataRowCount + 1;
+            for (let col = 0; col <= 2; col++) {
+                const addr = XLSX.utils.encode_cell({ r: totalRowIndex, c: col });
+                if (!summarySheet[addr]) continue;
+                summarySheet[addr].s = {
+                    font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
+                    fill: { fgColor: { rgb: "1F4E78" } },
+                    alignment: { horizontal: col === 1 ? "center" : "left", vertical: "center" },
+                    border: createBorder("000000")
+                };
+            }
+
+            summarySheet['!cols'] = [{ wch: 28 }, { wch: 12 }, { wch: 38 }];
+
             // Save file
             const fileName = `Roster_Expansion_${dateStr}.xlsx`;
             XLSX.writeFile(workbook, fileName);
