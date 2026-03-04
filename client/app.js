@@ -1178,7 +1178,124 @@ function exportToExcel() {
     
     worksheet['!cols'] = columnWidths;
 
-    // 8. Download the file with date in filename
+    // 9. Add "Resumen de Roster" sheet with class categorization
+    const allClasses = Object.keys(classSpecializations);
+
+    // Count characters per class using the full characters array (not filtered)
+    const classCount = allClasses.reduce((acc, cls) => { acc[cls] = 0; return acc; }, {});
+    characters.forEach(char => {
+        if (char.class && classCount[char.class] !== undefined) {
+            classCount[char.class]++;
+        }
+    });
+
+    const presentClasses = allClasses.filter(cls => classCount[cls] > 0);
+    const missingClasses = allClasses.filter(cls => classCount[cls] === 0);
+    const allPresent = missingClasses.length === 0;
+    const totalRosterCount = allClasses.reduce((sum, cls) => sum + classCount[cls], 0);
+
+    // Build roster summary worksheet data
+    const summaryTitle = [`RESUMEN DE ROSTER - ${displayDate}`];
+    const summaryStatusRow = [allPresent
+        ? '✓ Todas las clases están representadas en el roster'
+        : `⚠ Faltan ${missingClasses.length} clase(s): ${missingClasses.join(', ')}`];
+    const summaryEmpty = [];
+    const summaryHeaders = ['Clase', 'Cantidad', 'Estado'];
+    const summaryRows = allClasses.map(cls => [
+        cls,
+        classCount[cls],
+        classCount[cls] > 0 ? '✓ Presente' : '✗ Ausente'
+    ]);
+    const summaryTotalRow = ['TOTAL', totalRosterCount, `${presentClasses.length} / ${allClasses.length} clases`];
+
+    const summaryData = [
+        summaryTitle,
+        summaryStatusRow,
+        summaryEmpty,
+        summaryHeaders,
+        ...summaryRows,
+        summaryEmpty,
+        summaryTotalRow
+    ];
+
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumen de Roster");
+
+    // Style the summary sheet
+    // Merge title cell
+    summarySheet['!merges'] = summarySheet['!merges'] || [];
+    summarySheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } });
+    summarySheet['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 2 } });
+
+    // Title row style
+    const sTitleCell = summarySheet['A1'];
+    if (sTitleCell) {
+        sTitleCell.s = {
+            font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "1F4E78" } },
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+    }
+
+    // Status row style
+    const sStatusCell = summarySheet['A2'];
+    if (sStatusCell) {
+        sStatusCell.s = {
+            font: { bold: true, sz: 11, color: { rgb: allPresent ? "1F6E2E" : "7B2D00" } },
+            fill: { fgColor: { rgb: allPresent ? "C6EFCE" : "FFEB9C" } },
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+    }
+
+    // Header row style (row index 3)
+    const summaryHeaderStyle = {
+        font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4472C4" } },
+        alignment: { horizontal: "center", vertical: "center" },
+        border: createBorder("000000")
+    };
+    for (let col = 0; col <= 2; col++) {
+        const addr = XLSX.utils.encode_cell({ r: 3, c: col });
+        if (summarySheet[addr]) summarySheet[addr].s = summaryHeaderStyle;
+    }
+
+    // Data rows style (rows 4 onwards, up to before the last two rows)
+    const dataRowCount = allClasses.length;
+    for (let row = 4; row < 4 + dataRowCount; row++) {
+        const className = summarySheet[XLSX.utils.encode_cell({ r: row, c: 0 })]?.v;
+        const count = classCount[className] || 0;
+        const isPresent = count > 0;
+        const isEvenRow = ((row - 4) % 2) === 0;
+
+        for (let col = 0; col <= 2; col++) {
+            const addr = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!summarySheet[addr]) continue;
+            summarySheet[addr].s = {
+                font: { color: { rgb: isPresent ? "000000" : "9C0006" } },
+                fill: { fgColor: { rgb: isPresent ? (isEvenRow ? "F2F2F2" : "FFFFFF") : "FFC7CE" } },
+                alignment: { horizontal: col === 1 ? "center" : "left", vertical: "center" },
+                border: createBorder("D0D0D0")
+            };
+        }
+    }
+
+    // Total row style (last data row)
+    const totalRowIndex = 4 + dataRowCount + 1;
+    for (let col = 0; col <= 2; col++) {
+        const addr = XLSX.utils.encode_cell({ r: totalRowIndex, c: col });
+        if (!summarySheet[addr]) continue;
+        summarySheet[addr].s = {
+            font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "1F4E78" } },
+            alignment: { horizontal: col === 1 ? "center" : "left", vertical: "center" },
+            border: createBorder("000000")
+        };
+    }
+
+    // Column widths for summary sheet
+    summarySheet['!cols'] = [{ wch: 28 }, { wch: 12 }, { wch: 38 }];
+
+    // 10. Download the file with date in filename
     XLSX.writeFile(workbook, `asignaciones_loot_${dateStr}.xlsx`);
 }
 
