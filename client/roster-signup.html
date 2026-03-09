@@ -823,12 +823,12 @@
             // 4) Título y cabeceras
             setCell(summarySheet, "A1", { t: "s", v: `RESUMEN DE ROSTER - ${displayDate}` });
             
-            // Mensaje global (A2) - fórmula ES
+            // Mensaje global (A2) - fórmula EN (OOXML requires English function names)
             setCell(summarySheet, "A2", {
-              t: "s",
-              f: `SI(CONTAR.SI($B$5:$B$17;">0")=CONTARA($A$5:$A$17);` +
-                 `"✓ Todas las clases están representadas en el roster";` +
-                 `"⚠ Faltan "&(CONTARA($A$5:$A$17)-CONTAR.SI($B$5:$B$17;">0"))&" clase(s)")`
+              t: "str",
+              f: `IF(COUNTIF($B$5:$B$17,">0")=COUNTA($A$5:$A$17),` +
+                 `"✓ Todas las clases están representadas en el roster",` +
+                 `"⚠ Faltan "&(COUNTA($A$5:$A$17)-COUNTIF($B$5:$B$17,">0"))&" clase(s)")`
             });
             
             setCell(summarySheet, "A4", { t: "s", v: "Clase" });
@@ -844,19 +844,19 @@
             
               setCell(summarySheet, a, { t: "s", v: cls });
             
-              // Cantidad: =CONTAR.SI(Roster!$B$3:$B$1048576;A5)
-              setCell(summarySheet, b, { t: "n", f: `CONTAR.SI(${rosterClassRange};${a})` });
+              // Cantidad: =COUNTIF(Roster!$B$3:$B$1048576,A5)
+              setCell(summarySheet, b, { t: "n", f: `COUNTIF(${rosterClassRange},${a})` });
             
-              // Estado: =SI(B5>0;"✓ Presente";"✗ Ausente")
-              setCell(summarySheet, c, { t: "s", f: `SI(${b}>0;"✓ Presente";"✗ Ausente")` });
+              // Estado: =IF(B5>0,"✓ Presente","✗ Ausente")
+              setCell(summarySheet, c, { t: "str", f: `IF(${b}>0,"✓ Presente","✗ Ausente")` });
             });
             
             // 6) Totales (fila 19)
             setCell(summarySheet, "A19", { t: "s", v: "TOTAL" });
-            setCell(summarySheet, "B19", { t: "n", f: "SUMA($B$5:$B$17)" });
+            setCell(summarySheet, "B19", { t: "n", f: "SUM($B$5:$B$17)" });
             setCell(summarySheet, "C19", {
-              t: "s",
-              f: 'CONTAR.SI($B$5:$B$17;">0")&" / "&CONTARA($A$5:$A$17)&" clases"'
+              t: "str",
+              f: 'COUNTIF($B$5:$B$17,">0")&" / "&COUNTA($A$5:$A$17)&" clases"'
             });
             
             // 7) Ref/rango para que Excel sepa el área usada (A1:C19)
