@@ -869,11 +869,19 @@
             
             // 9) Añadir al workbook
             XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumen de Roster");
-            
+
+            // Compute class counts from roster data for summary sheet styling
+            const classCount = {};
+            classes.forEach(cls => { classCount[cls] = 0; });
+            rosterSignups.forEach(signup => {
+                if (Object.prototype.hasOwnProperty.call(classCount, signup.class)) {
+                    classCount[signup.class]++;
+                }
+            });
+            const allClasses = classes;
+            const allPresent = allClasses.every(cls => classCount[cls] > 0);
+
             // Style the summary sheet
-            summarySheet['!merges'] = summarySheet['!merges'] || [];
-            summarySheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } });
-            summarySheet['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 2 } });
 
             const sTitleCell = summarySheet['A1'];
             if (sTitleCell) {
