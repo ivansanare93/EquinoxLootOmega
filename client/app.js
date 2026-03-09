@@ -1066,6 +1066,7 @@ function exportToExcel() {
                 color: { rgb: "FFFFFF" }
             },
             fill: { 
+                patternType: "solid",
                 fgColor: { rgb: "1F4E78" } // Dark blue background
             },
             alignment: { 
@@ -1090,6 +1091,7 @@ function exportToExcel() {
             color: { rgb: "FFFFFF" }
         },
         fill: { 
+            patternType: "solid",
             fgColor: { rgb: "4472C4" } // Blue background
         },
         alignment: { 
@@ -1131,7 +1133,7 @@ function exportToExcel() {
             
             // Apply zebra striping (alternating gray for even rows)
             if (isEvenRow) {
-                cellStyle.fill = { fgColor: { rgb: "F2F2F2" } };
+                cellStyle.fill = { patternType: "solid", fgColor: { rgb: "F2F2F2" } };
             }
             
             // Apply bold to important columns (Personaje and Objeto)
@@ -1232,7 +1234,7 @@ function exportToExcel() {
     if (sTitleCell) {
         sTitleCell.s = {
             font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "1F4E78" } },
+            fill: { patternType: "solid", fgColor: { rgb: "1F4E78" } },
             alignment: { horizontal: "center", vertical: "center" }
         };
     }
@@ -1242,7 +1244,7 @@ function exportToExcel() {
     if (sStatusCell) {
         sStatusCell.s = {
             font: { bold: true, sz: 11, color: { rgb: allPresent ? "1F6E2E" : "7B2D00" } },
-            fill: { fgColor: { rgb: allPresent ? "C6EFCE" : "FFEB9C" } },
+            fill: { patternType: "solid", fgColor: { rgb: allPresent ? "C6EFCE" : "FFEB9C" } },
             alignment: { horizontal: "center", vertical: "center" }
         };
     }
@@ -1250,7 +1252,7 @@ function exportToExcel() {
     // Header row style (row index 3)
     const summaryHeaderStyle = {
         font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "4472C4" } },
+        fill: { patternType: "solid", fgColor: { rgb: "4472C4" } },
         alignment: { horizontal: "center", vertical: "center" },
         border: createBorder("000000")
     };
@@ -1272,7 +1274,7 @@ function exportToExcel() {
             if (!summarySheet[addr]) continue;
             summarySheet[addr].s = {
                 font: { color: { rgb: isPresent ? "000000" : "9C0006" } },
-                fill: { fgColor: { rgb: isPresent ? (isEvenRow ? "F2F2F2" : "FFFFFF") : "FFC7CE" } },
+                fill: { patternType: "solid", fgColor: { rgb: isPresent ? (isEvenRow ? "F2F2F2" : "FFFFFF") : "FFC7CE" } },
                 alignment: { horizontal: col === 1 ? "center" : "left", vertical: "center" },
                 border: createBorder("D0D0D0")
             };
@@ -1286,7 +1288,7 @@ function exportToExcel() {
         if (!summarySheet[addr]) continue;
         summarySheet[addr].s = {
             font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "1F4E78" } },
+            fill: { patternType: "solid", fgColor: { rgb: "1F4E78" } },
             alignment: { horizontal: col === 1 ? "center" : "left", vertical: "center" },
             border: createBorder("000000")
         };
