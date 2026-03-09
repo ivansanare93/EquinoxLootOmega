@@ -803,46 +803,73 @@
             worksheet['!rows'] = [];
             worksheet['!rows'][0] = { hpt: 30 }; // Title row height
 
-            // Add "Resumen de Roster" summary sheet with class counts
-            const allClasses = Object.keys(classSpecializations);
-            const classCount = allClasses.reduce((acc, cls) => { acc[cls] = 0; return acc; }, {});
-            rosterSignups.forEach(signup => {
-                if (signup.class && classCount[signup.class] !== undefined) {
-                    classCount[signup.class]++;
-                }
-            });
-
-            const presentClasses = allClasses.filter(cls => classCount[cls] > 0);
-            const missingClasses = allClasses.filter(cls => classCount[cls] === 0);
-            const allPresent = missingClasses.length === 0;
-            const totalRosterCount = allClasses.reduce((sum, cls) => sum + classCount[cls], 0);
-
-            const summaryTitle = [`RESUMEN DE ROSTER - ${displayDate}`];
-            const summaryStatusRow = [allPresent
-                ? '✓ Todas las clases están representadas en el roster'
-                : `⚠ Faltan ${missingClasses.length} clase(s): ${missingClasses.join(', ')}`];
-            const summaryEmpty = [];
-            const summaryHeaders = ['Clase', 'Cantidad', 'Estado'];
-            const summaryRows = allClasses.map(cls => [
-                cls,
-                classCount[cls],
-                classCount[cls] > 0 ? '✓ Presente' : '✗ Ausente'
-            ]);
-            const summaryTotalRow = ['TOTAL', totalRosterCount, `${presentClasses.length} / ${allClasses.length} clases`];
-
-            const summaryData = [
-                summaryTitle,
-                summaryStatusRow,
-                summaryEmpty,
-                summaryHeaders,
-                ...summaryRows,
-                summaryEmpty,
-                summaryTotalRow
+                       // 1) Crear hoja vacía
+            const summarySheet = XLSX.utils.aoa_to_sheet([]);
+            
+            // 2) Datos base
+            const classes = [
+              "Guerrero","Paladín","Cazador","Pícaro","Sacerdote","Chamán","Mago",
+              "Brujo","Druida","Monje","Caballero de la Muerte","Cazador de Demonios","Evocador"
             ];
-
-            const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-            XLSX.utils.book_append_sheet(workbook, summarySheet, 'Resumen de Roster');
-
+            
+            // Rango donde Excel buscará clases (columna B desde fila 3)
+            const rosterClassRange = "Roster!$B$3:$B$1048576";
+            
+            // 3) Helper para escribir celdas
+            function setCell(sheet, addr, cellObj) {
+              sheet[addr] = cellObj;
+            }
+            
+            // 4) Título y cabeceras
+            setCell(summarySheet, "A1", { t: "s", v: `RESUMEN DE ROSTER - ${displayDate}` });
+            
+            // Mensaje global (A2) - fórmula ES
+            setCell(summarySheet, "A2", {
+              t: "s",
+              f: `SI(CONTAR.SI($B$5:$B$17;">0")=CONTARA($A$5:$A$17);` +
+                 `"✓ Todas las clases están representadas en el roster";` +
+                 `"⚠ Faltan "&(CONTARA($A$5:$A$17)-CONTAR.SI($B$5:$B$17;">0"))&" clase(s)")`
+            });
+            
+            setCell(summarySheet, "A4", { t: "s", v: "Clase" });
+            setCell(summarySheet, "B4", { t: "s", v: "Cantidad" });
+            setCell(summarySheet, "C4", { t: "s", v: "Estado" });
+            
+            // 5) Filas por clase (A5:C17)
+            classes.forEach((cls, idx) => {
+              const row = 5 + idx;            // 5..17
+              const a = `A${row}`;
+              const b = `B${row}`;
+              const c = `C${row}`;
+            
+              setCell(summarySheet, a, { t: "s", v: cls });
+            
+              // Cantidad: =CONTAR.SI(Roster!$B$3:$B$1048576;A5)
+              setCell(summarySheet, b, { t: "n", f: `CONTAR.SI(${rosterClassRange};${a})` });
+            
+              // Estado: =SI(B5>0;"✓ Presente";"✗ Ausente")
+              setCell(summarySheet, c, { t: "s", f: `SI(${b}>0;"✓ Presente";"✗ Ausente")` });
+            });
+            
+            // 6) Totales (fila 19)
+            setCell(summarySheet, "A19", { t: "s", v: "TOTAL" });
+            setCell(summarySheet, "B19", { t: "n", f: "SUMA($B$5:$B$17)" });
+            setCell(summarySheet, "C19", {
+              t: "s",
+              f: 'CONTAR.SI($B$5:$B$17;">0")&" / "&CONTARA($A$5:$A$17)&" clases"'
+            });
+            
+            // 7) Ref/rango para que Excel sepa el área usada (A1:C19)
+            summarySheet["!ref"] = "A1:C19";
+            
+            // 8) Merges como antes (título y estado en A1..C1 y A2..C2)
+            summarySheet["!merges"] = summarySheet["!merges"] || [];
+            summarySheet["!merges"].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }); // A1:C1
+            summarySheet["!merges"].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 2 } }); // A2:C2
+            
+            // 9) Añadir al workbook
+            XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumen de Roster");
+            
             // Style the summary sheet
             summarySheet['!merges'] = summarySheet['!merges'] || [];
             summarySheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } });
