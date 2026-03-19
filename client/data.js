@@ -21,21 +21,80 @@ const bosses = [
     { id: 2740, name: 'L\'ura', description: 'Jefe de Marcha a Quel\'Danas.' }
 ];
 
+// ==========================================
+// PLACEHOLDER LOOT – HELPERS Y CONSTANTES
+// ==========================================
+
+// Tipos de armadura soportados (deben coincidir con las claves de armorCompatibility)
+const PLACEHOLDER_ARMOR_TYPES = ['Cloth Armor', 'Leather Armor', 'Mail Armor', 'Plate Armor'];
+
+// Slots de armadura para los ítems placeholder
+const PLACEHOLDER_ARMOR_SLOTS = ['Head', 'Chest', 'Legs', 'Hands', 'Feet', 'Shoulders', 'Wrists', 'Waist', 'Back'];
+
+// Categorías adicionales de loot placeholder: armas, escudo, accesorios y trinkets
+// Two-handed weapons (Two-Handed Sword, Staff, Polearm) use 'Two Hand' as their slot
+const PLACEHOLDER_EXTRA_CATEGORIES = [
+    { type: 'One-Handed Sword', slot: 'Main Hand', label: 'One-Handed Sword' },
+    { type: 'Two-Handed Sword', slot: 'Two Hand',  label: 'Two-Handed Sword' },
+    { type: 'Staff',            slot: 'Two Hand',  label: 'Staff'            },
+    { type: 'Dagger',           slot: 'Main Hand', label: 'Dagger'           },
+    { type: 'Polearm',          slot: 'Two Hand',  label: 'Polearm'          },
+    { type: 'Shield',           slot: 'Off Hand',  label: 'Shield'           },
+    { type: 'Accessories',      slot: 'Neck',      label: 'Neck Accessory'   },
+    { type: 'Accessories',      slot: 'Ring',      label: 'Ring Accessory'   },
+    { type: 'Trinket',          slot: 'Trinket',   label: 'Trinket 1'        },
+    { type: 'Trinket',          slot: 'Trinket',   label: 'Trinket 2'        }
+];
+
+/**
+ * Genera un array de ítems placeholder para un boss dado.
+ * Cubre todos los tipos de armadura soportados, armas principales,
+ * escudo, accesorios (cuello y anillo) y trinkets.
+ * TODO: Replace placeholder loot with real loot tables per boss.
+ * @param {Object} boss - Objeto con { id: number, name: string }
+ * @returns {Array} Array de ítems placeholder
+ */
+function generatePlaceholderLootForBoss(boss) {
+    const items = [];
+
+    // Armaduras: una entrada por tipo de armadura × slot
+    PLACEHOLDER_ARMOR_TYPES.forEach(armorType => {
+        PLACEHOLDER_ARMOR_SLOTS.forEach(slot => {
+            items.push({
+                name: `Placeholder ${armorType} ${slot} (Boss ${boss.id})`,
+                type: armorType,
+                slot,
+                ilvlBase: 645,
+                rarity: 'Épico',
+                description: `Ítem placeholder para ${boss.name}. Pendiente de datos reales.`,
+                wowheadLink: 'https://www.wowhead.com/item=0',
+                bossId: boss.id
+            });
+        });
+    });
+
+    // Armas, escudo, accesorios y trinkets
+    PLACEHOLDER_EXTRA_CATEGORIES.forEach(({ type, slot, label }) => {
+        items.push({
+            name: `Placeholder ${label} (Boss ${boss.id})`,
+            type,
+            slot,
+            ilvlBase: 645,
+            rarity: 'Épico',
+            description: `Ítem placeholder para ${boss.name}. Pendiente de datos reales.`,
+            wowheadLink: 'https://www.wowhead.com/item=0',
+            bossId: boss.id
+        });
+    });
+
+    return items;
+}
+
 // Loot por boss (se irá completando con los ítems de cada raid)
-const lootByBoss = {
-    // La Aguja del Vacío
-    2733: [], // Imperador Averzian
-    2734: [], // Vorasius
-    2735: [], // Vaelgor y Ezzorak
-    2736: [], // Rey caído Salhadaar
-    2737: [], // Vanguardia Cegada por la Luz
-    2738: [], // Corona del cosmos
-    // La Falla Onírica
-    2795: [], // Chimaerus, El Dios Inconcebible
-    // Marcha a Quel'Danas
-    2739: [], // Belo'ren, Hijo de Al'ar
-    2740: []  // L'ura
-};
+// TODO: Replace placeholder loot with real loot tables per boss
+const lootByBoss = Object.fromEntries(
+    bosses.map(boss => [boss.id, generatePlaceholderLootForBoss(boss)])
+);
 
 // Array plano optimizado para selects y búsquedas
 const lootItems = Object.values(lootByBoss).flat();
