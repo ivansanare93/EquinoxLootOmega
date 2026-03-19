@@ -31,19 +31,40 @@ const PLACEHOLDER_ARMOR_TYPES = ['Cloth Armor', 'Leather Armor', 'Mail Armor', '
 // Slots de armadura para los ítems placeholder
 const PLACEHOLDER_ARMOR_SLOTS = ['Head', 'Chest', 'Legs', 'Hands', 'Feet', 'Shoulders', 'Wrists', 'Waist', 'Back'];
 
+// Traducciones al español de los tipos de armadura
+const ARMOR_TYPE_ES = {
+    'Cloth Armor':   'Armadura de Tela',
+    'Leather Armor': 'Armadura de Cuero',
+    'Mail Armor':    'Armadura de Malla',
+    'Plate Armor':   'Armadura de Placas'
+};
+
+// Traducciones al español de los slots de armadura
+const ARMOR_SLOT_ES = {
+    'Head':      'Cabeza',
+    'Chest':     'Torso',
+    'Legs':      'Piernas',
+    'Hands':     'Manos',
+    'Feet':      'Pies',
+    'Shoulders': 'Hombros',
+    'Wrists':    'Muñecas',
+    'Waist':     'Cintura',
+    'Back':      'Espalda'
+};
+
 // Categorías adicionales de loot placeholder: armas, escudo, accesorios y trinkets
 // Two-handed weapons (Two-Handed Sword, Staff, Polearm) use 'Two Hand' as their slot
 const PLACEHOLDER_EXTRA_CATEGORIES = [
-    { type: 'One-Handed Sword', slot: 'Main Hand', label: 'One-Handed Sword' },
-    { type: 'Two-Handed Sword', slot: 'Two Hand',  label: 'Two-Handed Sword' },
-    { type: 'Staff',            slot: 'Two Hand',  label: 'Staff'            },
-    { type: 'Dagger',           slot: 'Main Hand', label: 'Dagger'           },
-    { type: 'Polearm',          slot: 'Two Hand',  label: 'Polearm'          },
-    { type: 'Shield',           slot: 'Off Hand',  label: 'Shield'           },
-    { type: 'Accessories',      slot: 'Neck',      label: 'Neck Accessory'   },
-    { type: 'Accessories',      slot: 'Ring',      label: 'Ring Accessory'   },
-    { type: 'Trinket',          slot: 'Trinket',   label: 'Trinket 1'        },
-    { type: 'Trinket',          slot: 'Trinket',   label: 'Trinket 2'        }
+    { type: 'One-Handed Sword', slot: 'Main Hand', label: 'Espada de Una Mano'   },
+    { type: 'Two-Handed Sword', slot: 'Two Hand',  label: 'Espada de Dos Manos'  },
+    { type: 'Staff',            slot: 'Two Hand',  label: 'Báculo'               },
+    { type: 'Dagger',           slot: 'Main Hand', label: 'Daga'                 },
+    { type: 'Polearm',          slot: 'Two Hand',  label: 'Arma de Asta'         },
+    { type: 'Shield',           slot: 'Off Hand',  label: 'Escudo'               },
+    { type: 'Accessories',      slot: 'Neck',      label: 'Accesorio de Cuello'  },
+    { type: 'Accessories',      slot: 'Ring',      label: 'Accesorio de Anillo'  },
+    { type: 'Trinket',          slot: 'Trinket',   label: 'Baratija 1'           },
+    { type: 'Trinket',          slot: 'Trinket',   label: 'Baratija 2'           }
 ];
 
 /**
@@ -61,7 +82,7 @@ function generatePlaceholderLootForBoss(boss) {
     PLACEHOLDER_ARMOR_TYPES.forEach(armorType => {
         PLACEHOLDER_ARMOR_SLOTS.forEach(slot => {
             items.push({
-                name: `Placeholder ${armorType} ${slot} (Boss ${boss.id})`,
+                name: `${ARMOR_TYPE_ES[armorType] || armorType} ${ARMOR_SLOT_ES[slot] || slot}`,
                 type: armorType,
                 slot,
                 ilvlBase: 645,
@@ -76,7 +97,7 @@ function generatePlaceholderLootForBoss(boss) {
     // Armas, escudo, accesorios y trinkets
     PLACEHOLDER_EXTRA_CATEGORIES.forEach(({ type, slot, label }) => {
         items.push({
-            name: `Placeholder ${label} (Boss ${boss.id})`,
+            name: label,
             type,
             slot,
             ilvlBase: 645,
