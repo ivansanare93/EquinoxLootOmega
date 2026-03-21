@@ -53,18 +53,14 @@ const ARMOR_SLOT_ES = {
 };
 
 // Categorías adicionales de loot placeholder: armas, escudo, accesorios y trinkets
-// Two-handed weapons (Two-Handed Sword, Staff, Polearm) use 'Two Hand' as their slot
 const PLACEHOLDER_EXTRA_CATEGORIES = [
-    { type: 'One-Handed Sword', slot: 'Main Hand', label: 'Espada de Una Mano'   },
-    { type: 'Two-Handed Sword', slot: 'Two Hand',  label: 'Espada de Dos Manos'  },
-    { type: 'Staff',            slot: 'Two Hand',  label: 'Báculo'               },
-    { type: 'Dagger',           slot: 'Main Hand', label: 'Daga'                 },
-    { type: 'Polearm',          slot: 'Two Hand',  label: 'Arma de Asta'         },
-    { type: 'Shield',           slot: 'Off Hand',  label: 'Escudo'               },
-    { type: 'OffHnad',           slot: 'Off Hand',  label: 'Off Hand'               },
-    { type: 'Accessories',      slot: 'Neck',      label: 'Collar'  },
-    { type: 'Accessories',      slot: 'Ring',      label: 'Anillo'  },
-    { type: 'Trinket',          slot: 'Trinket',   label: 'Abalorio'           }
+    { type: 'Two-Handed Weapon', slot: 'Two Hand',  label: 'Arma Dos Manos' },
+    { type: 'One-Handed Weapon', slot: 'Main Hand', label: 'Arma Una Mano'  },
+    { type: 'Shield',            slot: 'Off Hand',  label: 'Escudo'         },
+    { type: 'Off Hand',          slot: 'Off Hand',  label: 'Off Hand'       },
+    { type: 'Accessories',       slot: 'Neck',      label: 'Collar'         },
+    { type: 'Accessories',       slot: 'Ring',      label: 'Anillo'         },
+    { type: 'Trinket',           slot: 'Trinket',   label: 'Abalorio'       }
 ];
 
 /**
@@ -126,11 +122,17 @@ const armorCompatibility = {
     'Leather Armor': ['Druida', 'Pícaro', 'Monje', 'Cazador de Demonios'],
     'Mail Armor': ['Cazador', 'Chamán', 'Evocador'],
     'Plate Armor': ['Guerrero', 'Paladín', 'Caballero de la Muerte'],
+    // Armas genéricas (usadas por los ítems placeholder y como fallback)
+    'Two-Handed Weapon': ['Guerrero', 'Paladín', 'Cazador', 'Chamán', 'Monje', 'Druida', 'Caballero de la Muerte', 'Mago', 'Brujo', 'Sacerdote', 'Evocador'],
+    'One-Handed Weapon': ['Guerrero', 'Paladín', 'Mago', 'Brujo', 'Sacerdote', 'Pícaro', 'Monje', 'Cazador', 'Druida', 'Caballero de la Muerte', 'Chamán', 'Evocador', 'Cazador de Demonios'],
     'Shield': ['Guerrero', 'Paladín', 'Chamán'],
+    'Off Hand': ['Mago', 'Brujo', 'Sacerdote', 'Chamán', 'Druida', 'Paladín', 'Monje', 'Evocador'],
+    // Tipos de arma específicos (para ítems reales provenientes de la API de Blizzard)
+    // Nota: Pícaro, Monje y Druida no pueden usar Espada de Dos Manos en The War Within
     'One-Handed Sword': ['Guerrero', 'Paladín', 'Brujo', 'Sacerdote', 'Pícaro', 'Monje', 'Druida', 'Caballero de la Muerte'],
     'One-Handed Axe': ['Guerrero', 'Paladín', 'Chamán', 'Caballero de la Muerte'],
     'One-Handed Mace': ['Guerrero', 'Paladín', 'Chamán', 'Sacerdote', 'Monje', 'Druida', 'Caballero de la Muerte'],
-    'Two-Handed Sword': ['Guerrero', 'Paladín', 'Pícaro', 'Monje', 'Druida', 'Caballero de la Muerte'],
+    'Two-Handed Sword': ['Guerrero', 'Paladín', 'Caballero de la Muerte'],
     'Two-Handed Axe': ['Guerrero', 'Chamán', 'Caballero de la Muerte'],
     'Two-Handed Mace': ['Guerrero', 'Paladín', 'Chamán', 'Druida', 'Caballero de la Muerte'],
     'Polearm': ['Guerrero', 'Paladín', 'Cazador', 'Chamán', 'Monje', 'Druida', 'Caballero de la Muerte'],
