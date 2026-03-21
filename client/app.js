@@ -1008,7 +1008,6 @@ function exportToExcel() {
             'Especialización': char ? char.specialization : 'N/A',
             'Objeto': a.item,
             'Dificultad': a.dificultad,
-            'iLvl': a.ilvl,
             'Jefe': boss ? boss.name : 'N/A',
             'Tipo': a.tipo,
             'Nota': a.note
@@ -1143,8 +1142,8 @@ function exportToExcel() {
                 cellStyle.font.bold = true;
             }
             
-            // Center align specific columns (Dificultad and iLvl)
-            if (headerValue === 'Dificultad' || headerValue === 'iLvl') {
+            // Center align specific columns (Dificultad)
+            if (headerValue === 'Dificultad') {
                 cellStyle.alignment.horizontal = "center";
                 cellStyle.alignment.vertical = "center";
             } else {
@@ -1181,6 +1180,11 @@ function exportToExcel() {
     }
     
     worksheet['!cols'] = columnWidths;
+
+    // 8. Add AutoFilter to header row so users can sort/filter by each column
+    worksheet['!autofilter'] = {
+        ref: XLSX.utils.encode_range({ r: 2, c: newRange.s.c }, { r: newRange.e.r, c: newRange.e.c })
+    };
 
     // 9. Add "Resumen de Roster" sheet with class categorization
     const allClasses = Object.keys(classSpecializations);
