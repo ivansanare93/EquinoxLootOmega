@@ -474,6 +474,8 @@ function assignItem() {
     const charName = document.getElementById('select-personaje').value;
     const itemName = document.getElementById('select-item').value;
     const dificultad = document.getElementById('select-dificultad').value;
+    const bossSelectValue = document.getElementById('select-jefe-asignacion').value;
+    const selectedBossId = bossSelectValue !== '' ? parseInt(bossSelectValue, 10) : NaN;
     
     // Validación
     if (!charName || !itemName || !dificultad) {
@@ -516,7 +518,7 @@ function assignItem() {
     const assignment = {
         character: charName,
         item: itemName,
-        boss: item.bossId,
+        boss: !isNaN(selectedBossId) ? selectedBossId : item.bossId,
         dificultad,
         ilvl: calculateILvl(item.ilvlBase, dificultad),
         tipo: 'Necesidad',
