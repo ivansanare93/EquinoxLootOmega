@@ -251,6 +251,16 @@ const trinketSpecializationCompatibility = {
     // - Seda viviente de Loom'ithar (ID: 242393) - Confirmado: Para todas las clases
 };
 
+// Especializaciones de tanque por clase (solo las specs que ejercen el rol de tanque)
+const TANK_SPECIALIZATIONS = {
+    'Guerrero': ['Protección'],
+    'Paladín': ['Protección'],
+    'Caballero de la Muerte': ['Sangre'],
+    'Druida': ['Guardián'],
+    'Monje': ['Maestro Cervecero'],
+    'Cazador de Demonios': ['Venganza']
+};
+
 // Especializaciones por clase (World of Warcraft - Nombres Oficiales en Español)
 const classSpecializations = {
     'Guerrero': ['Armas', 'Protección', 'Furia'],
