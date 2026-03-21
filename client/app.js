@@ -109,6 +109,16 @@ function validateCharacterData(charData) {
  * @returns {boolean}
  */
 function isItemCompatibleWithClass(item, className, characterSpec = null) {
+    // Restricción de Escudo: solo para especialidades tanque que puedan equipar escudo.
+    // Si la especialización no se conoce (null), se deniega el acceso al escudo
+    // porque no se puede verificar el rol de tanque.
+    if (item.type === 'Shield') {
+        const shieldClasses = armorCompatibility['Shield'] || [];
+        if (!shieldClasses.includes(className)) return false;
+        const tankSpecs = TANK_SPECIALIZATIONS[className] || [];
+        return characterSpec ? tankSpecs.includes(characterSpec) : false;
+    }
+
     // Verificar si es un trinket con compatibilidad específica de especializaciones
     if (item.type === 'Trinket' && trinketSpecializationCompatibility[item.name] && characterSpec) {
         const specCompat = trinketSpecializationCompatibility[item.name];
@@ -366,7 +376,12 @@ function getEquippableItemTypes() {
         'Leather Armor',
         'Mail Armor',
         'Plate Armor',
+        // Armas genéricas (placeholder: 2H, 1H, Off Hand, Escudo)
+        'Two-Handed Weapon',
+        'One-Handed Weapon',
+        'Off Hand',
         'Shield',
+        // Armas específicas (ítems reales de la API de Blizzard)
         'One-Handed Sword',
         'One-Handed Axe',
         'One-Handed Mace',
