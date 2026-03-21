@@ -61,10 +61,10 @@ const PLACEHOLDER_EXTRA_CATEGORIES = [
     { type: 'Dagger',           slot: 'Main Hand', label: 'Daga'                 },
     { type: 'Polearm',          slot: 'Two Hand',  label: 'Arma de Asta'         },
     { type: 'Shield',           slot: 'Off Hand',  label: 'Escudo'               },
-    { type: 'Accessories',      slot: 'Neck',      label: 'Accesorio de Cuello'  },
-    { type: 'Accessories',      slot: 'Ring',      label: 'Accesorio de Anillo'  },
-    { type: 'Trinket',          slot: 'Trinket',   label: 'Baratija 1'           },
-    { type: 'Trinket',          slot: 'Trinket',   label: 'Baratija 2'           }
+    { type: 'OffHnad',           slot: 'Off Hand',  label: 'Off Hand'               },
+    { type: 'Accessories',      slot: 'Neck',      label: 'Collar'  },
+    { type: 'Accessories',      slot: 'Ring',      label: 'Anillo'  },
+    { type: 'Trinket',          slot: 'Trinket',   label: 'Abalorio'           }
 ];
 
 /**
