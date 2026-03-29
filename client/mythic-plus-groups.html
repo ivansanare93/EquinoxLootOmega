@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equinox - Organizador de Grupos Míticas+</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .mythic-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-to-home-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .back-to-home {
+            color: var(--dorado);
+            text-decoration: none;
+            font-size: 1em;
+            transition: color 0.2s;
+        }
+
+        .back-to-home:hover {
+            color: var(--purpura);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-section h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            font-size: 1.2em;
+            color: #a78bfa;
+        }
+
+        /* Layout principal */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Panel izquierdo: formulario + cola */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-card {
+            background-color: rgba(30, 41, 59, 0.8);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--dorado);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-card h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--dorado);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 1.4em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--dorado);
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--purpura);
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95em;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--dorado);
+        }
+
+        .form-group select option {
+            background-color: #1e293b;
+        }
+
+        /* Role selector buttons */
+        .role-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 10px 5px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            background-color: rgba(15, 23, 42, 0.9);
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .role-btn:hover {
+            border-color: var(--purpura);
+            color: white;
+        }
+
+        .role-btn.active[data-role="tank"] {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        .role-btn.active[data-role="healer"] {
+            border-color: var(--verde-epico);
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .role-btn.active[data-role="dps"] {
+            border-color: var(--rojo-legendario);
+            background-color: rgba(255, 69, 0, 0.2);
+            color: #fca5a5;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dorado);
+            color: var(--azul-profundo-1);
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            margin-top: 5px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--purpura);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        /* Cola de jugadores */
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .queue-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background-color: rgba(15, 23, 42, 0.7);
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .queue-player[data-role="tank"] { border-left-color: #3b82f6; }
+        .queue-player[data-role="healer"] { border-left-color: var(--verde-epico); }
+        .queue-player[data-role="dps"] { border-left-color: var(--rojo-legendario); }
+
+        .queue-player .player-name {
+            flex: 1;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        .queue-player .player-class {
+            font-size: 0.8em;
+            color: #9ca3af;
+        }
+
+        .queue-player .role-badge {
+            font-size: 0.75em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .role-badge.tank { background-color: rgba(59,130,246,0.2); color: #93c5fd; }
+        .role-badge.healer { background-color: rgba(16,185,129,0.2); color: #6ee7b7; }
+        .role-badge.dps { background-color: rgba(255,69,0,0.2); color: #fca5a5; }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.1em;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .remove-btn:hover {
+            background-color: rgba(239, 68, 68, 0.15);
+        }
+
+        .empty-queue {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9em;
+            padding: 20px 0;
+        }
+
+        /* Acciones de grupos */
+        .groups-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            padding: 10px 18px;
+            background-color: transparent;
+            color: var(--dorado);
+            border: 2px solid var(--dorado);
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--dorado);
+            color: var(--azul-profundo-1);
+        }
+
+        .btn-danger {
+            padding: 10px 18px;
+            background-color: transparent;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        /* Tablero de grupos */
+        .groups-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .group-card {
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .group-card.complete {
+            border-color: var(--verde-epico);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background-color: rgba(139, 92, 246, 0.15);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .group-card.complete .group-header {
+            background-color: rgba(16, 185, 129, 0.15);
+            border-bottom-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .group-title {
+            font-weight: bold;
+            font-size: 1.05em;
+            color: var(--dorado);
+        }
+
+        .group-count {
+            font-size: 0.85em;
+            color: #9ca3af;
+        }
+
+        .group-card.complete .group-count {
+            color: var(--verde-epico);
+            font-weight: bold;
+        }
+
+        .delete-group-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .delete-group-btn:hover {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .group-slots {
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Slot de rol dentro del grupo */
+        .role-slot {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            min-height: 42px;
+        }
+
+        .role-slot.tank-slot { background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .role-slot.healer-slot { background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .role-slot.dps-slot { background-color: rgba(255, 69, 0, 0.08); border: 1px solid rgba(255, 69, 0, 0.25); }
+
+        .slot-icon {
+            font-size: 1.2em;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .slot-content {
+            flex: 1;
+        }
+
+        .slot-label {
+            font-size: 0.75em;
+            color: #6b7280;
+            margin-bottom: 1px;
+        }
+
+        .role-slot.tank-slot .slot-label { color: #60a5fa; }
+        .role-slot.healer-slot .slot-label { color: #34d399; }
+        .role-slot.dps-slot .slot-label { color: #f87171; }
+
+        .slot-player-name {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #e5e7eb;
+        }
+
+        .slot-player-class {
+            font-size: 0.75em;
+            color: #9ca3af;
+        }
+
+        .slot-empty {
+            font-size: 0.85em;
+            color: #4b5563;
+            font-style: italic;
+        }
+
+        .slot-assign-btn {
+            background: none;
+            border: 1px solid #4b5563;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .slot-assign-btn:hover {
+            border-color: var(--dorado);
+            color: var(--dorado);
+        }
+
+        .slot-remove-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .slot-remove-btn:hover {
+            color: #ef4444;
+        }
+
+        /* Estadísticas */
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 20px;
+            font-size: 0.85em;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .stat-pill .stat-value {
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .stat-pill.tank-stat { border-color: rgba(59, 130, 246, 0.5); }
+        .stat-pill.healer-stat { border-color: rgba(16, 185, 129, 0.5); }
+        .stat-pill.dps-stat { border-color: rgba(255, 69, 0, 0.4); }
+        .stat-pill.total-stat { border-color: rgba(245, 158, 11, 0.5); }
+
+        /* Modal de asignación */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background-color: #1e293b;
+            border: 2px solid var(--dorado);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-box h3 {
+            margin-top: 0;
+            color: var(--dorado);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal-player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .modal-player-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background-color: rgba(15, 23, 42, 0.8);
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .modal-player-item:hover {
+            border-color: var(--dorado);
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .modal-empty {
+            color: #6b7280;
+            text-align: center;
+            padding: 15px 0;
+            font-style: italic;
+        }
+
+        .modal-cancel-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: transparent;
+            border: 2px solid #6b7280;
+            color: #9ca3af;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+
+        .modal-cancel-btn:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* Auto-fill badge */
+        .complete-badge {
+            display: inline-block;
+            background-color: var(--verde-epico);
+            color: var(--azul-profundo-1);
+            font-size: 0.7em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .left-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .groups-board {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mythic-container">
+        <div class="back-to-home-wrapper">
+            <a href="index.html" class="back-to-home">← Volver al Inicio</a>
+        </div>
+
+        <div class="header-section">
+            <h1>⚔️ Organizador de Grupos Míticas+ ⚔️</h1>
+            <p>Organiza grupos de 5 para hacer Míticas+: 1 Tanque, 1 Healer y 3 DPS</p>
+        </div>
+
+        <div class="content-layout">
+            <!-- Panel izquierdo -->
+            <div class="left-panel">
+                <!-- Formulario para añadir jugador -->
+                <div class="panel-card">
+                    <h2>➕ Añadir Jugador</h2>
+                    <div class="form-group">
+                        <label for="player-name">Nombre del Personaje</label>
+                        <input type="text" id="player-name" placeholder="Ej: Arthas, Thrall..." maxlength="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="player-class">Clase</label>
+                        <select id="player-class">
+                            <option value="">-- Selecciona clase --</option>
+                            <option value="Guerrero">⚔️ Guerrero</option>
+                            <option value="Paladín">🛡️ Paladín</option>
+                            <option value="Cazador">🏹 Cazador</option>
+                            <option value="Pícaro">🗡️ Pícaro</option>
+                            <option value="Sacerdote">✨ Sacerdote</option>
+                            <option value="Chamán">🌊 Chamán</option>
+                            <option value="Mago">🔥 Mago</option>
+                            <option value="Brujo">👁️ Brujo</option>
+                            <option value="Monje">☯️ Monje</option>
+                            <option value="Druida">🌿 Druida</option>
+                            <option value="Cazador de Demonios">😈 Cazador de Demonios</option>
+                            <option value="Caballero de la Muerte">💀 Caballero de la Muerte</option>
+                            <option value="Evocador">🐉 Evocador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Rol</label>
+                        <div class="role-buttons">
+                            <button class="role-btn" data-role="tank" onclick="selectRole(this)">🛡️ Tanque</button>
+                            <button class="role-btn" data-role="healer" onclick="selectRole(this)">💚 Healer</button>
+                            <button class="role-btn" data-role="dps" onclick="selectRole(this)">⚔️ DPS</button>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="addPlayer()">Añadir a la Cola</button>
+                </div>
+
+                <!-- Cola de jugadores -->
+                <div class="panel-card">
+                    <h2>📋 Cola de Jugadores</h2>
+                    <div id="queue-list" class="queue-list">
+                        <div class="empty-queue">No hay jugadores en la cola.<br>¡Añade jugadores para empezar!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel derecho: tablero de grupos -->
+            <div>
+                <!-- Estadísticas -->
+                <div class="stats-bar">
+                    <div class="stat-pill total-stat">
+                        👥 Cola: <span class="stat-value" id="stat-queue">0</span>
+                    </div>
+                    <div class="stat-pill tank-stat">
+                        🛡️ Tanques: <span class="stat-value" id="stat-tanks">0</span>
+                    </div>
+                    <div class="stat-pill healer-stat">
+                        💚 Healers: <span class="stat-value" id="stat-healers">0</span>
+                    </div>
+                    <div class="stat-pill dps-stat">
+                        ⚔️ DPS: <span class="stat-value" id="stat-dps">0</span>
+                    </div>
+                    <div class="stat-pill total-stat">
+                        ✅ Grupos completos: <span class="stat-value" id="stat-complete">0</span>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="groups-actions">
+                    <button class="btn-secondary" onclick="addGroup()">➕ Nuevo Grupo</button>
+                    <button class="btn-secondary" onclick="autoFillGroups()">⚡ Rellenar Automático</button>
+                    <button class="btn-danger" onclick="clearAll()">🗑️ Limpiar Todo</button>
+                </div>
+
+                <!-- Tablero de grupos -->
+                <div id="groups-board" class="groups-board">
+                    <!-- Los grupos se renderizan aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de selección de jugador -->
+    <div class="modal-overlay" id="assign-modal">
+        <div class="modal-box">
+            <h3 id="modal-title">Selecciona un jugador</h3>
+            <div id="modal-player-list" class="modal-player-list"></div>
+            <button class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== Estado de la aplicación ====================
+        let players = [];          // Cola de jugadores sin asignar
+        let groups = [];           // Array de grupos
+        let nextPlayerId = 1;
+        let nextGroupId = 1;
+
+        // Contexto para el modal de asignación
+        let modalContext = null;   // { groupId, slotRole, slotIndex }
+
+        // ==================== Utilidades ====================
+        function getRoleIcon(role) {
+            const icons = { tank: '🛡️', healer: '💚', dps: '⚔️' };
+            return icons[role] || '❓';
+        }
+
+        function getRoleLabel(role) {
+            const labels = { tank: 'Tanque', healer: 'Healer', dps: 'DPS' };
+            return labels[role] || role;
+        }
+
+        function selectedRole() {
+            const btn = document.querySelector('.role-btn.active');
+            return btn ? btn.dataset.role : null;
+        }
+
+        function selectRole(btn) {
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // ==================== Gestión de jugadores en cola ====================
+        function addPlayer() {
+            const nameInput = document.getElementById('player-name');
+            const classSelect = document.getElementById('player-class');
+            const role = selectedRole();
+
+            const name = nameInput.value.trim();
+            const playerClass = classSelect.value;
+
+            if (!name) {
+                alert('Por favor, introduce el nombre del personaje.');
+                nameInput.focus();
+                return;
+            }
+            if (!playerClass) {
+                alert('Por favor, selecciona una clase.');
+                classSelect.focus();
+                return;
+            }
+            if (!role) {
+                alert('Por favor, selecciona un rol.');
+                return;
+            }
+
+            const player = {
+                id: nextPlayerId++,
+                name,
+                class: playerClass,
+                role
+            };
+
+            players.push(player);
+
+            // Limpiar formulario
+            nameInput.value = '';
+            classSelect.value = '';
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+
+            renderQueue();
+            updateStats();
+        }
+
+        function removePlayerFromQueue(playerId) {
+            players = players.filter(p => p.id !== playerId);
+            renderQueue();
+            updateStats();
+        }
+
+        function renderQueue() {
+            const container = document.getElementById('queue-list');
+            if (players.length === 0) {
+                container.innerHTML = '<div class="empty-queue">No hay jugadores en la cola.<br>¡Añade jugadores para empezar!</div>';
+                return;
+            }
+
+            container.innerHTML = players.map(p => `
+                <div class="queue-player" data-role="${p.role}">
+                    <span style="font-size:1.3em">${getRoleIcon(p.role)}</span>
+                    <div style="flex:1; min-width:0;">
+                        <div class="player-name">${escapeHtml(p.name)}</div>
+                        <div class="player-class">${escapeHtml(p.class)}</div>
+                    </div>
+                    <span class="role-badge ${p.role}">${getRoleLabel(p.role)}</span>
+                    <button class="remove-btn" onclick="removePlayerFromQueue(${p.id})" title="Eliminar de la cola">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // ==================== Gestión de grupos ====================
+        function createGroup() {
+            const id = nextGroupId++;
+            return {
+                id,
+                name: `Grupo ${id}`,
+                slots: {
+                    tank: [null],          // 1 tanque
+                    healer: [null],        // 1 healer
+                    dps: [null, null, null] // 3 DPS
+                }
+            };
+        }
+
+        function addGroup() {
+            groups.push(createGroup());
+            renderGroups();
+        }
+
+        function deleteGroup(groupId) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+
+            // Devolver los jugadores asignados a la cola
+            ['tank', 'healer', 'dps'].forEach(role => {
+                group.slots[role].forEach(slot => {
+                    if (slot) players.push(slot);
+                });
+            });
+
+            groups = groups.filter(g => g.id !== groupId);
+            renderQueue();
+            renderGroups();
+            updateStats();
+        }
+
+        function removePlayerFromSlot(groupId, role, slotIndex) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+
+            const player = group.slots[role][slotIndex];
+            if (!player) return;
+
+            group.slots[role][slotIndex] = null;
+            players.push(player);
+
+            renderQueue();
+            renderGroups();
+            updateStats();
+        }
+
+        function isGroupComplete(group) {
+            return group.slots.tank[0] !== null &&
+                   group.slots.healer[0] !== null &&
+                   group.slots.dps.every(s => s !== null);
+        }
+
+        function countFilledSlots(group) {
+            let count = 0;
+            ['tank', 'healer', 'dps'].forEach(role => {
+                group.slots[role].forEach(s => { if (s) count++; });
+            });
+            return count;
+        }
+
+        function renderGroups() {
+            const board = document.getElementById('groups-board');
+            if (groups.length === 0) {
+                board.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; color:#6b7280; padding:40px 0;">
+                        No hay grupos creados todavía.<br>
+                        Pulsa <strong style="color:var(--dorado)">➕ Nuevo Grupo</strong> para crear uno,
+                        o <strong style="color:var(--dorado)">⚡ Rellenar Automático</strong> para crearlos automáticamente.
+                    </div>`;
+                updateStats();
+                return;
+            }
+
+            board.innerHTML = groups.map(group => {
+                const complete = isGroupComplete(group);
+                const filled = countFilledSlots(group);
+
+                const slotsHtml = [
+                    renderRoleSlots(group, 'tank', 'Tanque', 'tank-slot'),
+                    renderRoleSlots(group, 'healer', 'Healer', 'healer-slot'),
+                    ...renderDpsSlots(group)
+                ].join('');
+
+                return `
+                <div class="group-card ${complete ? 'complete' : ''}" id="group-${group.id}">
+                    <div class="group-header">
+                        <span class="group-title">${escapeHtml(group.name)}${complete ? '<span class="complete-badge">✓ Completo</span>' : ''}</span>
+                        <span class="group-count">${filled}/5</span>
+                        <button class="delete-group-btn" onclick="deleteGroup(${group.id})" title="Eliminar grupo">✕</button>
+                    </div>
+                    <div class="group-slots">
+                        ${slotsHtml}
+                    </div>
+                </div>`;
+            }).join('');
+
+            updateStats();
+        }
+
+        function renderRoleSlots(group, role, label, slotClass) {
+            const slot = group.slots[role][0];
+            return `
+                <div class="role-slot ${slotClass}">
+                    <span class="slot-icon">${getRoleIcon(role)}</span>
+                    <div class="slot-content">
+                        <div class="slot-label">${label}</div>
+                        ${slot
+                            ? `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
+                               <div class="slot-player-class">${escapeHtml(slot.class)}</div>`
+                            : `<div class="slot-empty">Vacío</div>`
+                        }
+                    </div>
+                    ${slot
+                        ? `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, '${role}', 0)" title="Quitar jugador">✕</button>`
+                        : `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0)">Asignar</button>`
+                    }
+                </div>`;
+        }
+
+        function renderDpsSlots(group) {
+            return group.slots.dps.map((slot, i) => `
+                <div class="role-slot dps-slot">
+                    <span class="slot-icon">⚔️</span>
+                    <div class="slot-content">
+                        <div class="slot-label">DPS ${i + 1}</div>
+                        ${slot
+                            ? `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
+                               <div class="slot-player-class">${escapeHtml(slot.class)}</div>`
+                            : `<div class="slot-empty">Vacío</div>`
+                        }
+                    </div>
+                    ${slot
+                        ? `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, 'dps', ${i})" title="Quitar jugador">✕</button>`
+                        : `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i})">Asignar</button>`
+                    }
+                </div>`);
+        }
+
+        // ==================== Auto-fill ====================
+        function autoFillGroups() {
+            const tanks   = players.filter(p => p.role === 'tank');
+            const healers  = players.filter(p => p.role === 'healer');
+            const dpsPlayers = players.filter(p => p.role === 'dps');
+
+            if (tanks.length === 0 && healers.length === 0 && dpsPlayers.length === 0) {
+                alert('No hay jugadores en la cola para rellenar grupos.');
+                return;
+            }
+
+            const maxGroups = Math.max(tanks.length, healers.length, Math.ceil(dpsPlayers.length / 3));
+            if (maxGroups === 0) return;
+
+            // Crear grupos adicionales necesarios según la cantidad de jugadores en cola
+            const groupsNeeded = Math.max(0, maxGroups - groups.length);
+            for (let i = 0; i < groupsNeeded; i++) {
+                groups.push(createGroup());
+            }
+
+            // Asignar tanques
+            groups.forEach(group => {
+                if (group.slots.tank[0] === null && tanks.length > 0) {
+                    group.slots.tank[0] = tanks.shift();
+                }
+            });
+
+            // Asignar healers
+            groups.forEach(group => {
+                if (group.slots.healer[0] === null && healers.length > 0) {
+                    group.slots.healer[0] = healers.shift();
+                }
+            });
+
+            // Asignar DPS
+            groups.forEach(group => {
+                group.slots.dps.forEach((slot, i) => {
+                    if (slot === null && dpsPlayers.length > 0) {
+                        group.slots.dps[i] = dpsPlayers.shift();
+                    }
+                });
+            });
+
+            // Actualizar cola: quitar los asignados
+            const assignedIds = new Set();
+            groups.forEach(g => {
+                [...g.slots.tank, ...g.slots.healer, ...g.slots.dps]
+                    .filter(s => s !== null)
+                    .forEach(s => assignedIds.add(s.id));
+            });
+            players = players.filter(p => !assignedIds.has(p.id));
+
+            renderQueue();
+            renderGroups();
+            updateStats();
+        }
+
+        // ==================== Modal de asignación ====================
+        function openModal(groupId, role, slotIndex) {
+            modalContext = { groupId, role, slotIndex };
+
+            const rolePlayers = players.filter(p => p.role === role);
+            const title = document.getElementById('modal-title');
+            const list = document.getElementById('modal-player-list');
+
+            title.textContent = `Asignar ${getRoleLabel(role)} al Grupo`;
+
+            if (rolePlayers.length === 0) {
+                list.innerHTML = `<div class="modal-empty">No hay jugadores con rol ${getRoleLabel(role)} en la cola.</div>`;
+            } else {
+                list.innerHTML = rolePlayers.map(p => `
+                    <div class="modal-player-item" onclick="assignPlayer(${p.id})">
+                        <span style="font-size:1.3em">${getRoleIcon(p.role)}</span>
+                        <div>
+                            <div style="font-weight:bold">${escapeHtml(p.name)}</div>
+                            <div style="font-size:0.8em; color:#9ca3af">${escapeHtml(p.class)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('assign-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('assign-modal').classList.remove('active');
+            modalContext = null;
+        }
+
+        function assignPlayer(playerId) {
+            if (!modalContext) return;
+            const { groupId, role, slotIndex } = modalContext;
+
+            const playerIndex = players.findIndex(p => p.id === playerId);
+            if (playerIndex === -1) return;
+
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+
+            group.slots[role][slotIndex] = players[playerIndex];
+            players.splice(playerIndex, 1);
+
+            closeModal();
+            renderQueue();
+            renderGroups();
+            updateStats();
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('assign-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ==================== Limpiar todo ====================
+        function clearAll() {
+            if (!confirm('¿Estás seguro de que quieres eliminar todos los jugadores y grupos?')) return;
+            players = [];
+            groups = [];
+            nextPlayerId = 1;
+            nextGroupId = 1;
+            renderQueue();
+            renderGroups();
+            updateStats();
+        }
+
+        // ==================== Estadísticas ====================
+        function updateStats() {
+            document.getElementById('stat-queue').textContent = players.length;
+            document.getElementById('stat-tanks').textContent = players.filter(p => p.role === 'tank').length;
+            document.getElementById('stat-healers').textContent = players.filter(p => p.role === 'healer').length;
+            document.getElementById('stat-dps').textContent = players.filter(p => p.role === 'dps').length;
+            document.getElementById('stat-complete').textContent = groups.filter(g => isGroupComplete(g)).length;
+        }
+
+        // ==================== Seguridad: escapeHtml ====================
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ==================== Inicialización ====================
+        renderQueue();
+        renderGroups();
+        updateStats();
+    </script>
+</body>
+</html>
