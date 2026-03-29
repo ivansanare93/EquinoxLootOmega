@@ -556,6 +556,128 @@
             vertical-align: middle;
         }
 
+        /* Sección de horario en la tarjeta del grupo */
+        .group-schedule {
+            padding: 10px 16px;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82em;
+        }
+
+        .group-card.complete .group-schedule {
+            border-top-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .schedule-days-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .schedule-day-pill {
+            background-color: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 10px;
+            padding: 1px 7px;
+            color: #c4b5fd;
+            font-size: 0.9em;
+        }
+
+        .schedule-time-display {
+            color: var(--dorado);
+            font-weight: bold;
+        }
+
+        .schedule-notes-display {
+            color: #9ca3af;
+            font-style: italic;
+            flex-basis: 100%;
+            margin-top: 2px;
+        }
+
+        .schedule-empty {
+            color: #4b5563;
+            font-style: italic;
+            flex: 1;
+        }
+
+        .schedule-btn {
+            background: none;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+            cursor: pointer;
+            font-size: 0.75em;
+            padding: 3px 9px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            margin-left: auto;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .schedule-btn:hover {
+            border-color: var(--dorado);
+            color: var(--dorado);
+        }
+
+        /* Modal de horario */
+        .schedule-days-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .day-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 8px;
+            background-color: rgba(15, 23, 42, 0.8);
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-size: 0.88em;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .day-checkbox-label:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .day-checkbox-label input[type="checkbox"] {
+            accent-color: var(--purpura);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .day-checkbox-label.checked {
+            background-color: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.6);
+            color: #c4b5fd;
+        }
+
+        .schedule-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .schedule-modal-actions .btn-primary {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .schedule-modal-actions .modal-cancel-btn {
+            flex: 1;
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .content-layout {
@@ -679,6 +801,32 @@
         </div>
     </div>
 
+    <!-- Modal de horario del grupo -->
+    <div class="modal-overlay" id="schedule-modal">
+        <div class="modal-box">
+            <h3>📅 Horario del Grupo</h3>
+            <p id="schedule-modal-group-name" style="color:#a78bfa; margin:0 0 15px; font-weight:bold;"></p>
+            <div class="form-group">
+                <label>Días de la semana</label>
+                <div class="schedule-days-grid" id="schedule-days-grid">
+                    <!-- Checkboxes rendered by JS -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="schedule-time-input">Hora de inicio</label>
+                <input type="time" id="schedule-time-input">
+            </div>
+            <div class="form-group">
+                <label for="schedule-notes-input">Notas</label>
+                <input type="text" id="schedule-notes-input" placeholder="Ej: Farm de llaves, alta prioridad..." maxlength="80">
+            </div>
+            <div class="schedule-modal-actions">
+                <button class="btn-primary" onclick="saveSchedule()">💾 Guardar</button>
+                <button class="modal-cancel-btn" onclick="closeScheduleModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de selección de jugador -->
     <div class="modal-overlay" id="assign-modal">
         <div class="modal-box">
@@ -697,6 +845,20 @@
 
         // Contexto para el modal de asignación
         let modalContext = null;   // { groupId, slotRole, slotIndex }
+
+        // Contexto para el modal de horario
+        let scheduleModalContext = null; // { groupId }
+
+        // Días de la semana (abreviatura para mostrar, nombre completo para formulario)
+        const DAYS_OF_WEEK = [
+            { label: 'Lunes',     short: 'Lun' },
+            { label: 'Martes',    short: 'Mar' },
+            { label: 'Miércoles', short: 'Mié' },
+            { label: 'Jueves',    short: 'Jue' },
+            { label: 'Viernes',   short: 'Vie' },
+            { label: 'Sábado',    short: 'Sáb' },
+            { label: 'Domingo',   short: 'Dom' }
+        ];
 
         // ==================== Utilidades ====================
         function getRoleIcon(role) {
@@ -797,6 +959,11 @@
                     tank: [null],          // 1 tanque
                     healer: [null],        // 1 healer
                     dps: [null, null, null] // 3 DPS
+                },
+                schedule: {
+                    days: [],   // Nombres de días seleccionados
+                    time: '',   // HH:MM
+                    notes: ''   // Notas opcionales
                 }
             };
         }
@@ -885,6 +1052,9 @@
                     <div class="group-slots">
                         ${slotsHtml}
                     </div>
+                    <div class="group-schedule">
+                        ${renderScheduleSection(group)}
+                    </div>
                 </div>`;
             }).join('');
 
@@ -929,6 +1099,95 @@
                     }
                 </div>`);
         }
+
+        // ==================== Sección de horario en la tarjeta ====================
+        function renderScheduleSection(group) {
+            const s = group.schedule;
+            const hasSchedule = s.days.length > 0 || s.time;
+
+            const validDays = s.days.filter(d => DAYS_OF_WEEK.some(x => x.label === d));
+            const daysHtml = validDays.length > 0
+                ? `<div class="schedule-days-display">${validDays.map(d => {
+                    const day = DAYS_OF_WEEK.find(x => x.label === d);
+                    return `<span class="schedule-day-pill">${escapeHtml(day.short)}</span>`;
+                }).join('')}</div>`
+                : '';
+
+            const timeHtml = s.time
+                ? `<span class="schedule-time-display">🕐 ${escapeHtml(s.time)}</span>`
+                : '';
+
+            const notesHtml = s.notes
+                ? `<span class="schedule-notes-display">📝 ${escapeHtml(s.notes)}</span>`
+                : '';
+
+            const contentHtml = hasSchedule
+                ? `${daysHtml}${timeHtml}${notesHtml}`
+                : `<span class="schedule-empty">Sin horario asignado</span>`;
+
+            return `${contentHtml}<button class="schedule-btn" onclick="openScheduleModal(${group.id})">📅 ${hasSchedule ? 'Editar horario' : 'Añadir horario'}</button>`;
+        }
+
+        // ==================== Modal de horario ====================
+        function openScheduleModal(groupId) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            scheduleModalContext = { groupId };
+
+            document.getElementById('schedule-modal-group-name').textContent = group.name;
+            document.getElementById('schedule-time-input').value = group.schedule.time || '';
+            document.getElementById('schedule-notes-input').value = group.schedule.notes || '';
+
+            // Renderizar checkboxes de días
+            const grid = document.getElementById('schedule-days-grid');
+            grid.innerHTML = DAYS_OF_WEEK.map(day => {
+                const checked = group.schedule.days.includes(day.label);
+                return `
+                    <label class="day-checkbox-label ${checked ? 'checked' : ''}">
+                        <input type="checkbox" value="${escapeHtml(day.label)}" ${checked ? 'checked' : ''}
+                            onchange="toggleDayLabel(this)">
+                        ${escapeHtml(day.label)}
+                    </label>`;
+            }).join('');
+
+            document.getElementById('schedule-modal').classList.add('active');
+        }
+
+        function toggleDayLabel(checkbox) {
+            const label = checkbox.parentElement;
+            if (checkbox.checked) {
+                label.classList.add('checked');
+            } else {
+                label.classList.remove('checked');
+            }
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('schedule-modal').classList.remove('active');
+            scheduleModalContext = null;
+        }
+
+        function saveSchedule() {
+            if (!scheduleModalContext) return;
+            const group = groups.find(g => g.id === scheduleModalContext.groupId);
+            if (!group) return;
+
+            const checkedBoxes = document.querySelectorAll('#schedule-days-grid input[type="checkbox"]:checked');
+            const validDayLabels = new Set(DAYS_OF_WEEK.map(d => d.label));
+            group.schedule.days = Array.from(checkedBoxes)
+                .map(cb => cb.value)
+                .filter(v => validDayLabels.has(v));
+            group.schedule.time = document.getElementById('schedule-time-input').value;
+            group.schedule.notes = document.getElementById('schedule-notes-input').value.trim();
+
+            closeScheduleModal();
+            renderGroups();
+        }
+
+        // Cerrar modal de horario al hacer clic fuera
+        document.getElementById('schedule-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeScheduleModal();
+        });
 
         // ==================== Auto-fill ====================
         function autoFillGroups() {
