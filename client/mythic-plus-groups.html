@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equinox - Organizador de Grupos Míticas+</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        try {
+            const { firebaseConfig } = await import('./firebase-config.js');
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+            window.firestoreDB = db;
+            window.firestoreDoc = doc;
+            window.firestoreSetDoc = setDoc;
+            window.firestoreOnSnapshot = onSnapshot;
+            window.firebaseConfigured = true;
+        } catch (error) {
+            console.error('Firebase configuration error:', error);
+            window.firebaseConfigured = false;
+        }
+    </script>
+
     <style>
         .mythic-container {
             max-width: 1400px;
@@ -921,12 +943,14 @@
 
             renderQueue();
             updateStats();
+            saveData();
         }
 
         function removePlayerFromQueue(playerId) {
             players = players.filter(p => p.id !== playerId);
             renderQueue();
             updateStats();
+            saveData();
         }
 
         function renderQueue() {
@@ -971,6 +995,7 @@
         function addGroup() {
             groups.push(createGroup());
             renderGroups();
+            saveData();
         }
 
         function deleteGroup(groupId) {
@@ -988,6 +1013,7 @@
             renderQueue();
             renderGroups();
             updateStats();
+            saveData();
         }
 
         function removePlayerFromSlot(groupId, role, slotIndex) {
@@ -1003,6 +1029,7 @@
             renderQueue();
             renderGroups();
             updateStats();
+            saveData();
         }
 
         function isGroupComplete(group) {
@@ -1182,6 +1209,7 @@
 
             closeScheduleModal();
             renderGroups();
+            saveData();
         }
 
         // Cerrar modal de horario al hacer clic fuera
@@ -1244,6 +1272,7 @@
             renderQueue();
             renderGroups();
             updateStats();
+            saveData();
         }
 
         // ==================== Modal de asignación ====================
@@ -1295,6 +1324,7 @@
             renderQueue();
             renderGroups();
             updateStats();
+            saveData();
         }
 
         // Cerrar modal al hacer clic fuera
@@ -1312,6 +1342,7 @@
             renderQueue();
             renderGroups();
             updateStats();
+            saveData();
         }
 
         // ==================== Estadísticas ====================
@@ -1333,10 +1364,53 @@
                 .replace(/'/g, '&#39;');
         }
 
+        // ==================== Firebase ====================
+        async function saveData() {
+            if (!window.firestoreDB || !window.firebaseConfigured) return;
+            try {
+                const docRef = window.firestoreDoc(window.firestoreDB, 'mythicPlusGroups', 'current');
+                await window.firestoreSetDoc(docRef, {
+                    players: players,
+                    groups: groups,
+                    nextPlayerId: nextPlayerId,
+                    nextGroupId: nextGroupId
+                });
+            } catch (error) {
+                console.error('Error saving data to Firebase:', error);
+            }
+        }
+
+        function initializeFirebase() {
+            if (!window.firestoreDB || !window.firebaseConfigured) return;
+            const docRef = window.firestoreDoc(window.firestoreDB, 'mythicPlusGroups', 'current');
+            window.firestoreOnSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    players = data.players || [];
+                    groups = data.groups || [];
+                    nextPlayerId = data.nextPlayerId || 1;
+                    nextGroupId = data.nextGroupId || 1;
+                }
+                renderQueue();
+                renderGroups();
+                updateStats();
+            }, (error) => {
+                console.error('Error in Firebase listener:', error);
+            });
+        }
+
         // ==================== Inicialización ====================
         renderQueue();
         renderGroups();
         updateStats();
+
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (window.firestoreDB && window.firebaseConfigured) {
+                    initializeFirebase();
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
