@@ -858,6 +858,22 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación: Limpiar Todo -->
+    <div class="modal-overlay" id="clear-all-modal">
+        <div class="modal-box">
+            <h3>⚠️ Limpiar Todo</h3>
+            <p style="color:#f87171; margin-bottom:12px;">Esta acción eliminará <strong>TODOS</strong> los jugadores y grupos de forma permanente y no se puede deshacer.</p>
+            <p style="color:#9ca3af; margin-bottom:10px;">Para confirmar, escribe <strong style="color:#ef4444;">CONFIRMAR</strong> en el campo de abajo:</p>
+            <input type="text" id="clear-all-confirm-input" placeholder="Escribe CONFIRMAR" autocomplete="off"
+                aria-label="Campo de confirmación: escribe CONFIRMAR para habilitar el botón de eliminar"
+                style="width:100%; padding:10px; border-radius:8px; border:2px solid #6b7280; background:#0f172a; color:#e2e8f0; font-size:1em; box-sizing:border-box; margin-bottom:15px;">
+            <div style="display:flex; gap:10px;">
+                <button id="clear-all-confirm-btn" class="btn-danger" disabled onclick="confirmClearAll()" style="flex:1;">🗑️ Eliminar Todo</button>
+                <button class="modal-cancel-btn" onclick="closeClearAllModal()" style="flex:1; width:auto;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================== Identidad del usuario (sesión local) ====================
         function getCurrentUserId() {
@@ -1378,8 +1394,26 @@
         });
 
         // ==================== Limpiar todo ====================
+        const CLEAR_ALL_CONFIRMATION_TEXT = 'CONFIRMAR';
+
         function clearAll() {
-            if (!confirm('¿Estás seguro de que quieres eliminar todos los jugadores y grupos?')) return;
+            openClearAllModal();
+        }
+
+        function openClearAllModal() {
+            const input = document.getElementById('clear-all-confirm-input');
+            const btn = document.getElementById('clear-all-confirm-btn');
+            input.value = '';
+            btn.disabled = true;
+            document.getElementById('clear-all-modal').classList.add('active');
+            input.focus();
+        }
+
+        function closeClearAllModal() {
+            document.getElementById('clear-all-modal').classList.remove('active');
+        }
+
+        function confirmClearAll() {
             players = [];
             groups = [];
             nextPlayerId = 1;
@@ -1388,7 +1422,24 @@
             renderGroups();
             updateStats();
             saveData();
+            closeClearAllModal();
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('clear-all-confirm-input').addEventListener('input', function () {
+                document.getElementById('clear-all-confirm-btn').disabled = this.value.trim() !== CLEAR_ALL_CONFIRMATION_TEXT;
+            });
+
+            document.getElementById('clear-all-modal').addEventListener('click', function (e) {
+                if (e.target === this) closeClearAllModal();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && document.getElementById('clear-all-modal').classList.contains('active')) {
+                    closeClearAllModal();
+                }
+            });
+        });
 
         // ==================== Estadísticas ====================
         function updateStats() {
