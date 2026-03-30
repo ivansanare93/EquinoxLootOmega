@@ -859,6 +859,19 @@
     </div>
 
     <script>
+        // ==================== Identidad del usuario (sesión local) ====================
+        function getCurrentUserId() {
+            let uid = localStorage.getItem('mythicPlusUserId');
+            if (!uid) {
+                uid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+                    ? crypto.randomUUID()
+                    : 'user_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+                localStorage.setItem('mythicPlusUserId', uid);
+            }
+            return uid;
+        }
+        const currentUserId = getCurrentUserId();
+
         // ==================== Estado de la aplicación ====================
         let players = [];          // Cola de jugadores sin asignar
         let groups = [];           // Array de grupos
@@ -931,7 +944,8 @@
                 id: nextPlayerId++,
                 name,
                 class: playerClass,
-                role
+                role,
+                ownerId: currentUserId
             };
 
             players.push(player);
@@ -947,6 +961,9 @@
         }
 
         function removePlayerFromQueue(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+            if (player.ownerId && player.ownerId !== currentUserId) return;
             players = players.filter(p => p.id !== playerId);
             renderQueue();
             updateStats();
@@ -968,7 +985,9 @@
                         <div class="player-class">${escapeHtml(p.class)}</div>
                     </div>
                     <span class="role-badge ${p.role}">${getRoleLabel(p.role)}</span>
-                    <button class="remove-btn" onclick="removePlayerFromQueue(${p.id})" title="Eliminar de la cola">✕</button>
+                    ${p.ownerId === currentUserId
+                        ? `<button class="remove-btn" onclick="removePlayerFromQueue(${p.id})" title="Eliminar de la cola">✕</button>`
+                        : ''}
                 </div>
             `).join('');
         }
@@ -979,6 +998,7 @@
             return {
                 id,
                 name: `Grupo ${id}`,
+                creatorId: currentUserId,
                 slots: {
                     tank: [null],          // 1 tanque
                     healer: [null],        // 1 healer
@@ -1001,6 +1021,7 @@
         function deleteGroup(groupId) {
             const group = groups.find(g => g.id === groupId);
             if (!group) return;
+            if (group.creatorId && group.creatorId !== currentUserId) return;
 
             // Devolver los jugadores asignados a la cola
             ['tank', 'healer', 'dps'].forEach(role => {
@@ -1019,6 +1040,7 @@
         function removePlayerFromSlot(groupId, role, slotIndex) {
             const group = groups.find(g => g.id === groupId);
             if (!group) return;
+            if (group.creatorId && group.creatorId !== currentUserId) return;
 
             const player = group.slots[role][slotIndex];
             if (!player) return;
@@ -1074,7 +1096,9 @@
                     <div class="group-header">
                         <span class="group-title">${escapeHtml(group.name)}${complete ? '<span class="complete-badge">✓ Completo</span>' : ''}</span>
                         <span class="group-count">${filled}/5</span>
-                        <button class="delete-group-btn" onclick="deleteGroup(${group.id})" title="Eliminar grupo">✕</button>
+                        ${group.creatorId === currentUserId
+                            ? `<button class="delete-group-btn" onclick="deleteGroup(${group.id})" title="Eliminar grupo">✕</button>`
+                            : ''}
                     </div>
                     <div class="group-slots">
                         ${slotsHtml}
@@ -1090,6 +1114,15 @@
 
         function renderRoleSlots(group, role, label, slotClass) {
             const slot = group.slots[role][0];
+            const isCreator = group.creatorId === currentUserId;
+            let actionBtn = '';
+            if (slot) {
+                if (isCreator) {
+                    actionBtn = `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, '${role}', 0)" title="Quitar jugador">✕</button>`;
+                }
+            } else {
+                actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0)">Asignar</button>`;
+            }
             return `
                 <div class="role-slot ${slotClass}">
                     <span class="slot-icon">${getRoleIcon(role)}</span>
@@ -1101,15 +1134,22 @@
                             : `<div class="slot-empty">Vacío</div>`
                         }
                     </div>
-                    ${slot
-                        ? `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, '${role}', 0)" title="Quitar jugador">✕</button>`
-                        : `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0)">Asignar</button>`
-                    }
+                    ${actionBtn}
                 </div>`;
         }
 
         function renderDpsSlots(group) {
-            return group.slots.dps.map((slot, i) => `
+            const isCreator = group.creatorId === currentUserId;
+            return group.slots.dps.map((slot, i) => {
+                let actionBtn = '';
+                if (slot) {
+                    if (isCreator) {
+                        actionBtn = `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, 'dps', ${i})" title="Quitar jugador">✕</button>`;
+                    }
+                } else {
+                    actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i})">Asignar</button>`;
+                }
+                return `
                 <div class="role-slot dps-slot">
                     <span class="slot-icon">⚔️</span>
                     <div class="slot-content">
@@ -1120,17 +1160,16 @@
                             : `<div class="slot-empty">Vacío</div>`
                         }
                     </div>
-                    ${slot
-                        ? `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, 'dps', ${i})" title="Quitar jugador">✕</button>`
-                        : `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i})">Asignar</button>`
-                    }
-                </div>`);
+                    ${actionBtn}
+                </div>`;
+            });
         }
 
         // ==================== Sección de horario en la tarjeta ====================
         function renderScheduleSection(group) {
             const s = group.schedule;
             const hasSchedule = s.days.length > 0 || s.time;
+            const isCreator = group.creatorId === currentUserId;
 
             const validDays = s.days.filter(d => DAYS_OF_WEEK.some(x => x.label === d));
             const daysHtml = validDays.length > 0
@@ -1152,13 +1191,18 @@
                 ? `${daysHtml}${timeHtml}${notesHtml}`
                 : `<span class="schedule-empty">Sin horario asignado</span>`;
 
-            return `${contentHtml}<button class="schedule-btn" onclick="openScheduleModal(${group.id})">📅 ${hasSchedule ? 'Editar horario' : 'Añadir horario'}</button>`;
+            const editBtnHtml = isCreator
+                ? `<button class="schedule-btn" onclick="openScheduleModal(${group.id})">📅 ${hasSchedule ? 'Editar horario' : 'Añadir horario'}</button>`
+                : '';
+
+            return `${contentHtml}${editBtnHtml}`;
         }
 
         // ==================== Modal de horario ====================
         function openScheduleModal(groupId) {
             const group = groups.find(g => g.id === groupId);
             if (!group) return;
+            if (group.creatorId && group.creatorId !== currentUserId) return;
             scheduleModalContext = { groupId };
 
             document.getElementById('schedule-modal-group-name').textContent = group.name;
@@ -1198,6 +1242,7 @@
             if (!scheduleModalContext) return;
             const group = groups.find(g => g.id === scheduleModalContext.groupId);
             if (!group) return;
+            if (group.creatorId && group.creatorId !== currentUserId) return;
 
             const checkedBoxes = document.querySelectorAll('#schedule-days-grid input[type="checkbox"]:checked');
             const validDayLabels = new Set(DAYS_OF_WEEK.map(d => d.label));
