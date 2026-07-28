@@ -10,7 +10,8 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs, writeBatch, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
         
         try {
             // Import Firebase configuration from external file
@@ -20,6 +21,7 @@
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
+            const auth = getAuth(app);
             
             // Make Firebase Firestore functions globally accessible
             window.firestoreDB = db;
@@ -27,6 +29,14 @@
             window.firestoreSetDoc = setDoc;
             window.firestoreGetDoc = getDoc;
             window.firestoreOnSnapshot = onSnapshot;
+            window.firestoreCollection = collection;
+            window.firestoreGetDocs = getDocs;
+            window.firestoreWriteBatch = writeBatch;
+            window.firestoreDeleteDoc = deleteDoc;
+            window.firebaseAuth = auth;
+            window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.firebaseSignOut = signOut;
+            window.firebaseOnAuthStateChanged = onAuthStateChanged;
             window.firebaseConfigured = true;
         } catch (error) {
             console.error('Firebase configuration error:', error);
@@ -328,6 +338,9 @@
                 <h2>📊 Roster Actual</h2>
                 
                 <div class="filters">
+                    <button id="btn-admin-auth">🔐 Acceso Administrador</button>
+                    <span id="admin-status" style="margin-left: 10px; color: #fbbf24; font-weight: bold;">Modo usuario</span>
+                    <br><br>
                     <label>Filtrar por Clase:</label>
                     <select id="filter-class">
                         <option value="">Todas las Clases</option>
@@ -366,7 +379,7 @@
                                 <th>Especialización</th>
                                 <th>Roles</th>
                                 <th>Notas</th>
-                                <th>Acciones</th>
+                                <th id="actions-header">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="roster-tbody">
@@ -398,38 +411,119 @@
 
         // Global roster data
         let rosterSignups = [];
+        let isAdmin = false;
+        const ADMIN_EMAIL = 'oficiales@equinox.com';
+        const ROSTER_COLLECTION = 'rosterSignupsEntries';
+
+        function getSignupDocId(playerName) {
+            return encodeURIComponent(playerName.trim().toLowerCase());
+        }
+
+        function normalizeSignup(signup) {
+            return {
+                name: signup.name || '',
+                class: signup.class || '',
+                specialization: signup.specialization || '',
+                roles: Array.isArray(signup.roles) ? signup.roles : [],
+                notes: signup.notes || '',
+                timestamp: signup.timestamp || new Date().toISOString()
+            };
+        }
+
+        function updateAdminUI() {
+            const status = document.getElementById('admin-status');
+            const button = document.getElementById('btn-admin-auth');
+            const actionsHeader = document.getElementById('actions-header');
+
+            status.textContent = isAdmin ? 'Modo administrador activo' : 'Modo usuario';
+            status.style.color = isAdmin ? '#10b981' : '#fbbf24';
+            button.textContent = isAdmin ? '🚪 Cerrar Sesión Admin' : '🔐 Acceso Administrador';
+            actionsHeader.style.display = isAdmin ? '' : 'none';
+        }
+
+        async function migrateLegacyRosterData() {
+            const migrationDocRef = window.firestoreDoc(window.firestoreDB, 'rosterSignupsMeta', 'migration');
+            const migrationSnap = await window.firestoreGetDoc(migrationDocRef);
+            if (migrationSnap.exists() && migrationSnap.data().completed) {
+                return;
+            }
+
+            const legacyDocRef = window.firestoreDoc(window.firestoreDB, 'rosterSignups', 'expansion');
+            const legacySnap = await window.firestoreGetDoc(legacyDocRef);
+            const legacySignups = legacySnap.exists() && Array.isArray(legacySnap.data().signups)
+                ? legacySnap.data().signups.map(normalizeSignup)
+                : [];
+
+            const rosterCollectionRef = window.firestoreCollection(window.firestoreDB, ROSTER_COLLECTION);
+            const existingEntriesSnap = await window.firestoreGetDocs(rosterCollectionRef);
+            const existingIds = new Set(existingEntriesSnap.docs.map(entry => entry.id));
+
+            let migratedCount = 0;
+            if (legacySignups.length > 0) {
+                const batch = window.firestoreWriteBatch(window.firestoreDB);
+                legacySignups.forEach((signup) => {
+                    const signupId = getSignupDocId(signup.name);
+                    if (!existingIds.has(signupId)) {
+                        const signupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, signupId);
+                        batch.set(signupRef, signup);
+                        migratedCount++;
+                    }
+                });
+
+                if (migratedCount > 0) {
+                    await batch.commit();
+                }
+            }
+
+            const totalAfterMigration = existingEntriesSnap.size + migratedCount;
+            if (legacySignups.length > totalAfterMigration) {
+                console.warn('Migración incompleta detectada', { legacy: legacySignups.length, current: totalAfterMigration });
+            } else {
+                console.log('Migración completada', { legacy: legacySignups.length, current: totalAfterMigration });
+            }
+
+            await window.firestoreSetDoc(migrationDocRef, {
+                completed: true,
+                legacyCount: legacySignups.length,
+                currentCount: totalAfterMigration,
+                migratedAt: new Date().toISOString()
+            }, { merge: true });
+        }
 
         // Initialize Firebase listeners
-        function initializeFirebase() {
-            if (!window.firestoreDB) {
+        async function initializeFirebase() {
+            if (!window.firestoreDB || !window.firebaseAuth) {
                 console.error('Firebase not initialized');
                 return;
             }
 
-            // Listen to roster signups in real-time
-            const rosterDoc = window.firestoreDoc(window.firestoreDB, 'rosterSignups', 'expansion');
-            window.firestoreOnSnapshot(rosterDoc, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    rosterSignups = data.signups || [];
-                } else {
-                    rosterSignups = [];
-                }
+            window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                isAdmin = !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL);
+                updateAdminUI();
+                renderRoster();
+            });
+
+            await migrateLegacyRosterData();
+
+            const rosterCollectionRef = window.firestoreCollection(window.firestoreDB, ROSTER_COLLECTION);
+            window.firestoreOnSnapshot(rosterCollectionRef, (snapshot) => {
+                rosterSignups = snapshot.docs
+                    .map((docSnap) => normalizeSignup({ id: docSnap.id, ...docSnap.data() }))
+                    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
                 renderRoster();
                 updateStatistics();
             });
         }
 
-        // Save roster to Firebase
-        async function saveRosterToFirebase() {
-            try {
-                const rosterDoc = window.firestoreDoc(window.firestoreDB, 'rosterSignups', 'expansion');
-                await window.firestoreSetDoc(rosterDoc, { signups: rosterSignups });
-                console.log('Roster saved successfully');
-            } catch (error) {
-                console.error('Error saving roster:', error);
-                alert('Error al guardar. Por favor, intenta de nuevo.');
-            }
+        async function saveRosterSignupToFirebase(signup) {
+            const signupId = getSignupDocId(signup.name);
+            const signupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, signupId);
+            await window.firestoreSetDoc(signupRef, normalizeSignup(signup));
+        }
+
+        async function deleteRosterSignupFromFirebase(playerName) {
+            const signupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, getSignupDocId(playerName));
+            await window.firestoreDeleteDoc(signupRef);
         }
 
         // Update class specialization dropdown when class is selected
@@ -489,6 +583,11 @@
             };
 
             if (existingIndex >= 0) {
+                if (!isAdmin) {
+                    alert(`${playerName} ya está registrado. Solo un administrador puede editar registros existentes.`);
+                    return;
+                }
+
                 // Update existing signup
                 if (confirm(`${playerName} ya está registrado. ¿Quieres actualizar su información?`)) {
                     rosterSignups[existingIndex] = newSignup;
@@ -500,7 +599,13 @@
                 rosterSignups.push(newSignup);
             }
 
-            await saveRosterToFirebase();
+            try {
+                await saveRosterSignupToFirebase(newSignup);
+            } catch (error) {
+                console.error('Error saving roster:', error);
+                alert('Error al guardar. Por favor, intenta de nuevo.');
+                return;
+            }
 
             // Reset form
             this.reset();
@@ -523,9 +628,10 @@
             }
 
             tbody.innerHTML = '';
+            const totalColumns = isAdmin ? 6 : 5;
 
             if (filteredSignups.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay registros aún</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="${totalColumns}" style="text-align: center;">No hay registros aún</td></tr>`;
                 return;
             }
 
@@ -544,35 +650,51 @@
                     <td>${signup.specialization}</td>
                     <td>${rolesBadges}</td>
                     <td>${signup.notes || '-'}</td>
-                    <td>
-                        <button class="edit-btn" data-player-name="${signup.name}">✏️ Editar</button>
-                        <button class="delete-btn" data-player-name="${signup.name}">🗑️ Borrar</button>
-                    </td>
+                    ${isAdmin ? `
+                        <td>
+                            <button class="edit-btn" data-player-name="${signup.name}">✏️ Editar</button>
+                            <button class="delete-btn" data-player-name="${signup.name}">🗑️ Borrar</button>
+                        </td>
+                    ` : ''}
                 `;
-                
-                // Add event listeners to buttons
-                const editBtn = row.querySelector('.edit-btn');
-                const deleteBtn = row.querySelector('.delete-btn');
-                
-                editBtn.addEventListener('click', () => editSignup(signup.name));
-                deleteBtn.addEventListener('click', () => deleteSignup(signup.name));
+
+                if (isAdmin) {
+                    const editBtn = row.querySelector('.edit-btn');
+                    const deleteBtn = row.querySelector('.delete-btn');
+                    editBtn.addEventListener('click', () => editSignup(signup.name));
+                    deleteBtn.addEventListener('click', () => deleteSignup(signup.name));
+                }
                 
                 tbody.appendChild(row);
             });
         }
 
         // Delete signup
-        function deleteSignup(playerName) {
+        async function deleteSignup(playerName) {
+            if (!isAdmin) {
+                alert('Solo el administrador puede borrar registros.');
+                return;
+            }
+
             if (!confirm(`¿Estás seguro de que quieres eliminar a ${playerName}?`)) {
                 return;
             }
 
-            rosterSignups = rosterSignups.filter(s => s.name !== playerName);
-            saveRosterToFirebase();
+            try {
+                await deleteRosterSignupFromFirebase(playerName);
+            } catch (error) {
+                console.error('Error deleting roster entry:', error);
+                alert('Error al borrar. Por favor, intenta de nuevo.');
+            }
         }
 
         // Edit signup
         function editSignup(playerName) {
+            if (!isAdmin) {
+                alert('Solo el administrador puede editar registros.');
+                return;
+            }
+
             const signup = rosterSignups.find(s => s.name === playerName);
             if (!signup) {
                 alert('No se encontró el registro.');
@@ -623,6 +745,36 @@
         // Filter change listeners
         document.getElementById('filter-class').addEventListener('change', renderRoster);
         document.getElementById('filter-role').addEventListener('change', renderRoster);
+        document.getElementById('btn-admin-auth').addEventListener('click', async function() {
+            if (!window.firebaseAuth) {
+                alert('Firebase Auth no está disponible.');
+                return;
+            }
+
+            if (isAdmin) {
+                try {
+                    await window.firebaseSignOut(window.firebaseAuth);
+                    alert('Sesión de administrador cerrada.');
+                } catch (error) {
+                    console.error('Error closing admin session:', error);
+                    alert('No se pudo cerrar la sesión de administrador.');
+                }
+                return;
+            }
+
+            const password = prompt('Introduce la contraseña de administrador:');
+            if (password === null) {
+                return;
+            }
+
+            try {
+                await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, ADMIN_EMAIL, password.trim());
+                alert('Acceso de administrador concedido.');
+            } catch (error) {
+                console.error('Admin authentication error:', error.code);
+                alert('Credenciales de administrador incorrectas.');
+            }
+        });
 
         // Export to Excel
         document.getElementById('btn-export-excel').addEventListener('click', function() {
@@ -951,6 +1103,8 @@
 
         // Initialize when DOM is ready
         window.addEventListener('load', function() {
+            updateAdminUI();
+
             // Setup instructions constant
             const FIREBASE_SETUP_INSTRUCTIONS = '\n\nPara configurar Firebase:\n\n' +
                 '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
@@ -965,7 +1119,10 @@
                     console.error('Firebase configuration not found');
                     alert('Error: No se pudo conectar con la base de datos.' + FIREBASE_SETUP_INSTRUCTIONS);
                 } else if (window.firestoreDB) {
-                    initializeFirebase();
+                    initializeFirebase().catch((error) => {
+                        console.error('Initialization error:', error);
+                        alert('Error inicializando la herramienta. Revisa tu configuración de Firebase.');
+                    });
                 } else {
                     // Firebase SDK failed to load or config is missing
                     console.error('Firebase not available');

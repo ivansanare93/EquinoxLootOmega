@@ -176,6 +176,33 @@ service cloud.firestore {
 
 Consider implementing Firebase Authentication to control who can access and modify the data.
 
+### Reglas recomendadas para `roster-signup.html` (usuarios + administrador)
+
+La página `client/roster-signup.html` usa una colección por registro (`rosterSignupsEntries`) para poder permitir altas públicas y restringir edición/borrado al administrador.
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rosterSignupsEntries/{signupId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if request.auth != null &&
+                            request.auth.token.email == 'oficiales@equinox.com';
+    }
+
+    match /rosterSignupsMeta/{document=**} {
+      allow read: if request.auth != null &&
+                  request.auth.token.email == 'oficiales@equinox.com';
+      allow write: if request.auth != null &&
+                   request.auth.token.email == 'oficiales@equinox.com';
+    }
+  }
+}
+```
+
+> Si prefieres que solo usuarios autenticados puedan apuntarse, cambia `allow create: if true;` por `allow create: if request.auth != null;`.
+
 ## How It Works
 
 ### 1. Initialization
