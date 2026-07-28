@@ -1181,8 +1181,9 @@
                 }
             }
 
-            // Enable AutoFilter on the header row (Excel row 3)
-            worksheet['!autofilter'] = { ref: `A3:F${3 + exportData.length}` };
+            // Enable AutoFilter on the header row — range derived from worksheet dimensions
+            const autoFilterLastCol = XLSX.utils.encode_col(range.e.c);
+            worksheet['!autofilter'] = { ref: `A${DATA_START_ROW}:${autoFilterLastCol}${range.e.r + 1}` };
             
             // Set column widths
             const colWidths = [
