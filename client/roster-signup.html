@@ -140,6 +140,43 @@
         .filters {
             margin-bottom: 20px;
         }
+        .filters{
+        display:flex;
+        flex-direction:column;
+        gap:18px;
+    }
+    
+    .filters-row{
+        display:flex;
+        align-items:center;
+        gap:18px;
+        flex-wrap:wrap;
+    }
+    
+    .filter-group{
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+    
+    .filter-group label{
+        white-space:nowrap;
+        margin:0;
+    }
+    
+    #admin-status{
+        font-weight:bold;
+        color:#10b981;
+    }
+    
+    #filter-class,
+    #filter-role{
+        min-width:180px;
+    }
+    
+    #btn-export-excel{
+        margin-left:0;
+    }
 
         .roster-table {
             width: 100%;
@@ -451,36 +488,54 @@
                 <h2>📊 Roster Actual</h2>
                 
                 <div class="filters">
-                    <button id="btn-admin-auth">🔐 Acceso Administrador</button>
-                    <span id="admin-status" style="margin-left: 10px; color: #fbbf24; font-weight: bold;">Modo usuario</span>
-                    <br><br>
-                    <label>Filtrar por Clase:</label>
-                    <select id="filter-class">
-                        <option value="">Todas las Clases</option>
-                        <option value="Guerrero">Guerrero</option>
-                        <option value="Mago">Mago</option>
-                        <option value="Sacerdote">Sacerdote</option>
-                        <option value="Paladín">Paladín</option>
-                        <option value="Cazador">Cazador</option>
-                        <option value="Brujo">Brujo</option>
-                        <option value="Chamán">Chamán</option>
-                        <option value="Druida">Druida</option>
-                        <option value="Pícaro">Pícaro</option>
-                        <option value="Caballero de la Muerte">Caballero de la Muerte</option>
-                        <option value="Monje">Monje</option>
-                        <option value="Cazador de Demonios">Cazador de Demonios</option>
-                        <option value="Evocador">Evocador</option>
-                    </select>
-
-                    <label style="margin-left: 15px;">Filtrar por Rol:</label>
-                    <select id="filter-role">
-                        <option value="">Todos los Roles</option>
-                        <option value="Tank">Tank</option>
-                        <option value="Healer">Healer</option>
-                        <option value="DPS">DPS</option>
-                    </select>
-
-                    <button id="btn-export-excel" style="margin-left: 20px;">📥 Exportar a Excel</button>
+                
+                    <div class="filters-row">
+                        <button id="btn-admin-auth">🔐 Acceso Administrador</button>
+                
+                        <span id="admin-status">
+                            Modo usuario
+                        </span>
+                
+                        <div class="filter-group">
+                            <label for="filter-class">Filtrar por Clase:</label>
+                            <select id="filter-class">
+                                <option value="">Todas las Clases</option>
+                                <option value="Guerrero">Guerrero</option>
+                                <option value="Mago">Mago</option>
+                                <option value="Sacerdote">Sacerdote</option>
+                                <option value="Paladín">Paladín</option>
+                                <option value="Cazador">Cazador</option>
+                                <option value="Brujo">Brujo</option>
+                                <option value="Chamán">Chamán</option>
+                                <option value="Druida">Druida</option>
+                                <option value="Pícaro">Pícaro</option>
+                                <option value="Caballero de la Muerte">Caballero de la Muerte</option>
+                                <option value="Monje">Monje</option>
+                                <option value="Cazador de Demonios">Cazador de Demonios</option>
+                                <option value="Evocador">Evocador</option>
+                            </select>
+                        </div>
+                    </div>
+                
+                    <div class="filters-row">
+                
+                        <div class="filter-group">
+                            <label for="filter-role">Filtrar por Rol:</label>
+                
+                            <select id="filter-role">
+                                <option value="">Todos los Roles</option>
+                                <option value="Tank">Tank</option>
+                                <option value="Healer">Healer</option>
+                                <option value="DPS">DPS</option>
+                            </select>
+                        </div>
+                
+                        <button id="btn-export-excel">
+                            📥 Exportar a Excel
+                        </button>
+                
+                    </div>
+                
                 </div>
 
                 <div class="roster-table">
