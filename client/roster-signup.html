@@ -195,6 +195,31 @@
             background-color: #1d4ed8;
         }
 
+        .admin-auth-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .admin-auth-modal-content {
+            width: min(90vw, 380px);
+            background-color: #1e293b;
+            border: 2px solid var(--dorado);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .admin-auth-modal-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
         .summary-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -273,6 +298,7 @@
             <!-- Signup Form Section -->
             <div class="signup-section">
                 <h2>📝 Registrar Personaje</h2>
+                <p style="margin-top: -8px; color: #cbd5e1;">Nota: editar y borrar registros es exclusivo de administrador.</p>
                 <form id="signup-form">
                     <div class="form-group">
                         <label for="player-name">Nombre del Personaje *</label>
@@ -412,7 +438,7 @@
         // Global roster data
         let rosterSignups = [];
         let isAdmin = false;
-        const ADMIN_EMAIL = 'oficiales@equinox.com';
+        const ADMIN_EMAIL = window.ROSTER_ADMIN_EMAIL || 'oficiales@equinox.com';
         const ROSTER_COLLECTION = 'rosterSignupsEntries';
 
         function getSignupDocId(playerName) {
@@ -441,6 +467,41 @@
             actionsHeader.style.display = isAdmin ? '' : 'none';
         }
 
+        function requestAdminPassword() {
+            return new Promise((resolve, reject) => {
+                const modal = document.createElement('div');
+                modal.className = 'admin-auth-modal';
+                modal.innerHTML = `
+                    <div class="admin-auth-modal-content">
+                        <h3 style="margin-top:0;">🔐 Acceso Administrador</h3>
+                        <p>Introduce la contraseña del administrador:</p>
+                        <label for="admin-password-input" style="display:block; margin-bottom:6px; color: var(--dorado);">Contraseña</label>
+                        <input id="admin-password-input" type="password" placeholder="Contraseña" autocomplete="new-password">
+                        <div class="admin-auth-modal-buttons">
+                            <button id="admin-auth-cancel">Cancelar</button>
+                            <button id="admin-auth-submit">Entrar</button>
+                        </div>
+                    </div>
+                `;
+
+                const cleanup = () => modal.remove();
+                document.body.appendChild(modal);
+                const input = modal.querySelector('#admin-password-input');
+                input.focus();
+
+                modal.querySelector('#admin-auth-cancel').addEventListener('click', () => {
+                    cleanup();
+                    reject(new Error('cancelled'));
+                });
+
+                modal.querySelector('#admin-auth-submit').addEventListener('click', () => {
+                    const password = input.value.trim();
+                    cleanup();
+                    resolve(password);
+                });
+            });
+        }
+
         async function migrateLegacyRosterData() {
             const migrationDocRef = window.firestoreDoc(window.firestoreDB, 'rosterSignupsMeta', 'migration');
             const migrationSnap = await window.firestoreGetDoc(migrationDocRef);
@@ -453,20 +514,31 @@
             const legacySignups = legacySnap.exists() && Array.isArray(legacySnap.data().signups)
                 ? legacySnap.data().signups.map(normalizeSignup)
                 : [];
+            const uniqueLegacyIds = new Set(
+                legacySignups
+                    .filter((signup) => signup.name)
+                    .map((signup) => getSignupDocId(signup.name))
+            );
+            const uniqueLegacyCount = uniqueLegacyIds.size;
 
             const rosterCollectionRef = window.firestoreCollection(window.firestoreDB, ROSTER_COLLECTION);
             const existingEntriesSnap = await window.firestoreGetDocs(rosterCollectionRef);
             const existingIds = new Set(existingEntriesSnap.docs.map(entry => entry.id));
 
+            const expectedMigrationIds = new Set([...uniqueLegacyIds].filter((signupId) => !existingIds.has(signupId)));
             let migratedCount = 0;
             if (legacySignups.length > 0) {
                 const batch = window.firestoreWriteBatch(window.firestoreDB);
                 legacySignups.forEach((signup) => {
+                    if (!signup.name) {
+                        return;
+                    }
                     const signupId = getSignupDocId(signup.name);
-                    if (!existingIds.has(signupId)) {
+                    if (expectedMigrationIds.has(signupId)) {
                         const signupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, signupId);
                         batch.set(signupRef, signup);
                         migratedCount++;
+                        expectedMigrationIds.delete(signupId);
                     }
                 });
 
@@ -475,17 +547,18 @@
                 }
             }
 
-            const totalAfterMigration = existingEntriesSnap.size + migratedCount;
-            if (legacySignups.length > totalAfterMigration) {
-                console.warn('Migración incompleta detectada', { legacy: legacySignups.length, current: totalAfterMigration });
+            const expectedMigrated = [...uniqueLegacyIds].filter((signupId) => !existingIds.has(signupId)).length;
+            if (migratedCount < expectedMigrated) {
+                console.warn('Migración incompleta detectada', { expectedMigrated, migratedCount });
             } else {
-                console.log('Migración completada', { legacy: legacySignups.length, current: totalAfterMigration });
+                console.log('Migración completada', { expectedMigrated, migratedCount });
             }
 
             await window.firestoreSetDoc(migrationDocRef, {
                 completed: true,
                 legacyCount: legacySignups.length,
-                currentCount: totalAfterMigration,
+                uniqueLegacyCount: uniqueLegacyCount,
+                currentCount: existingEntriesSnap.size + migratedCount,
                 migratedAt: new Date().toISOString()
             }, { merge: true });
         }
@@ -516,6 +589,9 @@
         }
 
         async function saveRosterSignupToFirebase(signup) {
+            if (!signup.name) {
+                throw new Error('El nombre del personaje es obligatorio.');
+            }
             const signupId = getSignupDocId(signup.name);
             const signupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, signupId);
             await window.firestoreSetDoc(signupRef, normalizeSignup(signup));
@@ -588,15 +664,9 @@
                     return;
                 }
 
-                // Update existing signup
-                if (confirm(`${playerName} ya está registrado. ¿Quieres actualizar su información?`)) {
-                    rosterSignups[existingIndex] = newSignup;
-                } else {
+                if (!confirm(`${playerName} ya está registrado. ¿Quieres actualizar su información?`)) {
                     return;
                 }
-            } else {
-                // Add new signup
-                rosterSignups.push(newSignup);
             }
 
             try {
@@ -628,7 +698,8 @@
             }
 
             tbody.innerHTML = '';
-            const totalColumns = isAdmin ? 6 : 5;
+            const totalColumns = Array.from(document.querySelectorAll('#roster-table thead th'))
+                .filter((header) => header.style.display !== 'none').length;
 
             if (filteredSignups.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="${totalColumns}" style="text-align: center;">No hay registros aún</td></tr>`;
@@ -762,17 +833,19 @@
                 return;
             }
 
-            const password = prompt('Introduce la contraseña de administrador:');
-            if (password === null) {
+            let password = '';
+            try {
+                password = await requestAdminPassword();
+            } catch (error) {
                 return;
             }
 
             try {
-                await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, ADMIN_EMAIL, password.trim());
+                await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, ADMIN_EMAIL, password);
                 alert('Acceso de administrador concedido.');
             } catch (error) {
                 console.error('Admin authentication error:', error.code);
-                alert('Credenciales de administrador incorrectas.');
+                alert(`Credenciales de administrador incorrectas (${error.code || 'error-desconocido'}).`);
             }
         });
 

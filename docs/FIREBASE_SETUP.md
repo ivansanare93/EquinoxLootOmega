@@ -179,6 +179,7 @@ Consider implementing Firebase Authentication to control who can access and modi
 ### Reglas recomendadas para `roster-signup.html` (usuarios + administrador)
 
 La página `client/roster-signup.html` usa una colección por registro (`rosterSignupsEntries`) para poder permitir altas públicas y restringir edición/borrado al administrador.
+Para producción, **usa como enfoque principal custom claims (`request.auth.token.admin`)**.
 
 ```javascript
 rules_version = '2';
@@ -188,20 +189,21 @@ service cloud.firestore {
       allow read: if true;
       allow create: if true;
       allow update, delete: if request.auth != null &&
-                            request.auth.token.email == 'oficiales@equinox.com';
+                            request.auth.token.admin == true;
     }
 
     match /rosterSignupsMeta/{document=**} {
-      allow read: if request.auth != null &&
-                  request.auth.token.email == 'oficiales@equinox.com';
-      allow write: if request.auth != null &&
-                   request.auth.token.email == 'oficiales@equinox.com';
+      allow read: if request.auth != null && request.auth.token.admin == true;
+      allow write: if request.auth != null && request.auth.token.admin == true;
     }
   }
 }
 ```
 
 > Si prefieres que solo usuarios autenticados puedan apuntarse, cambia `allow create: if true;` por `allow create: if request.auth != null;`.
+>
+> Si necesitas una transición rápida, puedes usar validación por email temporalmente,
+> pero no es la opción recomendada para producción.
 
 ## How It Works
 
