@@ -170,7 +170,8 @@
     }
     
     #filter-class,
-    #filter-role{
+    #filter-main-role,
+    #filter-available-role{
         min-width:180px;
     }
     
@@ -398,15 +399,15 @@
                 <div class="stat-value" id="stat-total">0</div>
             </div>
             <div class="stat-card">
-                <h3>Tanks</h3>
+                <h3>Tanks <span style="font-size:0.7em;font-weight:normal;color:#94a3b8;">(por spec)</span></h3>
                 <div class="stat-value" id="stat-tanks">0</div>
             </div>
             <div class="stat-card">
-                <h3>Healers</h3>
+                <h3>Healers <span style="font-size:0.7em;font-weight:normal;color:#94a3b8;">(por spec)</span></h3>
                 <div class="stat-value" id="stat-healers">0</div>
             </div>
             <div class="stat-card">
-                <h3>DPS</h3>
+                <h3>DPS <span style="font-size:0.7em;font-weight:normal;color:#94a3b8;">(por spec)</span></h3>
                 <div class="stat-value" id="stat-dps">0</div>
             </div>
         </div>
@@ -520,9 +521,20 @@
                     <div class="filters-row">
                 
                         <div class="filter-group">
-                            <label for="filter-role">Filtrar por Rol:</label>
+                            <label for="filter-main-role">Filtrar por Rol principal (Spec):</label>
                 
-                            <select id="filter-role">
+                            <select id="filter-main-role">
+                                <option value="">Todos los Roles</option>
+                                <option value="Tank">Tank</option>
+                                <option value="Healer">Healer</option>
+                                <option value="DPS">DPS</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filter-available-role">Filtrar por Rol disponible:</label>
+                
+                            <select id="filter-available-role">
                                 <option value="">Todos los Roles</option>
                                 <option value="Tank">Tank</option>
                                 <option value="Healer">Healer</option>
@@ -576,6 +588,59 @@
             'Cazador de Demonios': ['Devastación', 'Venganza', 'Devorador'],
             'Evocador': ['Devastación', 'Preservación', 'Aumento']
         };
+
+        // Mapping from specialization name to main role (for filters and stats)
+        const SPEC_TO_ROLE = {
+            // Tanks
+            'Protección':       'Tank',
+            'Guardián':         'Tank',
+            'Sangre':           'Tank',
+            'Maestro Cervecero':'Tank',
+            'Venganza':         'Tank',
+            // Healers
+            'Sagrado':          'Healer',
+            'Disciplina':       'Healer',
+            'Restauración':     'Healer',
+            'Tejedor de Niebla':'Healer',
+            'Preservación':     'Healer',
+            // DPS
+            'Armas':            'DPS',
+            'Furia':            'DPS',
+            'Represión':        'DPS',
+            'Escarcha':         'DPS',
+            'Profano':          'DPS',
+            'Supervivencia':    'DPS',
+            'Bestias':          'DPS',
+            'Puntería':         'DPS',
+            'Asesinato':        'DPS',
+            'Forajido':         'DPS',
+            'Sutileza':         'DPS',
+            'Elemental':        'DPS',
+            'Mejora':           'DPS',
+            'Arcano':           'DPS',
+            'Fuego':            'DPS',
+            'Aflicción':        'DPS',
+            'Demonología':      'DPS',
+            'Destrucción':      'DPS',
+            'Equilibrio':       'DPS',
+            'Feral':            'DPS',
+            'Devastación':      'DPS',
+            'Aumento':          'DPS',
+            'Viajero del Viento':'DPS',
+            'Sombra':           'DPS'
+        };
+
+        function getMainRoleFromSpec(specialization) {
+            if (!specialization) return '';
+            // Normalize: trim whitespace; do a direct lookup first, then case-insensitive fallback
+            const trimmed = specialization.trim();
+            if (SPEC_TO_ROLE[trimmed]) return SPEC_TO_ROLE[trimmed];
+            const lower = trimmed.toLowerCase();
+            for (const key of Object.keys(SPEC_TO_ROLE)) {
+                if (key.toLowerCase() === lower) return SPEC_TO_ROLE[key];
+            }
+            return '';
+        }
 
         // WoW class colors: bg (RGB hex for Excel / CSS), text color
         const classColors = {
@@ -845,15 +910,19 @@
         function renderRoster() {
             const tbody = document.getElementById('roster-tbody');
             const filterClass = document.getElementById('filter-class').value;
-            const filterRole = document.getElementById('filter-role').value;
+            const filterMainRole = document.getElementById('filter-main-role').value;
+            const filterAvailableRole = document.getElementById('filter-available-role').value;
 
             // Filter signups
             let filteredSignups = rosterSignups;
             if (filterClass) {
                 filteredSignups = filteredSignups.filter(s => s.class === filterClass);
             }
-            if (filterRole) {
-                filteredSignups = filteredSignups.filter(s => s.roles.includes(filterRole));
+            if (filterMainRole) {
+                filteredSignups = filteredSignups.filter(s => getMainRoleFromSpec(s.specialization) === filterMainRole);
+            }
+            if (filterAvailableRole) {
+                filteredSignups = filteredSignups.filter(s => s.roles.includes(filterAvailableRole));
             }
 
             tbody.innerHTML = '';
@@ -969,9 +1038,9 @@
         function updateStatistics() {
             document.getElementById('stat-total').textContent = rosterSignups.length;
             
-            const tanks = rosterSignups.filter(s => s.roles.includes('Tank')).length;
-            const healers = rosterSignups.filter(s => s.roles.includes('Healer')).length;
-            const dps = rosterSignups.filter(s => s.roles.includes('DPS')).length;
+            const tanks = rosterSignups.filter(s => getMainRoleFromSpec(s.specialization) === 'Tank').length;
+            const healers = rosterSignups.filter(s => getMainRoleFromSpec(s.specialization) === 'Healer').length;
+            const dps = rosterSignups.filter(s => getMainRoleFromSpec(s.specialization) === 'DPS').length;
 
             document.getElementById('stat-tanks').textContent = tanks;
             document.getElementById('stat-healers').textContent = healers;
@@ -1022,7 +1091,8 @@
 
         // Filter change listeners
         document.getElementById('filter-class').addEventListener('change', renderRoster);
-        document.getElementById('filter-role').addEventListener('change', renderRoster);
+        document.getElementById('filter-main-role').addEventListener('change', renderRoster);
+        document.getElementById('filter-available-role').addEventListener('change', renderRoster);
         document.getElementById('btn-admin-auth').addEventListener('click', async function() {
             if (!window.firebaseAuth) {
                 alert('Firebase Auth no está disponible.');
@@ -1081,7 +1151,8 @@
                 'Personaje': signup.name,
                 'Clase': signup.class,
                 'Especialización': signup.specialization,
-                'Roles': signup.roles.join(', '),
+                'Rol principal': getMainRoleFromSpec(signup.specialization),
+                'Roles disponibles': signup.roles.join(', '),
                 'Notas': signup.notes || '',
                 'Fecha Registro': new Date(signup.timestamp).toLocaleString('es-ES')
             }));
@@ -1206,12 +1277,12 @@
                     const headerValue = worksheet[headerAddress]?.v || '';
                     
                     // Center align certain columns
-                    if (headerValue === 'Roles' || headerValue === 'Clase') {
+                    if (headerValue === 'Roles disponibles' || headerValue === 'Clase' || headerValue === 'Rol principal') {
                         cellStyle.alignment.horizontal = "center";
                     }
                     
-                    // Special styling for Roles column
-                    if (headerValue === 'Roles') {
+                    // Special styling for Roles disponibles column
+                    if (headerValue === 'Roles disponibles') {
                         cellStyle.font.bold = true;
                         cellStyle.font.color = { rgb: "1F4E78" };
                     }
@@ -1245,7 +1316,8 @@
                 { wch: 20 }, // Personaje
                 { wch: 25 }, // Clase
                 { wch: 20 }, // Especialización
-                { wch: 25 }, // Roles
+                { wch: 15 }, // Rol principal
+                { wch: 25 }, // Roles disponibles
                 { wch: 40 }, // Notas
                 { wch: 22 }  // Fecha Registro
             ];
