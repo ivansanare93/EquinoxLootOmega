@@ -190,7 +190,7 @@ const trinketSpecializationCompatibility = {
         'Pícaro': ['Asesinato', 'Subterfugio', 'Forajido'],
         'Chamán': ['Mejora'],
         'Monje': ['Maestro Cervecero', 'Viajero del viento'],
-        'Cazador de Demonios': ['Venganza', 'Devorador']
+        'Cazador de Demonios': ['Devastación', 'Venganza', 'Devorador']
     },
     'Latigazo místico de Naazindhri': {
         'Mago': ['Fuego', 'Escarcha', 'Arcano'],
@@ -208,7 +208,7 @@ const trinketSpecializationCompatibility = {
         'Pícaro': ['Asesinato', 'Subterfugio', 'Forajido'],
         'Chamán': ['Mejora'],
         'Monje': ['Maestro Cervecero', 'Viajero del viento'],
-        'Cazador de Demonios': ['Venganza', 'Devorador']
+        'Cazador de Demonios': ['Devastación', 'Venganza', 'Devorador']
     },
     'Marca de ira incesante': {
         'Druida': ['Guardián'],
@@ -274,7 +274,7 @@ const classSpecializations = {
     'Pícaro': ['Asesinato', 'Sutileza', 'Forajido'],
     'Caballero de la Muerte': ['Sangre', 'Escarcha', 'Profano'],
     'Monje': ['Maestro Cervecero', 'Viajero del viento', 'Tejedor de Niebla'],
-    'Cazador de Demonios': ['Venganza', 'Devorador'],
+    'Cazador de Demonios': ['Devastación', 'Venganza', 'Devorador'],
     'Evocador': ['Devastación', 'Preservación', 'Aumento']
 };
 
