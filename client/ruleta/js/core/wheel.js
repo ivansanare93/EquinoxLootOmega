@@ -259,7 +259,9 @@ const WheelEngine = (() => {
     const startAngle = currentAngle;
     const angleAfterRawSpin = startAngle + totalRotation;
     const normalize = (angle) => ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    const correction = normalize(-angleToTarget - normalize(angleAfterRawSpin));
+    const targetPointerAngle = normalize(-angleToTarget);
+    const currentPointerAngle = normalize(angleAfterRawSpin);
+    const correction = (targetPointerAngle - currentPointerAngle + 2 * Math.PI) % (2 * Math.PI);
     const endAngle = angleAfterRawSpin + correction;
 
     targetAngle = endAngle;
