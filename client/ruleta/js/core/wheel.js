@@ -25,7 +25,7 @@ const WheelEngine = (() => {
 
   function resize() {
     if (!canvas) return;
-    const size = Math.min(canvas.parentElement.offsetWidth - 48, 520);
+    const size = Math.min(canvas.parentElement.offsetWidth - 48, 700);
     canvas.width = size;
     canvas.height = size;
     draw();
