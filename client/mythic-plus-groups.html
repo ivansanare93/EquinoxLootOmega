@@ -10,16 +10,22 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
         try {
             const { firebaseConfig } = await import('./firebase-config.js');
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
+            const auth = getAuth(app);
 
             window.firestoreDB = db;
             window.firestoreDoc = doc;
             window.firestoreSetDoc = setDoc;
             window.firestoreOnSnapshot = onSnapshot;
+            window.firebaseAuth = auth;
+            window.firebaseOnAuthStateChanged = onAuthStateChanged;
+            window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.firebaseSignOut = signOut;
             window.firebaseConfigured = true;
         } catch (error) {
             console.error('Firebase configuration error:', error);
@@ -725,6 +731,58 @@
                 gap: 8px;
             }
         }
+
+        /* Admin */
+        .admin-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            justify-content: flex-end;
+        }
+
+        #admin-status {
+            font-weight: bold;
+            color: #fbbf24;
+            font-size: 0.9em;
+        }
+
+        .admin-auth-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .admin-auth-modal-content {
+            width: min(90vw, 380px);
+            background-color: #1e293b;
+            border: 2px solid var(--dorado);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .admin-auth-modal-content input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #6b7280;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1em;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .admin-auth-modal-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -808,11 +866,18 @@
                     </div>
                 </div>
 
+                <!-- Admin -->
+                <div class="admin-bar">
+                    <span id="admin-status">Modo usuario</span>
+                    <button id="btn-admin-auth" class="btn-secondary">🔐 Acceso Administrador</button>
+                </div>
+
                 <!-- Acciones -->
                 <div class="groups-actions">
-                    <button class="btn-secondary" onclick="addGroup()">➕ Nuevo Grupo</button>
-                    <button class="btn-secondary" onclick="autoFillGroups()">⚡ Rellenar Automático</button>
-                    <button class="btn-danger" onclick="clearAll()">🗑️ Limpiar Todo</button>
+                    <button id="btn-add-group" class="btn-secondary" onclick="addGroup()" style="display:none;">➕ Nuevo Grupo</button>
+                    <button id="btn-auto-fill" class="btn-secondary" onclick="autoFillGroups()" style="display:none;">⚡ Rellenar Automático</button>
+                    <button id="btn-clear-all" class="btn-danger" onclick="clearAll()" style="display:none;">🗑️ Limpiar Todo</button>
+                    <span id="groups-actions-user-hint" style="color:#6b7280; font-size:0.85em;">Añade jugadores a la cola y únete a los grupos disponibles.</span>
                 </div>
 
                 <!-- Tablero de grupos -->
@@ -887,6 +952,72 @@
             return uid;
         }
         const currentUserId = getCurrentUserId();
+
+        // ==================== Admin ====================
+        let isAdmin = false;
+        const ADMIN_EMAIL = window.MYTHIC_ADMIN_EMAIL || 'ofi@equinox.com';
+
+        function updateAdminUI() {
+            const status = document.getElementById('admin-status');
+            const button = document.getElementById('btn-admin-auth');
+            const addGroupBtn = document.getElementById('btn-add-group');
+            const autoFillBtn = document.getElementById('btn-auto-fill');
+            const clearAllBtn = document.getElementById('btn-clear-all');
+            const hint = document.getElementById('groups-actions-user-hint');
+
+            status.textContent = isAdmin ? 'Modo administrador activo' : 'Modo usuario';
+            status.style.color = isAdmin ? '#10b981' : '#fbbf24';
+            button.textContent = isAdmin ? '🚪 Cerrar Sesión Admin' : '🔐 Acceso Administrador';
+
+            addGroupBtn.style.display = isAdmin ? '' : 'none';
+            autoFillBtn.style.display = isAdmin ? '' : 'none';
+            clearAllBtn.style.display = isAdmin ? '' : 'none';
+            hint.style.display = isAdmin ? 'none' : '';
+
+            renderGroups();
+        }
+
+        function requestAdminPassword() {
+            return new Promise((resolve, reject) => {
+                const modal = document.createElement('div');
+                modal.className = 'admin-auth-modal';
+                modal.innerHTML = `
+                    <div class="admin-auth-modal-content">
+                        <h3 style="margin-top:0;">🔐 Acceso Administrador</h3>
+                        <p>Introduce la contraseña del administrador:</p>
+                        <label for="admin-password-input" style="display:block; margin-bottom:6px; color: var(--dorado);">Contraseña</label>
+                        <input id="admin-password-input" type="password" placeholder="Contraseña" autocomplete="new-password">
+                        <div class="admin-auth-modal-buttons">
+                            <button id="admin-auth-cancel" class="modal-cancel-btn">Cancelar</button>
+                            <button id="admin-auth-submit" class="btn-primary">Entrar</button>
+                        </div>
+                    </div>
+                `;
+                const cleanup = () => modal.remove();
+                document.body.appendChild(modal);
+                const input = modal.querySelector('#admin-password-input');
+                input.focus();
+                modal.querySelector('#admin-auth-cancel').addEventListener('click', () => {
+                    cleanup();
+                    reject(new Error('cancelled'));
+                });
+                modal.querySelector('#admin-auth-submit').addEventListener('click', () => {
+                    const password = input.value.trim();
+                    cleanup();
+                    resolve(password);
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const password = input.value.trim();
+                        cleanup();
+                        resolve(password);
+                    } else if (e.key === 'Escape') {
+                        cleanup();
+                        reject(new Error('cancelled'));
+                    }
+                });
+            });
+        }
 
         // ==================== Estado de la aplicación ====================
         let players = [];          // Cola de jugadores sin asignar
@@ -979,7 +1110,7 @@
         function removePlayerFromQueue(playerId) {
             const player = players.find(p => p.id === playerId);
             if (!player) return;
-            if (player.ownerId && player.ownerId !== currentUserId) return;
+            if (!isAdmin && player.ownerId && player.ownerId !== currentUserId) return;
             players = players.filter(p => p.id !== playerId);
             renderQueue();
             updateStats();
@@ -1001,7 +1132,7 @@
                         <div class="player-class">${escapeHtml(p.class)}</div>
                     </div>
                     <span class="role-badge ${p.role}">${getRoleLabel(p.role)}</span>
-                    ${p.ownerId === currentUserId
+                    ${(isAdmin || p.ownerId === currentUserId)
                         ? `<button class="remove-btn" onclick="removePlayerFromQueue(${p.id})" title="Eliminar de la cola">✕</button>`
                         : ''}
                 </div>
@@ -1029,6 +1160,10 @@
         }
 
         function addGroup() {
+            if (!isAdmin) {
+                alert('Solo el administrador puede crear grupos.');
+                return;
+            }
             groups.push(createGroup());
             renderGroups();
             saveData();
@@ -1037,7 +1172,7 @@
         function deleteGroup(groupId) {
             const group = groups.find(g => g.id === groupId);
             if (!group) return;
-            if (group.creatorId && group.creatorId !== currentUserId) return;
+            if (!isAdmin && group.creatorId !== currentUserId) return;
 
             // Devolver los jugadores asignados a la cola
             ['tank', 'healer', 'dps'].forEach(role => {
@@ -1062,7 +1197,7 @@
 
             const isCreator = group.creatorId === currentUserId;
             const isSlotOwner = player.ownerId === currentUserId;
-            if (!isCreator && !isSlotOwner) return;
+            if (!isAdmin && !isCreator && !isSlotOwner) return;
 
             group.slots[role][slotIndex] = null;
             players.push(player);
@@ -1115,7 +1250,7 @@
                     <div class="group-header">
                         <span class="group-title">${escapeHtml(group.name)}${complete ? '<span class="complete-badge">✓ Completo</span>' : ''}</span>
                         <span class="group-count">${filled}/5</span>
-                        ${group.creatorId === currentUserId
+                        ${(isAdmin || group.creatorId === currentUserId)
                             ? `<button class="delete-group-btn" onclick="deleteGroup(${group.id})" title="Eliminar grupo">✕</button>`
                             : ''}
                     </div>
@@ -1137,11 +1272,11 @@
             let actionBtn = '';
             if (slot) {
                 const isSlotOwner = slot.ownerId === currentUserId;
-                if (isCreator || isSlotOwner) {
+                if (isAdmin || isCreator || isSlotOwner) {
                     actionBtn = `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, '${role}', 0)" title="Quitar jugador">✕</button>`;
                 }
             } else {
-                if (isCreator) {
+                if (isAdmin || isCreator) {
                     actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0)">Asignar</button>`;
                 } else {
                     const hasOwnPlayer = players.some(p => p.role === role && p.ownerId === currentUserId);
@@ -1171,11 +1306,11 @@
                 let actionBtn = '';
                 if (slot) {
                     const isSlotOwner = slot.ownerId === currentUserId;
-                    if (isCreator || isSlotOwner) {
+                    if (isAdmin || isCreator || isSlotOwner) {
                         actionBtn = `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, 'dps', ${i})" title="Quitar jugador">✕</button>`;
                     }
                 } else {
-                    if (isCreator) {
+                    if (isAdmin || isCreator) {
                         actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i})">Asignar</button>`;
                     } else {
                         const hasOwnPlayer = players.some(p => p.role === 'dps' && p.ownerId === currentUserId);
@@ -1226,7 +1361,7 @@
                 ? `${daysHtml}${timeHtml}${notesHtml}`
                 : `<span class="schedule-empty">Sin horario asignado</span>`;
 
-            const editBtnHtml = isCreator
+            const editBtnHtml = (isAdmin || isCreator)
                 ? `<button class="schedule-btn" onclick="openScheduleModal(${group.id})">📅 ${hasSchedule ? 'Editar horario' : 'Añadir horario'}</button>`
                 : '';
 
@@ -1237,7 +1372,7 @@
         function openScheduleModal(groupId) {
             const group = groups.find(g => g.id === groupId);
             if (!group) return;
-            if (group.creatorId && group.creatorId !== currentUserId) return;
+            if (!isAdmin && group.creatorId && group.creatorId !== currentUserId) return;
             scheduleModalContext = { groupId };
 
             document.getElementById('schedule-modal-group-name').textContent = group.name;
@@ -1277,7 +1412,7 @@
             if (!scheduleModalContext) return;
             const group = groups.find(g => g.id === scheduleModalContext.groupId);
             if (!group) return;
-            if (group.creatorId && group.creatorId !== currentUserId) return;
+            if (!isAdmin && group.creatorId && group.creatorId !== currentUserId) return;
 
             const checkedBoxes = document.querySelectorAll('#schedule-days-grid input[type="checkbox"]:checked');
             const validDayLabels = new Set(DAYS_OF_WEEK.map(d => d.label));
@@ -1299,6 +1434,10 @@
 
         // ==================== Auto-fill ====================
         function autoFillGroups() {
+            if (!isAdmin) {
+                alert('Solo el administrador puede usar el relleno automático.');
+                return;
+            }
             const tanks   = players.filter(p => p.role === 'tank');
             const healers  = players.filter(p => p.role === 'healer');
             const dpsPlayers = players.filter(p => p.role === 'dps');
@@ -1403,7 +1542,7 @@
             const player = players[playerIndex];
             const isCreator = group.creatorId === currentUserId;
             const isOwnPlayer = player.ownerId === currentUserId;
-            if (!isCreator && !isOwnPlayer) return;
+            if (!isAdmin && !isCreator && !isOwnPlayer) return;
 
             group.slots[role][slotIndex] = player;
             players.splice(playerIndex, 1);
@@ -1424,6 +1563,10 @@
         const CLEAR_ALL_CONFIRMATION_TEXT = 'CONFIRMAR';
 
         function clearAll() {
+            if (!isAdmin) {
+                alert('Solo el administrador puede limpiar todos los grupos.');
+                return;
+            }
             openClearAllModal();
         }
 
@@ -1441,6 +1584,7 @@
         }
 
         function confirmClearAll() {
+            if (!isAdmin) return;
             players = [];
             groups = [];
             nextPlayerId = 1;
@@ -1464,6 +1608,39 @@
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && document.getElementById('clear-all-modal').classList.contains('active')) {
                     closeClearAllModal();
+                }
+            });
+
+            document.getElementById('btn-admin-auth').addEventListener('click', async function () {
+                if (!window.firebaseAuth) {
+                    alert('Firebase Auth no está disponible.');
+                    return;
+                }
+
+                if (isAdmin) {
+                    try {
+                        await window.firebaseSignOut(window.firebaseAuth);
+                        alert('Sesión de administrador cerrada.');
+                    } catch (error) {
+                        console.error('Error closing admin session:', error);
+                        alert('No se pudo cerrar la sesión de administrador.');
+                    }
+                    return;
+                }
+
+                let password = '';
+                try {
+                    password = await requestAdminPassword();
+                } catch (error) {
+                    return;
+                }
+
+                try {
+                    await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, ADMIN_EMAIL, password);
+                    alert('Acceso de administrador concedido.');
+                } catch (error) {
+                    console.error('Admin authentication error:', error.code);
+                    alert(`Credenciales de administrador incorrectas (${error.code || 'error-desconocido'}).`);
                 }
             });
         });
@@ -1505,6 +1682,14 @@
 
         function initializeFirebase() {
             if (!window.firestoreDB || !window.firebaseConfigured) return;
+
+            if (window.firebaseAuth && window.firebaseOnAuthStateChanged) {
+                window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                    isAdmin = !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL);
+                    updateAdminUI();
+                });
+            }
+
             const docRef = window.firestoreDoc(window.firestoreDB, 'mythicPlusGroups', 'current');
             window.firestoreOnSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
