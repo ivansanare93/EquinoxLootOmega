@@ -26,7 +26,7 @@ const WheelEngine = (() => {
   function resize() {
     if (!canvas) return;
     const layoutRoot = document.getElementById('panel-center') || canvas.parentElement;
-    const wheelWrapper = document.getElementById('wheel-wrapper') || canvas.parentElement;
+    const wheelWrapper = document.getElementById('wheel-wrapper');
     const availableWidth = Math.max(280, layoutRoot.clientWidth - 96);
     const availableHeight = Math.max(280, window.innerHeight - 300);
     const maxSize = window.innerWidth <= 768 ? 540 : 920;
