@@ -874,7 +874,7 @@
 
                 <!-- Acciones -->
                 <div class="groups-actions">
-                    <button id="btn-add-group" class="btn-secondary" onclick="addGroup()" style="display:none;">➕ Nuevo Grupo</button>
+                    <button id="btn-add-group" class="btn-secondary" onclick="addGroup()">➕ Nuevo Grupo</button>
                     <button id="btn-auto-fill" class="btn-secondary" onclick="autoFillGroups()" style="display:none;">⚡ Rellenar Automático</button>
                     <button id="btn-clear-all" class="btn-danger" onclick="clearAll()" style="display:none;">🗑️ Limpiar Todo</button>
                     <span id="groups-actions-user-hint" style="color:#6b7280; font-size:0.85em;">Añade jugadores a la cola y únete a los grupos disponibles.</span>
@@ -969,7 +969,6 @@
             status.style.color = isAdmin ? '#10b981' : '#fbbf24';
             button.textContent = isAdmin ? '🚪 Cerrar Sesión Admin' : '🔐 Acceso Administrador';
 
-            addGroupBtn.style.display = isAdmin ? '' : 'none';
             autoFillBtn.style.display = isAdmin ? '' : 'none';
             clearAllBtn.style.display = isAdmin ? '' : 'none';
             hint.style.display = isAdmin ? 'none' : '';
@@ -1160,10 +1159,6 @@
         }
 
         function addGroup() {
-            if (!isAdmin) {
-                alert('Solo el administrador puede crear grupos.');
-                return;
-            }
             groups.push(createGroup());
             renderGroups();
             saveData();
