@@ -106,7 +106,7 @@ const WheelEngine = (() => {
     // Texto
     const labelAngle = (startAngle + endAngle) / 2;
     const sliceAngle = endAngle - startAngle;
-    const textDist = r * 0.6;
+    const textDist = r * 0.62;
 
     ctx.save();
     ctx.translate(
@@ -118,21 +118,25 @@ const WheelEngine = (() => {
     // Solo mostrar texto si la sección es suficientemente grande
     if (sliceAngle > 0.08) {
       // Icono
-      const iconSize = Math.max(10, Math.min(22, r * 0.12));
+      const iconSize = Math.max(12, Math.min(26, r * 0.13));
       ctx.font = `${iconSize}px serif`;
       ctx.textAlign = 'center';
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillStyle = 'rgba(255,255,255,0.98)';
       ctx.fillText(item.icon, 0, -8);
 
       // Label
-      if (sliceAngle > 0.18) {
-        const fontSize = Math.max(8, Math.min(14, r * 0.055));
+      if (sliceAngle > 0.14) {
+        const fontSize = Math.max(10, Math.min(18, r * 0.065));
         ctx.font = `bold ${fontSize}px Inter, sans-serif`;
         ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = 'rgba(0,0,0,0.8)';
-        ctx.shadowBlur = 4;
+        ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+        ctx.lineWidth = Math.max(2, fontSize * 0.18);
+        ctx.shadowColor = 'rgba(0,0,0,0.95)';
+        ctx.shadowBlur = 6;
         const maxWidth = r * 0.5;
-        ctx.fillText(truncate(item.label, 12), 0, 8, maxWidth);
+        const label = truncate(item.label, 14);
+        ctx.strokeText(label, 0, 8, maxWidth);
+        ctx.fillText(label, 0, 8, maxWidth);
         ctx.shadowBlur = 0;
       }
     }

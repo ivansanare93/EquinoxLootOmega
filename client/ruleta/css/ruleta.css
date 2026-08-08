@@ -158,10 +158,10 @@ html, body {
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   cursor: pointer;
   font-family: var(--font-ui);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
@@ -223,8 +223,8 @@ html, body {
 /* ── Frase de spin ── */
 #spin-phrase {
   font-family: var(--font-main);
-  font-size: 1rem;
-  color: var(--color-text-muted);
+  font-size: 1.08rem;
+  color: var(--color-text);
   text-align: center;
   font-style: italic;
   min-height: 1.5rem;
@@ -286,8 +286,8 @@ html, body {
   background: var(--color-bg2);
   border: 1px solid var(--color-border);
   border-radius: 20px;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  color: var(--color-text);
 }
 
 .stat-chip span {
@@ -302,7 +302,7 @@ html, body {
 
 .panel-section-title {
   font-family: var(--font-main);
-  font-size: 0.9rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--color-primary);
@@ -346,8 +346,8 @@ html, body {
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  color: var(--color-text);
   transition: color var(--transition-fast);
   user-select: none;
 }
@@ -371,11 +371,11 @@ html, body {
 
 .bulk-btn {
   padding: 4px 10px;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   background: var(--color-bg2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
+  color: var(--color-text);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -415,12 +415,12 @@ html, body {
   align-items: center;
   gap: var(--gap-sm);
   margin-bottom: 6px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .weight-row label {
   flex: 1;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -446,7 +446,7 @@ html, body {
   padding: 8px;
   border-radius: var(--radius-sm);
   border-bottom: 1px solid var(--color-border);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: background var(--transition-fast);
 }
@@ -471,8 +471,8 @@ html, body {
 }
 
 .history-item .hist-time {
-  color: var(--color-text-muted);
-  font-size: 0.72rem;
+  color: var(--color-text);
+  font-size: 0.8rem;
 }
 
 /* ── Baneados ── */
@@ -485,7 +485,7 @@ html, body {
   background: rgba(220, 38, 38, 0.1);
   border: 1px solid rgba(220, 38, 38, 0.3);
   margin-bottom: 6px;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
 }
 
 .banned-item .restore-btn {
@@ -599,8 +599,8 @@ html, body {
 }
 
 #result-card .result-description {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+  font-size: 0.98rem;
+  color: var(--color-text);
   line-height: 1.6;
   margin: var(--gap-sm) 0;
 }
@@ -850,7 +850,7 @@ body.obs-mode.transparent-bg #app {
 
 .candidate-card .cand-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
 .candidate-card .cand-name { font-weight: 700; font-size: 0.9rem; }
-.candidate-card .cand-spec { font-size: 0.78rem; color: var(--color-text-muted); }
+.candidate-card .cand-spec { font-size: 0.85rem; color: var(--color-text); }
 
 /* ── Indicadores activos ── */
 .active-indicator {
@@ -859,7 +859,7 @@ body.obs-mode.transparent-bg #app {
   gap: 4px;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -890,7 +890,7 @@ body.obs-mode.transparent-bg #app {
   background: transparent;
   color: var(--color-text);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-family: var(--font-ui);
   transition: all var(--transition-fast);
   display: inline-flex;
@@ -1019,8 +1019,8 @@ body.obs-mode.transparent-bg #app {
 }
 
 .config-row label {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  color: var(--color-text);
   flex: 1;
 }
 
