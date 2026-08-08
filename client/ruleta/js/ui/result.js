@@ -2,6 +2,17 @@
  * result.js — Pantalla de resultado espectacular + confeti + frases
  */
 
+/** Escapa caracteres HTML para prevenir XSS */
+function escapeHTML(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const ResultUI = (() => {
   let overlay = null;
   let onBan = null;
@@ -255,7 +266,7 @@ const ResultUI = (() => {
       <div id="result-card">
         <div class="result-label">👤 PERSONAJE SELECCIONADO</div>
         <div style="font-size:4rem;margin:16px 0">🎮</div>
-        <div class="result-class-name">${result.character || '?'}</div>
+        <div class="result-class-name">${escapeHTML(result.character)}</div>
         <div class="result-actions">
           <button class="result-btn primary" id="btn-spin-again">🎲 Re-girar</button>
           <button class="result-btn" id="btn-close-result">✕ Cerrar</button>

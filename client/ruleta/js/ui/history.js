@@ -2,6 +2,17 @@
  * history.js — Historial y sistema de baneados (UI)
  */
 
+/** Escapa caracteres HTML para prevenir XSS */
+function escapeHTMLHist(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const HistoryUI = (() => {
   let container = null;
   let bannedContainer = null;
@@ -27,7 +38,7 @@ const HistoryUI = (() => {
     }
     container.innerHTML = history.map(h => {
       const icon = h.specIcon || h.classIcon || '🎲';
-      const name = h.specName ? `${h.className} ${h.specName}` : (h.className || h.character || '?');
+      const name = h.specName ? `${escapeHTMLHist(h.className)} ${escapeHTMLHist(h.specName)}` : escapeHTMLHist(h.className || h.character || '?');
       const time = formatTime(h.timestamp);
       const role = h.role ? `<span class="role-${h.role}" style="font-size:0.7rem">[${roleLabel(h.role)}]</span>` : '';
       return `

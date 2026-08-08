@@ -86,7 +86,7 @@ const ConfigManager = (() => {
       config,
       filters: filtersState,
       weights: weightsData,
-      characters: SelectionManager ? SelectionManager.getCustomCharacters() : []
+      characters: window.SelectionManager ? SelectionManager.getCustomCharacters() : []
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

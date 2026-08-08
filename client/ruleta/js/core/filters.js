@@ -96,7 +96,7 @@ const FiltersManager = (() => {
   /** Selección aleatoria de N specs */
   function selectRandomN(n) {
     const all = WOW_DATA.classes.flatMap(c => c.specs.map(s => s.id));
-    const shuffled = all.sort(() => Math.random() - 0.5);
+    const shuffled = [...all].sort(() => Math.random() - 0.5);
     // Desactivar todas, activar solo las N primeras
     all.forEach(id => state.specs[id] = false);
     shuffled.slice(0, n).forEach(id => state.specs[id] = true);

@@ -259,6 +259,10 @@ const PanelsUI = (() => {
   function renderConfig() {
     if (!configModal) return;
     const cfg = ConfigManager.get();
+    // Sanitize numeric values from storage before inserting into HTML
+    const safeVolume = Math.max(0, Math.min(1, Number(cfg.soundVolume) || 0.5)).toFixed(2);
+    const safeDuration = Math.max(1000, Math.min(12000, parseInt(cfg.spinDuration) || 4000));
+    const safeMaxHist = Math.max(5, Math.min(200, parseInt(cfg.maxHistory) || 50));
     document.getElementById('config-modal-inner').innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
         <h2 style="font-family:var(--font-main);color:var(--color-primary);margin:0">⚙️ Configuración</h2>
@@ -274,7 +278,7 @@ const PanelsUI = (() => {
       </div>
       <div class="config-row">
         <label>🔊 Volumen</label>
-        <input type="range" min="0" max="1" step="0.05" value="${cfg.soundVolume}" id="cfg-volume" style="accent-color:var(--color-primary)">
+        <input type="range" min="0" max="1" step="0.05" value="${safeVolume}" id="cfg-volume" style="accent-color:var(--color-primary)">
       </div>
       <div class="config-row">
         <label>✨ Animaciones</label>
@@ -285,7 +289,7 @@ const PanelsUI = (() => {
       </div>
       <div class="config-row">
         <label>⏱️ Duración del giro (ms)</label>
-        <input class="input" type="number" id="cfg-duration" value="${cfg.spinDuration}" min="1000" max="12000" step="500" style="width:100px">
+        <input class="input" type="number" id="cfg-duration" value="${safeDuration}" min="1000" max="12000" step="500" style="width:100px">
       </div>
       <div class="config-row">
         <label>🔁 Permitir repetición</label>
@@ -296,7 +300,7 @@ const PanelsUI = (() => {
       </div>
       <div class="config-row">
         <label>📚 Historial máximo</label>
-        <input class="input" type="number" id="cfg-maxhist" value="${cfg.maxHistory}" min="5" max="200" style="width:80px">
+        <input class="input" type="number" id="cfg-maxhist" value="${safeMaxHist}" min="5" max="200" style="width:80px">
       </div>
 
       <div style="margin-top:20px">

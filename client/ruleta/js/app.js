@@ -64,6 +64,9 @@ const App = (() => {
     document.getElementById('btn-toggle-left')?.addEventListener('click', () => {
       document.getElementById('panel-left').classList.toggle('collapsed');
     });
+    document.getElementById('btn-close-left')?.addEventListener('click', () => {
+      document.getElementById('panel-left').classList.add('collapsed');
+    });
 
     // Botón panel derecho toggle
     document.getElementById('btn-toggle-right')?.addEventListener('click', () => {
@@ -97,7 +100,7 @@ const App = (() => {
     // Botón borrar baneados
     document.getElementById('btn-clear-banned')?.addEventListener('click', () => {
       HistoryUI.clearBanned();
-      if (window.App) App.refreshWheel();
+      refreshWheel();
       showToast('Baneados restaurados ♻️', 'success');
     });
 
