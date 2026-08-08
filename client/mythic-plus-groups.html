@@ -1172,7 +1172,7 @@
         function deleteGroup(groupId) {
             const group = groups.find(g => g.id === groupId);
             if (!group) return;
-            if (!isAdmin && group.creatorId !== currentUserId) return;
+            if (!isAdmin && group.creatorId && group.creatorId !== currentUserId) return;
 
             // Devolver los jugadores asignados a la cola
             ['tank', 'healer', 'dps'].forEach(role => {
