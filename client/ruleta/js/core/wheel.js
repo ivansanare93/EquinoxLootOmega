@@ -25,7 +25,11 @@ const WheelEngine = (() => {
 
   function resize() {
     if (!canvas) return;
-    const size = Math.min(canvas.parentElement.offsetWidth - 48, 700);
+    const layoutRoot = document.getElementById('panel-center') || canvas.parentElement;
+    const availableWidth = Math.max(280, layoutRoot.clientWidth - 96);
+    const availableHeight = Math.max(280, window.innerHeight - 300);
+    const maxSize = window.innerWidth <= 768 ? 540 : 920;
+    const size = Math.max(260, Math.min(availableWidth, availableHeight, maxSize));
     canvas.width = size;
     canvas.height = size;
     draw();

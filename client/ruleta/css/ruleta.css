@@ -186,17 +186,20 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: var(--gap-md);
+  width: 100%;
 }
 
 #wheel-wrapper {
   position: relative;
   display: inline-block;
+  width: min(100%, 920px);
 }
 
 #wheel-canvas {
   border-radius: 50%;
   box-shadow: 0 0 60px var(--color-glow), 0 0 120px rgba(0,0,0,0.5);
   display: block;
+  margin: 0 auto;
 }
 
 /* Puntero */
@@ -1068,6 +1071,10 @@ body.obs-mode.transparent-bg #app {
   .header-title { font-size: 1rem; }
 
   #wheel-pointer { display: none; }
+
+  #wheel-wrapper {
+    width: min(100%, 540px);
+  }
 }
 
 @media (max-width: 480px) {
