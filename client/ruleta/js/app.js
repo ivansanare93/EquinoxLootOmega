@@ -63,14 +63,17 @@ const App = (() => {
     // Botón panel izquierdo toggle
     document.getElementById('btn-toggle-left')?.addEventListener('click', () => {
       document.getElementById('panel-left').classList.toggle('collapsed');
+      requestWheelResize();
     });
     document.getElementById('btn-close-left')?.addEventListener('click', () => {
       document.getElementById('panel-left').classList.add('collapsed');
+      requestWheelResize();
     });
 
     // Botón panel derecho toggle
     document.getElementById('btn-toggle-right')?.addEventListener('click', () => {
       document.getElementById('panel-right').classList.toggle('collapsed');
+      requestWheelResize();
     });
 
     // Selector de modo
@@ -437,7 +440,11 @@ const App = (() => {
     document.body.classList.toggle('obs-mode', obsMode);
     const btn = document.getElementById('btn-streamer');
     if (btn) btn.textContent = obsMode ? '🎥 Modo Normal' : '🎥 Modo Stream';
-    WheelEngine.resize();
+    requestWheelResize();
+  }
+
+  function requestWheelResize() {
+    requestAnimationFrame(() => WheelEngine.resize());
   }
 
   function updateSpecialModePanel(mode) {
