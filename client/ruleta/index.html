@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎲 Destino de Azeroth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/ruleta.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="theme-wow">
+
+<div id="app">
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header id="app-header">
+    <div class="header-title">🎲 Destino de Azeroth</div>
+
+    <div class="header-actions">
+      <div id="weights-indicator" class="active-indicator hidden">⚖️ Pesos activos</div>
+      <div id="banned-indicator" class="active-indicator hidden" style="border-color:var(--color-danger);color:var(--color-danger);background:rgba(239,68,68,0.1)">❌ 0 baneados</div>
+      <button class="btn btn-icon" id="btn-toggle-left" title="Filtros">☰</button>
+      <button class="btn btn-icon" id="btn-streamer" title="Modo Stream">🎥</button>
+      <button class="btn btn-icon" id="btn-config" title="Configuración">⚙️</button>
+      <button class="btn btn-icon" id="btn-toggle-right" title="Historial">📜</button>
+      <a href="../index.html" class="btn btn-icon" title="Volver">🏠</a>
+    </div>
+  </header>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div id="app-body">
+
+    <!-- ── Panel izquierdo: Filtros ── -->
+    <aside id="panel-left">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="font-family:var(--font-main);color:var(--color-primary);font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;margin:0">🔍 Filtros</h3>
+        <button class="btn btn-sm" id="btn-toggle-left" style="font-size:0.75rem" title="Cerrar">✕</button>
+      </div>
+      <div id="filters-panel"></div>
+
+      <!-- Personajes personalizados (solo en modo character) -->
+      <div id="character-panel" class="hidden panel-section">
+        <div class="panel-section-title">👤 Mis Personajes</div>
+        <div class="panel-section-content" style="max-height:2000px">
+          <div id="character-entries" class="character-list"></div>
+          <button class="btn btn-sm w-full mt-sm" id="btn-add-character">➕ Añadir personaje</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Centro: Ruleta ── -->
+    <main id="panel-center">
+
+      <!-- Selector de modo -->
+      <div id="mode-selector">
+        <button class="mode-btn" data-mode="class">⚔️ Clase</button>
+        <button class="mode-btn active" data-mode="class_spec">🎯 Clase + Spec</button>
+        <button class="mode-btn" data-mode="spec">📋 Spec</button>
+        <button class="mode-btn" data-mode="character">👤 Personaje</button>
+        <button class="mode-btn" data-mode="chaos">🌀 Caos</button>
+        <button class="mode-btn" data-mode="destiny">⚡ Destino Absoluto</button>
+        <button class="mode-btn" data-mode="best_of_3">🏆 Best of 3</button>
+        <button class="mode-btn" data-mode="curse">🔮 Maldición</button>
+        <button class="mode-btn" data-mode="challenge">🏹 Desafío</button>
+      </div>
+
+      <!-- Panel de modo especial (descripción) -->
+      <div id="special-mode-panel" class="hidden"></div>
+
+      <!-- Ruleta -->
+      <div id="wheel-container">
+        <div id="wheel-wrapper">
+          <canvas id="wheel-canvas"></canvas>
+          <div id="wheel-pointer">▶</div>
+        </div>
+
+        <!-- Frase de giro -->
+        <div id="spin-phrase"></div>
+
+        <!-- Barra de progreso de giro (cosmética) -->
+        <div style="width:100%;max-width:480px;height:3px;background:var(--color-bg2);border-radius:2px;overflow:hidden">
+          <div id="spin-progress"></div>
+        </div>
+      </div>
+
+      <!-- Botón principal -->
+      <button id="btn-spin">
+        🎲 GIRAR RULETA
+      </button>
+
+      <!-- Stats bar -->
+      <div id="stats-bar">
+        <div class="stat-chip">🎲 Tiradas: <span>0</span></div>
+        <div class="stat-chip">⚔️ Clases: <span>0</span></div>
+        <div class="stat-chip">🛡️ Tanque: <span>0</span></div>
+        <div class="stat-chip">💚 Healer: <span>0</span></div>
+        <div class="stat-chip">🗡️ DPS: <span>0</span></div>
+      </div>
+
+    </main>
+
+    <!-- ── Panel derecho: Historial + Baneados ── -->
+    <aside id="panel-right">
+      <!-- Historial -->
+      <div class="panel-section">
+        <div class="panel-section-title" style="cursor:default;justify-content:space-between">
+          <span>📜 Historial</span>
+          <button class="btn btn-sm btn-danger" id="btn-clear-history" style="font-size:0.7rem;padding:2px 8px">🗑️</button>
+        </div>
+        <div id="history-list" style="max-height:320px;overflow-y:auto"></div>
+      </div>
+
+      <!-- Baneados -->
+      <div class="panel-section">
+        <div class="panel-section-title" style="cursor:default;justify-content:space-between">
+          <span>❌ Sala del Olvido</span>
+          <button class="btn btn-sm" id="btn-clear-banned" style="font-size:0.7rem;padding:2px 8px">♻️ Todo</button>
+        </div>
+        <div id="banned-list"></div>
+      </div>
+
+      <!-- Créditos -->
+      <div style="text-align:center;padding:16px 0;font-size:0.7rem;color:var(--color-text-muted)">
+        🎲 Destino de Azeroth<br>
+        Equinox Tools · WoW<br>
+        <span style="font-size:0.65rem">The War Within</span>
+      </div>
+    </aside>
+
+  </div><!-- /#app-body -->
+
+</div><!-- /#app -->
+
+<!-- ══════════ OVERLAY DE RESULTADO ══════════ -->
+<div id="result-overlay"></div>
+
+<!-- ══════════ BANNER DE RACHA ══════════ -->
+<div id="streak-banner"></div>
+
+<!-- ══════════ TOAST CONTAINER ══════════ -->
+<div id="toast-container"></div>
+
+<!-- ══════════ MODAL DE CONFIGURACIÓN ══════════ -->
+<div id="config-modal">
+  <div id="config-modal-inner"></div>
+</div>
+
+<!-- ══════════ SCRIPTS (orden importante) ══════════ -->
+<!-- 1. Datos -->
+<script src="js/data/wow-data.js"></script>
+<!-- 2. Core -->
+<script src="js/core/filters.js"></script>
+<script src="js/core/weights.js"></script>
+<script src="js/core/selection.js"></script>
+<script src="js/core/wheel.js"></script>
+<!-- 3. Features -->
+<script src="js/features/sounds.js"></script>
+<script src="js/features/themes.js"></script>
+<script src="js/features/config.js"></script>
+<!-- 4. UI -->
+<script src="js/ui/history.js"></script>
+<script src="js/ui/streaks.js"></script>
+<script src="js/ui/result.js"></script>
+<script src="js/ui/panels.js"></script>
+<!-- 5. App -->
+<script src="js/app.js"></script>
+
+</body>
+</html>
