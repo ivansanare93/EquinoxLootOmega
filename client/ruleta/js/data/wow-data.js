@@ -477,6 +477,15 @@ const WOW_DATA = {
           icon: "🔥",
           color: "#A330C9",
           description: "Tanque que absorbe el dolor demoníaco y lo convierte en poder."
+        },
+        {
+          id: "devorador",
+          name: "Devorador",
+          role: "dps",
+          dpsType: "melee",
+          icon: "🩸",
+          color: "#A330C9",
+          description: "Cazademonios que consume la esencia de sus enemigos para potenciar sus ataques."
         }
       ]
     },
