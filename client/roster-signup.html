@@ -202,6 +202,11 @@
             color: white;
         }
 
+        .role-offtank {
+            background-color: #1d4ed8;
+            color: white;
+        }
+
         .role-healer {
             background-color: #10b981;
             color: white;
@@ -465,6 +470,10 @@
                                 <label for="role-tank">Tank</label>
                             </div>
                             <div class="role-checkbox">
+                                <input type="checkbox" id="role-offtank" value="Offtank">
+                                <label for="role-offtank">Offtank</label>
+                            </div>
+                            <div class="role-checkbox">
                                 <input type="checkbox" id="role-healer" value="Healer">
                                 <label for="role-healer">Healer</label>
                             </div>
@@ -537,6 +546,7 @@
                             <select id="filter-available-role">
                                 <option value="">Todos los Roles</option>
                                 <option value="Tank">Tank</option>
+                                <option value="Offtank">Offtank</option>
                                 <option value="Healer">Healer</option>
                                 <option value="DPS">DPS</option>
                             </select>
@@ -855,6 +865,7 @@
             // Get selected roles
             const roles = [];
             if (document.getElementById('role-tank').checked) roles.push('Tank');
+            if (document.getElementById('role-offtank').checked) roles.push('Offtank');
             if (document.getElementById('role-healer').checked) roles.push('Healer');
             if (document.getElementById('role-dps').checked) roles.push('DPS');
 
@@ -1025,6 +1036,7 @@
 
             // Set role checkboxes
             document.getElementById('role-tank').checked = signup.roles.includes('Tank');
+            document.getElementById('role-offtank').checked = signup.roles.includes('Offtank');
             document.getElementById('role-healer').checked = signup.roles.includes('Healer');
             document.getElementById('role-dps').checked = signup.roles.includes('DPS');
 
