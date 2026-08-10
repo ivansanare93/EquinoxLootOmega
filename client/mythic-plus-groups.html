@@ -706,6 +706,189 @@
             flex: 1;
         }
 
+        /* ===== SEPARADOR EN MODAL ===== */
+        .modal-section-title {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: var(--dorado);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+            padding-bottom: 6px;
+            margin: 16px 0 10px;
+        }
+        .modal-section-title:first-child {
+            margin-top: 0;
+        }
+
+        /* ===== INFO DE RUN EN TARJETA DE GRUPO ===== */
+        .group-run-info {
+            padding: 8px 16px;
+            border-top: 1px solid rgba(139, 92, 246, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.8em;
+            align-items: center;
+            min-height: 34px;
+        }
+        .group-card.complete .group-run-info {
+            border-top-color: rgba(16, 185, 129, 0.15);
+        }
+        .run-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+        .run-badge.key-level {
+            background-color: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+            color: #fcd34d;
+        }
+        .run-badge.run-type-push    { background-color: rgba(239, 68, 68, 0.15);   border: 1px solid rgba(239, 68, 68, 0.4);   color: #fca5a5; }
+        .run-badge.run-type-farm    { background-color: rgba(16, 185, 129, 0.15);  border: 1px solid rgba(16, 185, 129, 0.4);  color: #6ee7b7; }
+        .run-badge.run-type-boost   { background-color: rgba(59, 130, 246, 0.15);  border: 1px solid rgba(59, 130, 246, 0.4);  color: #93c5fd; }
+        .run-badge.run-type-aprendizaje { background-color: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); color: #c4b5fd; }
+        .run-badge.afijo {
+            background-color: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #d8b4fe;
+        }
+        .run-badge.duracion {
+            background-color: rgba(100, 116, 139, 0.2);
+            border: 1px solid rgba(100, 116, 139, 0.4);
+            color: #cbd5e1;
+        }
+        .run-info-empty {
+            color: #4b5563;
+            font-style: italic;
+        }
+        .run-info-edit-btn {
+            background: none;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+            cursor: pointer;
+            font-size: 0.75em;
+            padding: 3px 9px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            margin-left: auto;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .run-info-edit-btn:hover { border-color: var(--dorado); color: var(--dorado); }
+
+        /* ===== PRIORIDAD DEL JUGADOR ===== */
+        .priority-badge {
+            font-size: 0.72em;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        .priority-badge.alta    { background-color: rgba(239, 68, 68, 0.2);    color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4);    }
+        .priority-badge.media   { background-color: rgba(245, 158, 11, 0.2);   color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4);   }
+        .priority-badge.baja    { background-color: rgba(100, 116, 139, 0.2);  color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4);  }
+
+        /* ===== DISPONIBILIDAD DEL JUGADOR ===== */
+        .availability-badge {
+            display: inline-block;
+            font-size: 0.72em;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 10px;
+            white-space: nowrap;
+            cursor: default;
+        }
+        .availability-badge.libre       { background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .availability-badge.confirmado  { background-color: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .availability-badge.pendiente   { background-color: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .availability-badge.fuera       { background-color: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
+
+        .avail-edit-btn {
+            background: none;
+            border: none;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: #6b7280;
+            transition: color 0.2s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .avail-edit-btn:hover { color: var(--dorado); }
+
+        /* ===== VISTA SEMANAL DE DISPONIBILIDAD ===== */
+        .weekly-view {
+            padding: 8px 16px 12px;
+            border-top: 1px solid rgba(139, 92, 246, 0.15);
+            font-size: 0.8em;
+        }
+        .group-card.complete .weekly-view {
+            border-top-color: rgba(16, 185, 129, 0.15);
+        }
+        .weekly-view-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            color: #a78bfa;
+            font-weight: bold;
+            user-select: none;
+            padding: 2px 0;
+        }
+        .weekly-view-toggle:hover { color: var(--dorado); }
+        .weekly-view-content {
+            margin-top: 8px;
+        }
+        .weekly-view-content.hidden { display: none; }
+        .weekly-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .weekly-day-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .weekly-day-label {
+            font-weight: bold;
+            color: #c4b5fd;
+            font-size: 0.85em;
+            margin-bottom: 2px;
+        }
+        .weekly-player-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65em;
+            font-weight: bold;
+            border: 1px solid transparent;
+            cursor: default;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .weekly-player-dot.libre       { background-color: rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.6); color: #6ee7b7; }
+        .weekly-player-dot.confirmado  { background-color: rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.6); color: #93c5fd; }
+        .weekly-player-dot.pendiente   { background-color: rgba(245, 158, 11, 0.3); border-color: rgba(245, 158, 11, 0.5); color: #fcd34d; }
+        .weekly-player-dot.fuera       { background-color: rgba(100, 116, 139, 0.2); border-color: rgba(100, 116, 139, 0.4); color: #94a3b8; }
+        .weekly-player-dot.no-data     { background-color: rgba(30, 41, 59, 0.5);   border-color: rgba(100, 116, 139, 0.25); color: #4b5563; }
+        .weekly-time-hint {
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            margin-top: 6px;
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .content-layout {
@@ -833,6 +1016,14 @@
                             <button class="role-btn" data-role="dps" onclick="selectRole(this)">⚔️ DPS</button>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label for="player-priority">Prioridad</label>
+                        <select id="player-priority">
+                            <option value="media">⭐ Media</option>
+                            <option value="alta">🔴 Alta</option>
+                            <option value="baja">⚪ Baja</option>
+                        </select>
+                    </div>
                     <button class="btn-primary" onclick="addPlayer()">Añadir a la Cola</button>
                 </div>
 
@@ -890,9 +1081,46 @@
 
     <!-- Modal de horario del grupo -->
     <div class="modal-overlay" id="schedule-modal">
-        <div class="modal-box">
-            <h3>📅 Horario del Grupo</h3>
-            <p id="schedule-modal-group-name" style="color:#a78bfa; margin:0 0 15px; font-weight:bold;"></p>
+        <div class="modal-box" style="max-width:480px;">
+            <h3>⚙️ Configurar Grupo</h3>
+            <p id="schedule-modal-group-name" style="color:#a78bfa; margin:0 0 10px; font-weight:bold;"></p>
+
+            <!-- Sección: Info de la Run -->
+            <div class="modal-section-title">🎮 Información de la Run</div>
+            <div class="form-group">
+                <label for="run-key-level-input">Key Level objetivo</label>
+                <input type="number" id="run-key-level-input" min="2" max="35" placeholder="Ej: 10" style="width:100%;box-sizing:border-box;">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="run-tipo-input">Tipo de run</label>
+                    <select id="run-tipo-input">
+                        <option value="">-- Sin especificar --</option>
+                        <option value="push">🚀 Push</option>
+                        <option value="farm">🌾 Farm</option>
+                        <option value="boost">⚡ Boost</option>
+                        <option value="aprendizaje">📚 Aprendizaje</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="run-duracion-input">Duración estimada</label>
+                    <select id="run-duracion-input">
+                        <option value="">-- Sin especificar --</option>
+                        <option value="30 min">30 min</option>
+                        <option value="45 min">45 min</option>
+                        <option value="1 hora">1 hora</option>
+                        <option value="1.5 horas">1.5 horas</option>
+                        <option value="2+ horas">2+ horas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:10px;">
+                <label for="run-afijo-input">Afijo semanal</label>
+                <input type="text" id="run-afijo-input" placeholder="Ej: Tirano / Robustecido / Sangrante..." maxlength="60" style="width:100%;box-sizing:border-box;">
+            </div>
+
+            <!-- Sección: Horario -->
+            <div class="modal-section-title">📅 Horario</div>
             <div class="form-group">
                 <label>Días de la semana</label>
                 <div class="schedule-days-grid" id="schedule-days-grid">
@@ -920,6 +1148,49 @@
             <h3 id="modal-title">Selecciona un jugador</h3>
             <div id="modal-player-list" class="modal-player-list"></div>
             <button class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal de disponibilidad del jugador -->
+    <div class="modal-overlay" id="availability-modal">
+        <div class="modal-box" style="max-width:460px;">
+            <h3>📆 Disponibilidad</h3>
+            <p id="avail-modal-player-name" style="color:#a78bfa; margin:0 0 10px; font-weight:bold;"></p>
+
+            <div class="modal-section-title">Estado actual</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="libre">
+                    <input type="radio" name="avail-status" value="libre" style="accent-color:var(--verde-epico);">
+                    <span class="availability-badge libre">Libre</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="confirmado">
+                    <input type="radio" name="avail-status" value="confirmado" style="accent-color:#3b82f6;">
+                    <span class="availability-badge confirmado">Confirmado</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="pendiente">
+                    <input type="radio" name="avail-status" value="pendiente" style="accent-color:#f59e0b;">
+                    <span class="availability-badge pendiente">Pendiente</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="fuera">
+                    <input type="radio" name="avail-status" value="fuera" style="accent-color:#64748b;">
+                    <span class="availability-badge fuera">Fuera</span>
+                </label>
+            </div>
+
+            <div class="modal-section-title">Días disponibles</div>
+            <div class="schedule-days-grid" id="avail-days-grid" style="margin-bottom:14px;">
+                <!-- Checkboxes rendered by JS -->
+            </div>
+
+            <div class="form-group">
+                <label for="avail-time-input">Horario preferido</label>
+                <input type="time" id="avail-time-input">
+            </div>
+
+            <div class="schedule-modal-actions">
+                <button class="btn-primary" onclick="saveAvailability()">💾 Guardar</button>
+                <button class="modal-cancel-btn" onclick="closeAvailabilityModal()">Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -1027,8 +1298,11 @@
         // Contexto para el modal de asignación
         let modalContext = null;   // { groupId, slotRole, slotIndex }
 
-        // Contexto para el modal de horario
+        // Contexto para el modal de horario/config
         let scheduleModalContext = null; // { groupId }
+
+        // Contexto para el modal de disponibilidad
+        let availabilityModalContext = null; // { playerId }
 
         // Días de la semana (abreviatura para mostrar, nombre completo para formulario)
         const DAYS_OF_WEEK = [
@@ -1091,6 +1365,12 @@
                 name,
                 class: playerClass,
                 role,
+                priority: document.getElementById('player-priority').value || 'media',
+                availability: {
+                    status: 'libre',   // libre | confirmado | pendiente | fuera
+                    days: [],          // Array de nombres de días disponibles
+                    timePreference: '' // HH:MM preferido
+                },
                 ownerId: currentUserId
             };
 
@@ -1123,22 +1403,49 @@
                 return;
             }
 
-            container.innerHTML = players.map(p => `
+            container.innerHTML = players.map(p => {
+                const avail = p.availability || {};
+                const status = avail.status || 'libre';
+                const priority = p.priority || 'media';
+                const priorityLabel = { alta: '🔴 Alta', media: '⭐ Media', baja: '⚪ Baja' }[priority] || priority;
+                const availLabel = { libre: 'Libre', confirmado: 'Confirmado', pendiente: 'Pendiente', fuera: 'Fuera' }[status] || status;
+                const isOwn = isAdmin || p.ownerId === currentUserId;
+
+                return `
                 <div class="queue-player" data-role="${p.role}">
                     <span style="font-size:1.3em">${getRoleIcon(p.role)}</span>
                     <div style="flex:1; min-width:0;">
                         <div class="player-name">${escapeHtml(p.name)}</div>
                         <div class="player-class">${escapeHtml(p.class)}</div>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;">
+                            <span class="priority-badge ${priority}">${priorityLabel}</span>
+                            <span class="availability-badge ${status}">${availLabel}</span>
+                        </div>
                     </div>
-                    <span class="role-badge ${p.role}">${getRoleLabel(p.role)}</span>
+                    ${isOwn
+                        ? `<button class="avail-edit-btn" onclick="openAvailabilityModal(${p.id})" title="Editar disponibilidad">📆</button>`
+                        : ''}
                     ${(isAdmin || p.ownerId === currentUserId)
                         ? `<button class="remove-btn" onclick="removePlayerFromQueue(${p.id})" title="Eliminar de la cola">✕</button>`
                         : ''}
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         // ==================== Gestión de grupos ====================
+        function findPlayerById(id) {
+            const inQueue = players.find(p => p.id === id);
+            if (inQueue) return inQueue;
+            for (const g of groups) {
+                for (const role of ['tank', 'healer', 'dps']) {
+                    for (const slot of (g.slots[role] || [])) {
+                        if (slot && slot.id === id) return slot;
+                    }
+                }
+            }
+            return null;
+        }
+
         function createGroup() {
             const id = nextGroupId++;
             return {
@@ -1149,6 +1456,12 @@
                     tank: [null],          // 1 tanque
                     healer: [null],        // 1 healer
                     dps: [null, null, null] // 3 DPS
+                },
+                runInfo: {
+                    keyLevel: '',   // Número de llave objetivo
+                    afijo: '',      // Afijo semanal
+                    tipo: '',       // push | farm | boost | aprendizaje
+                    duracion: ''    // Duración estimada
                 },
                 schedule: {
                     days: [],   // Nombres de días seleccionados
@@ -1249,11 +1562,17 @@
                             ? `<button class="delete-group-btn" onclick="deleteGroup(${group.id})" title="Eliminar grupo">✕</button>`
                             : ''}
                     </div>
+                    <div class="group-run-info">
+                        ${renderRunInfoSection(group)}
+                    </div>
                     <div class="group-slots">
                         ${slotsHtml}
                     </div>
                     <div class="group-schedule">
                         ${renderScheduleSection(group)}
+                    </div>
+                    <div class="weekly-view">
+                        ${renderWeeklyView(group)}
                     </div>
                 </div>`;
             }).join('');
@@ -1264,70 +1583,174 @@
         function renderRoleSlots(group, role, label, slotClass) {
             const slot = group.slots[role][0];
             const isCreator = group.creatorId === currentUserId;
-            let actionBtn = '';
+            let actionBtns = '';
             if (slot) {
                 const isSlotOwner = slot.ownerId === currentUserId;
+                if (isSlotOwner || isAdmin) {
+                    actionBtns += `<button class="avail-edit-btn" onclick="openAvailabilityModal(${slot.id})" title="Editar disponibilidad">📆</button>`;
+                }
                 if (isAdmin || isCreator || isSlotOwner) {
-                    actionBtn = `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, '${role}', 0)" title="Quitar jugador">✕</button>`;
+                    actionBtns += `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, '${role}', 0)" title="Quitar jugador">✕</button>`;
                 }
             } else {
                 if (isAdmin || isCreator) {
-                    actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0)">Asignar</button>`;
+                    actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0)">Asignar</button>`;
                 } else {
                     const hasOwnPlayer = players.some(p => p.role === role && p.ownerId === currentUserId);
                     if (hasOwnPlayer) {
-                        actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0, true)" title="Unirte a este grupo">Unirme</button>`;
+                        actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0, true)" title="Unirte a este grupo">Unirme</button>`;
                     }
                 }
+            }
+            let slotInfoHtml = '';
+            if (slot) {
+                const avail = slot.availability || {};
+                const status = avail.status || 'libre';
+                const availLabel = { libre: 'Libre', confirmado: '✓ Listo', pendiente: '⏳', fuera: '✗ Fuera' }[status] || status;
+                slotInfoHtml = `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
+                    <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;">
+                        <span class="slot-player-class">${escapeHtml(slot.class)}</span>
+                        <span class="availability-badge ${status}" style="font-size:0.68em;">${availLabel}</span>
+                    </div>`;
             }
             return `
                 <div class="role-slot ${slotClass}">
                     <span class="slot-icon">${getRoleIcon(role)}</span>
                     <div class="slot-content">
                         <div class="slot-label">${label}</div>
-                        ${slot
-                            ? `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
-                               <div class="slot-player-class">${escapeHtml(slot.class)}</div>`
-                            : `<div class="slot-empty">Vacío</div>`
-                        }
+                        ${slot ? slotInfoHtml : `<div class="slot-empty">Vacío</div>`}
                     </div>
-                    ${actionBtn}
+                    ${actionBtns ? `<div style="display:flex;gap:2px;flex-shrink:0;">${actionBtns}</div>` : ''}
                 </div>`;
         }
 
         function renderDpsSlots(group) {
             const isCreator = group.creatorId === currentUserId;
             return group.slots.dps.map((slot, i) => {
-                let actionBtn = '';
+                let actionBtns = '';
                 if (slot) {
                     const isSlotOwner = slot.ownerId === currentUserId;
+                    if (isSlotOwner || isAdmin) {
+                        actionBtns += `<button class="avail-edit-btn" onclick="openAvailabilityModal(${slot.id})" title="Editar disponibilidad">📆</button>`;
+                    }
                     if (isAdmin || isCreator || isSlotOwner) {
-                        actionBtn = `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, 'dps', ${i})" title="Quitar jugador">✕</button>`;
+                        actionBtns += `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, 'dps', ${i})" title="Quitar jugador">✕</button>`;
                     }
                 } else {
                     if (isAdmin || isCreator) {
-                        actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i})">Asignar</button>`;
+                        actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i})">Asignar</button>`;
                     } else {
                         const hasOwnPlayer = players.some(p => p.role === 'dps' && p.ownerId === currentUserId);
                         if (hasOwnPlayer) {
-                            actionBtn = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i}, true)" title="Unirte a este grupo">Unirme</button>`;
+                            actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i}, true)" title="Unirte a este grupo">Unirme</button>`;
                         }
                     }
+                }
+                let slotInfoHtml = '';
+                if (slot) {
+                    const avail = slot.availability || {};
+                    const status = avail.status || 'libre';
+                    const availLabel = { libre: 'Libre', confirmado: '✓ Listo', pendiente: '⏳', fuera: '✗ Fuera' }[status] || status;
+                    slotInfoHtml = `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
+                        <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;">
+                            <span class="slot-player-class">${escapeHtml(slot.class)}</span>
+                            <span class="availability-badge ${status}" style="font-size:0.68em;">${availLabel}</span>
+                        </div>`;
                 }
                 return `
                 <div class="role-slot dps-slot">
                     <span class="slot-icon">⚔️</span>
                     <div class="slot-content">
                         <div class="slot-label">DPS ${i + 1}</div>
-                        ${slot
-                            ? `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
-                               <div class="slot-player-class">${escapeHtml(slot.class)}</div>`
-                            : `<div class="slot-empty">Vacío</div>`
-                        }
+                        ${slot ? slotInfoHtml : `<div class="slot-empty">Vacío</div>`}
                     </div>
-                    ${actionBtn}
+                    ${actionBtns ? `<div style="display:flex;gap:2px;flex-shrink:0;">${actionBtns}</div>` : ''}
                 </div>`;
             });
+        }
+
+        // ==================== Sección de info de run en la tarjeta ====================
+        function renderRunInfoSection(group) {
+            const r = group.runInfo || {};
+            const isCreator = group.creatorId === currentUserId;
+            const hasInfo = r.keyLevel || r.tipo || r.afijo || r.duracion;
+
+            const tipoLabels = { push: '🚀 Push', farm: '🌾 Farm', boost: '⚡ Boost', aprendizaje: '📚 Aprendizaje' };
+
+            let badgesHtml = '';
+            if (r.keyLevel) {
+                badgesHtml += `<span class="run-badge key-level">🔑 +${escapeHtml(String(r.keyLevel))}</span>`;
+            }
+            if (r.tipo) {
+                badgesHtml += `<span class="run-badge run-type-${escapeHtml(r.tipo)}">${escapeHtml(tipoLabels[r.tipo] || r.tipo)}</span>`;
+            }
+            if (r.afijo) {
+                badgesHtml += `<span class="run-badge afijo">⚙️ ${escapeHtml(r.afijo)}</span>`;
+            }
+            if (r.duracion) {
+                badgesHtml += `<span class="run-badge duracion">⏱️ ${escapeHtml(r.duracion)}</span>`;
+            }
+            if (!hasInfo) {
+                badgesHtml = '<span class="run-info-empty">Sin info de run</span>';
+            }
+
+            const editBtn = (isAdmin || isCreator)
+                ? `<button class="run-info-edit-btn" onclick="openScheduleModal(${group.id})">✏️ Configurar</button>`
+                : '';
+
+            return `${badgesHtml}${editBtn}`;
+        }
+
+        // ==================== Vista semanal de disponibilidad ====================
+        function renderWeeklyView(group) {
+            // Recopilar todos los jugadores asignados al grupo
+            const assigned = [
+                ...(group.slots.tank || []),
+                ...(group.slots.healer || []),
+                ...(group.slots.dps || [])
+            ].filter(Boolean);
+
+            if (assigned.length === 0) {
+                return `<div class="weekly-view-toggle" onclick="toggleWeeklyView(${group.id})">
+                    📅 Vista semanal <span>▸</span>
+                </div>`;
+            }
+
+            return `
+                <div class="weekly-view-toggle" onclick="toggleWeeklyView(${group.id})">
+                    📅 Vista semanal de disponibilidad <span id="weekly-arrow-${group.id}">▸</span>
+                </div>
+                <div class="weekly-view-content hidden" id="weekly-content-${group.id}">
+                    <div class="weekly-grid">
+                        ${DAYS_OF_WEEK.map(day => {
+                            const dots = assigned.map(p => {
+                                const avail = p.availability || {};
+                                const availDays = avail.days || [];
+                                const status = avail.status || 'libre';
+                                const inDay = availDays.includes(day.label);
+                                const dotStatus = inDay ? status : 'no-data';
+                                const initials = escapeHtml(p.name.charAt(0).toUpperCase());
+                                const roleIcon = getRoleIcon(p.role);
+                                return `<div class="weekly-player-dot ${dotStatus}" title="${escapeHtml(p.name)} — ${inDay ? dotStatus : 'sin datos'}">${initials}</div>`;
+                            }).join('');
+                            return `<div class="weekly-day-col">
+                                <div class="weekly-day-label">${escapeHtml(day.short)}</div>
+                                ${dots}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <div class="weekly-time-hint">
+                        ${group.schedule && group.schedule.time ? `🕐 Hora del grupo: <strong>${escapeHtml(group.schedule.time)}</strong>` : 'Sin hora de grupo definida'}
+                    </div>
+                </div>`;
+        }
+
+        function toggleWeeklyView(groupId) {
+            const content = document.getElementById(`weekly-content-${groupId}`);
+            const arrow = document.getElementById(`weekly-arrow-${groupId}`);
+            if (!content) return;
+            const hidden = content.classList.toggle('hidden');
+            if (arrow) arrow.textContent = hidden ? '▸' : '▾';
         }
 
         // ==================== Sección de horario en la tarjeta ====================
@@ -1371,6 +1794,15 @@
             scheduleModalContext = { groupId };
 
             document.getElementById('schedule-modal-group-name').textContent = group.name;
+
+            // Poblar campos de run info
+            const r = group.runInfo || {};
+            document.getElementById('run-key-level-input').value = r.keyLevel || '';
+            document.getElementById('run-tipo-input').value = r.tipo || '';
+            document.getElementById('run-duracion-input').value = r.duracion || '';
+            document.getElementById('run-afijo-input').value = r.afijo || '';
+
+            // Poblar campos de horario
             document.getElementById('schedule-time-input').value = group.schedule.time || '';
             document.getElementById('schedule-notes-input').value = group.schedule.notes || '';
 
@@ -1409,6 +1841,15 @@
             if (!group) return;
             if (!isAdmin && group.creatorId && group.creatorId !== currentUserId) return;
 
+            // Guardar run info
+            if (!group.runInfo) group.runInfo = {};
+            const rawKeyLevel = document.getElementById('run-key-level-input').value;
+            group.runInfo.keyLevel = rawKeyLevel !== '' ? parseInt(rawKeyLevel, 10) : '';
+            group.runInfo.tipo = document.getElementById('run-tipo-input').value;
+            group.runInfo.duracion = document.getElementById('run-duracion-input').value;
+            group.runInfo.afijo = document.getElementById('run-afijo-input').value.trim();
+
+            // Guardar horario
             const checkedBoxes = document.querySelectorAll('#schedule-days-grid input[type="checkbox"]:checked');
             const validDayLabels = new Set(DAYS_OF_WEEK.map(d => d.label));
             group.schedule.days = Array.from(checkedBoxes)
@@ -1425,6 +1866,88 @@
         // Cerrar modal de horario al hacer clic fuera
         document.getElementById('schedule-modal').addEventListener('click', function(e) {
             if (e.target === this) closeScheduleModal();
+        });
+
+        // ==================== Modal de disponibilidad del jugador ====================
+        function openAvailabilityModal(playerId) {
+            const player = findPlayerById(playerId);
+            if (!player) return;
+            if (!isAdmin && player.ownerId && player.ownerId !== currentUserId) return;
+            availabilityModalContext = { playerId };
+
+            document.getElementById('avail-modal-player-name').textContent =
+                `${getRoleIcon(player.role)} ${player.name} (${player.class})`;
+
+            // Seleccionar estado
+            const avail = player.availability || {};
+            const status = avail.status || 'libre';
+            document.querySelectorAll('input[name="avail-status"]').forEach(radio => {
+                radio.checked = radio.value === status;
+                radio.closest('.avail-status-option').style.borderColor =
+                    radio.checked ? 'rgba(139, 92, 246, 0.6)' : 'transparent';
+            });
+
+            // Renderizar días
+            const availDays = avail.days || [];
+            const grid = document.getElementById('avail-days-grid');
+            grid.innerHTML = DAYS_OF_WEEK.map(day => {
+                const checked = availDays.includes(day.label);
+                return `
+                    <label class="day-checkbox-label ${checked ? 'checked' : ''}">
+                        <input type="checkbox" value="${escapeHtml(day.label)}" ${checked ? 'checked' : ''}
+                            onchange="toggleDayLabel(this)">
+                        ${escapeHtml(day.label)}
+                    </label>`;
+            }).join('');
+
+            document.getElementById('avail-time-input').value = avail.timePreference || '';
+
+            // Listener para highlight del radio seleccionado
+            document.querySelectorAll('input[name="avail-status"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    document.querySelectorAll('.avail-status-option').forEach(opt => {
+                        opt.style.borderColor = 'transparent';
+                    });
+                    radio.closest('.avail-status-option').style.borderColor = 'rgba(139, 92, 246, 0.6)';
+                });
+            });
+
+            document.getElementById('availability-modal').classList.add('active');
+        }
+
+        function closeAvailabilityModal() {
+            document.getElementById('availability-modal').classList.remove('active');
+            availabilityModalContext = null;
+        }
+
+        function saveAvailability() {
+            if (!availabilityModalContext) return;
+            const player = findPlayerById(availabilityModalContext.playerId);
+            if (!player) return;
+            if (!isAdmin && player.ownerId && player.ownerId !== currentUserId) return;
+
+            if (!player.availability) player.availability = {};
+
+            const selectedStatus = document.querySelector('input[name="avail-status"]:checked');
+            player.availability.status = selectedStatus ? selectedStatus.value : 'libre';
+
+            const checkedBoxes = document.querySelectorAll('#avail-days-grid input[type="checkbox"]:checked');
+            const validDayLabels = new Set(DAYS_OF_WEEK.map(d => d.label));
+            player.availability.days = Array.from(checkedBoxes)
+                .map(cb => cb.value)
+                .filter(v => validDayLabels.has(v));
+
+            player.availability.timePreference = document.getElementById('avail-time-input').value;
+
+            closeAvailabilityModal();
+            renderQueue();
+            renderGroups(); // Refrescar vista semanal
+            saveData();
+        }
+
+        // Cerrar modal de disponibilidad al hacer clic fuera
+        document.getElementById('availability-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeAvailabilityModal();
         });
 
         // ==================== Auto-fill ====================
@@ -1603,6 +2126,9 @@
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && document.getElementById('clear-all-modal').classList.contains('active')) {
                     closeClearAllModal();
+                }
+                if (e.key === 'Escape' && document.getElementById('availability-modal').classList.contains('active')) {
+                    closeAvailabilityModal();
                 }
             });
 
