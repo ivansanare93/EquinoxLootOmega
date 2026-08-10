@@ -3,22 +3,16 @@
 // ==========================================
 
 // Información de Bosses (Nombres traducidos al español)
-// Raid: La Aguja del Vacío
-// Raid: La Falla Onírica
-// Raid: Marcha a Quel'Danas
+// Nueva banda
 const bosses = [
-    // La Aguja del Vacío
-    { id: 2733, name: 'Imperador Averzian', description: 'Jefe de La Aguja del Vacío.' },
-    { id: 2734, name: 'Vorasius', description: 'Jefe de La Aguja del Vacío.' },
-    { id: 2735, name: 'Vaelgor y Ezzorak', description: 'Jefe de La Aguja del Vacío.' },
-    { id: 2736, name: 'Rey caído Salhadaar', description: 'Jefe de La Aguja del Vacío.' },
-    { id: 2737, name: 'Vanguardia Cegada por la Luz', description: 'Jefe de La Aguja del Vacío.' },
-    { id: 2738, name: 'Corona del cosmos', description: 'Jefe final de La Aguja del Vacío.' },
-    // La Falla Onírica
-    { id: 2795, name: 'Chimaerus, El Dios Inconcebible', description: 'Jefe de La Falla Onírica.' },
-    // Marcha a Quel'Danas
-    { id: 2739, name: 'Belo\'ren, Hijo de Al\'ar', description: 'Jefe de Marcha a Quel\'Danas.' },
-    { id: 2740, name: 'L\'ura', description: 'Jefe de Marcha a Quel\'Danas.' }
+    { id: 1, name: 'Nek\'zali, la Enroscadora de Almas', description: 'Jefe de la nueva banda.' },
+    { id: 2, name: 'Centinelas Sepultados', description: 'Jefe de la nueva banda.' },
+    { id: 3, name: 'Los Exploradores Perdidos', description: 'Jefe de la nueva banda.' },
+    { id: 4, name: 'Vashnik el Maligno', description: 'Jefe de la nueva banda.' },
+    { id: 5, name: 'Sszorak', description: 'Jefe de la nueva banda.' },
+    { id: 6, name: 'Los Colmillos Gemelos', description: 'Jefe de la nueva banda.' },
+    { id: 7, name: 'El Altar Enroscado', description: 'Jefe de la nueva banda.' },
+    { id: 8, name: 'Ula\'tek', description: 'Jefe final de la nueva banda.' }
 ];
 
 // ==========================================
