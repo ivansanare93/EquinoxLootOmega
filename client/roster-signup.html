@@ -385,6 +385,232 @@
             margin-top: 3px;
             font-weight: bold;
         }
+
+        /* =============================================
+           ROSTER GENERATOR SECTION
+           ============================================= */
+        .roster-generator {
+            background-color: rgba(30, 41, 59, 0.8);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--dorado);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .roster-generator h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--dorado);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .generator-controls {
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .comp-inputs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .comp-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .comp-input-group label {
+            color: var(--dorado);
+            font-weight: bold;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .comp-input-group input {
+            width: 72px;
+            text-align: center;
+            padding: 8px 6px;
+        }
+
+        .comp-input-group input[readonly] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .generator-info {
+            font-size: 0.85em;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+
+        .roster-builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .roster-builder {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .roster-column {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            min-height: 200px;
+        }
+
+        .roster-column h3 {
+            margin: 0 0 12px 0;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+            padding-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        #col-fixed h3 { color: #10b981; }
+        #col-subs h3  { color: #f59e0b; }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 80px;
+            padding: 4px 0;
+            transition: background 0.15s;
+        }
+
+        .player-list.drag-over {
+            background: rgba(167, 139, 250, 0.1);
+            border-radius: 6px;
+            outline: 2px dashed #a78bfa;
+        }
+
+        .role-group-header {
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            padding: 6px 0 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 4px;
+        }
+
+        .role-group-header:first-child {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .player-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: grab;
+            flex-wrap: wrap;
+            transition: border-color 0.15s, background 0.15s;
+            user-select: none;
+        }
+
+        .player-card:hover {
+            border-color: rgba(167, 139, 250, 0.5);
+            background: rgba(44, 56, 78, 0.9);
+        }
+
+        .player-card.dragging {
+            opacity: 0.45;
+            cursor: grabbing;
+        }
+
+        .player-card-name {
+            font-weight: bold;
+            flex: 1;
+            min-width: 80px;
+            font-size: 0.95em;
+        }
+
+        .player-card-class {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.78em;
+            font-weight: bold;
+        }
+
+        .player-card-spec {
+            font-size: 0.82em;
+            color: #94a3b8;
+        }
+
+        .player-card-notes {
+            font-size: 0.76em;
+            color: #64748b;
+            font-style: italic;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .player-card-actions {
+            margin-left: auto;
+        }
+
+        .move-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 3px 9px;
+            font-size: 0.78em;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        .move-btn:hover {
+            background: rgba(167, 139, 250, 0.25);
+            border-color: #a78bfa;
+            color: #fff;
+        }
+
+        .move-btn:hover { transform: none; }
+
+        .move-to-fixed { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+        .move-to-fixed:hover { background: rgba(16, 185, 129, 0.2); border-color: #10b981; }
+
+        .move-to-subs  { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+        .move-to-subs:hover  { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; }
+
+        .vacant-slot {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            color: #64748b;
+            font-style: italic;
+            font-size: 0.88em;
+            text-align: center;
+        }
+
+        .generator-availability-note {
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #fbbf24;
+        }
     </style>
 </head>
 <body>
@@ -579,6 +805,55 @@
                 </div>
             </div>
         </div>
+
+        <!-- =============================================
+             ROSTER GENERATOR SECTION
+             ============================================= -->
+        <div class="roster-generator" id="roster-generator-section">
+            <h2>⚙️ Generador de Roster Fijo</h2>
+
+            <p class="generator-info">
+                Define el tamaño del roster y la composición de roles. El generador asignará automáticamente
+                a los jugadores según su especialización y roles disponibles. Después puedes reordenar
+                arrastrando las tarjetas o usando los botones.
+            </p>
+
+            <div class="generator-controls">
+                <div class="comp-inputs">
+                    <div class="comp-input-group">
+                        <label for="roster-size">👥 Tamaño del roster fijo</label>
+                        <input type="number" id="roster-size" min="1" max="40" value="20">
+                    </div>
+                    <div class="comp-input-group">
+                        <label for="comp-tanks">🛡️ Tanks</label>
+                        <input type="number" id="comp-tanks" min="0" max="10" value="2">
+                    </div>
+                    <div class="comp-input-group">
+                        <label for="comp-healers">💚 Healers</label>
+                        <input type="number" id="comp-healers" min="0" max="15" value="4">
+                    </div>
+                    <div class="comp-input-group">
+                        <label for="comp-dps">⚔️ DPS (auto)</label>
+                        <input type="number" id="comp-dps" min="0" max="30" value="14" readonly>
+                    </div>
+                </div>
+                <button id="btn-generate-roster">⚙️ Generar Roster</button>
+            </div>
+
+            <div id="roster-builder" class="roster-builder" style="display:none;">
+                <div class="roster-column" id="col-fixed">
+                    <h3>✅ Roster Fijo (<span id="fixed-count">0</span>)</h3>
+                    <div class="player-list" id="list-fixed" data-list="fixed">
+                    </div>
+                </div>
+                <div class="roster-column" id="col-subs">
+                    <h3>🔄 Suplentes (<span id="subs-count">0</span>)</h3>
+                    <div class="player-list" id="list-subs" data-list="subs">
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -1507,9 +1782,221 @@
             XLSX.writeFile(workbook, fileName);
         });
 
+        // =============================================
+        // ROSTER GENERATOR
+        // =============================================
+        let generatedFixedRoster = [];
+        let generatedSubstitutes = [];
+        let dragSrcCard = null;
+
+        function suggestComposition(totalSize) {
+            let tanks = 2;
+            let healers = Math.max(2, Math.round(totalSize * 0.2));
+            let dps = Math.max(0, totalSize - tanks - healers);
+            return { tanks, healers, dps };
+        }
+
+        function generateRosterFromAvailable(tankCount, healerCount, dpsCount) {
+            const used = new Set();
+
+            function pickFromPool(count, roleFilter) {
+                const primary = rosterSignups.filter(
+                    p => !used.has(p.name) && getMainRoleFromSpec(p.specialization) === roleFilter
+                );
+                const secondary = rosterSignups.filter(
+                    p => !used.has(p.name) &&
+                         getMainRoleFromSpec(p.specialization) !== roleFilter &&
+                         p.roles.includes(roleFilter)
+                );
+                const chosen = [];
+                for (const player of [...primary, ...secondary]) {
+                    if (chosen.length >= count) break;
+                    chosen.push(player);
+                    used.add(player.name);
+                }
+                return chosen;
+            }
+
+            const tanks     = pickFromPool(tankCount, 'Tank');
+            const healers   = pickFromPool(healerCount, 'Healer');
+            const dps       = pickFromPool(dpsCount, 'DPS');
+            const fixedRoster  = [...tanks, ...healers, ...dps];
+            const substitutes  = rosterSignups.filter(p => !used.has(p.name));
+            return { fixedRoster, substitutes };
+        }
+
+        function updateRosterCounts() {
+            document.getElementById('fixed-count').textContent = generatedFixedRoster.length;
+            document.getElementById('subs-count').textContent  = generatedSubstitutes.length;
+        }
+
+        function createPlayerCard(signup, listName) {
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.draggable = true;
+            card.dataset.playerName = signup.name;
+
+            const clr      = classColors[signup.class];
+            const classBg  = clr ? `#${clr.bg}` : '#334155';
+            const clsTxt   = clr ? `#${clr.text}` : '#ffffff';
+            const mainRole = getMainRoleFromSpec(signup.specialization) || 'DPS';
+            const roleClass = mainRole.toLowerCase();
+
+            const extraBadges = signup.roles
+                .filter(r => r !== mainRole)
+                .map(r => `<span class="role-badge role-${r.toLowerCase()}" style="font-size:0.72em">${r}</span>`)
+                .join('');
+
+            const moveBtnHtml = listName === 'subs'
+                ? `<button class="move-btn move-to-fixed" title="Mover al Roster Fijo">→ Fijo</button>`
+                : `<button class="move-btn move-to-subs" title="Mover a Suplentes">→ Suplente</button>`;
+
+            card.innerHTML = `
+                <span class="player-card-name">${signup.name}</span>
+                <span class="player-card-class" style="background:${classBg};color:${clsTxt}">${signup.class}</span>
+                <span class="player-card-spec">${signup.specialization}</span>
+                <span class="role-badge role-${roleClass}" style="font-size:0.75em">${mainRole}</span>
+                ${extraBadges}
+                ${signup.notes ? `<span class="player-card-notes">📝 ${signup.notes}</span>` : ''}
+                <div class="player-card-actions">${moveBtnHtml}</div>
+            `;
+
+            card.querySelector('.move-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (listName === 'subs') movePlayerToFixed(signup.name);
+                else movePlayerToSubs(signup.name);
+            });
+
+            card.addEventListener('dragstart', (e) => {
+                dragSrcCard = { name: signup.name, from: listName };
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', signup.name);
+            });
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+                dragSrcCard = null;
+            });
+
+            return card;
+        }
+
+        function movePlayerToFixed(playerName) {
+            const idx = generatedSubstitutes.findIndex(p => p.name === playerName);
+            if (idx === -1) return;
+            const [player] = generatedSubstitutes.splice(idx, 1);
+            generatedFixedRoster.push(player);
+            renderRosterBuilder();
+        }
+
+        function movePlayerToSubs(playerName) {
+            const idx = generatedFixedRoster.findIndex(p => p.name === playerName);
+            if (idx === -1) return;
+            const [player] = generatedFixedRoster.splice(idx, 1);
+            generatedSubstitutes.push(player);
+            renderRosterBuilder();
+        }
+
+        function renderRosterBuilder() {
+            const listFixed = document.getElementById('list-fixed');
+            const listSubs  = document.getElementById('list-subs');
+            listFixed.innerHTML = '';
+            listSubs.innerHTML  = '';
+
+            const roleOrder = ['Tank', 'Healer', 'DPS'];
+            const roleIcons = { Tank: '🛡️ Tanks', Healer: '💚 Healers', DPS: '⚔️ DPS' };
+            const grouped   = { Tank: [], Healer: [], DPS: [] };
+
+            generatedFixedRoster.forEach(p => {
+                const role = getMainRoleFromSpec(p.specialization) || 'DPS';
+                (grouped[role] || grouped['DPS']).push(p);
+            });
+
+            let hasContent = false;
+            roleOrder.forEach(role => {
+                if (grouped[role].length === 0) return;
+                hasContent = true;
+                const header = document.createElement('div');
+                header.className = 'role-group-header';
+                header.textContent = roleIcons[role];
+                listFixed.appendChild(header);
+                grouped[role].forEach(player => listFixed.appendChild(createPlayerCard(player, 'fixed')));
+            });
+            if (!hasContent) {
+                listFixed.innerHTML = '<div class="vacant-slot">Sin jugadores asignados</div>';
+            }
+
+            generatedSubstitutes.forEach(player => listSubs.appendChild(createPlayerCard(player, 'subs')));
+            if (generatedSubstitutes.length === 0) {
+                listSubs.innerHTML = '<div class="vacant-slot">Sin suplentes</div>';
+            }
+
+            updateRosterCounts();
+            setupDropZones();
+        }
+
+        function setupDropZones() {
+            document.querySelectorAll('.player-list').forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                    e.dataTransfer.dropEffect = 'move';
+                });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    if (!dragSrcCard) return;
+                    const targetList = zone.dataset.list;
+                    if (dragSrcCard.from === targetList) return;
+                    if (targetList === 'fixed') movePlayerToFixed(dragSrcCard.name);
+                    else movePlayerToSubs(dragSrcCard.name);
+                });
+            });
+        }
+
+        function updateDpsCount() {
+            const size    = parseInt(document.getElementById('roster-size').value)  || 0;
+            const tanks   = parseInt(document.getElementById('comp-tanks').value)   || 0;
+            const healers = parseInt(document.getElementById('comp-healers').value) || 0;
+            document.getElementById('comp-dps').value = Math.max(0, size - tanks - healers);
+        }
+
+        document.getElementById('roster-size').addEventListener('input', function() {
+            const size = parseInt(this.value) || 20;
+            const suggested = suggestComposition(size);
+            document.getElementById('comp-tanks').value   = suggested.tanks;
+            document.getElementById('comp-healers').value = suggested.healers;
+            updateDpsCount();
+        });
+        document.getElementById('comp-tanks').addEventListener('input', updateDpsCount);
+        document.getElementById('comp-healers').addEventListener('input', updateDpsCount);
+
+        document.getElementById('btn-generate-roster').addEventListener('click', function() {
+            if (rosterSignups.length === 0) {
+                alert('No hay jugadores inscritos en el roster aún.');
+                return;
+            }
+            const tankCount   = parseInt(document.getElementById('comp-tanks').value)   || 0;
+            const healerCount = parseInt(document.getElementById('comp-healers').value) || 0;
+            const dpsCount    = parseInt(document.getElementById('comp-dps').value)     || 0;
+            if (tankCount + healerCount + dpsCount === 0) {
+                alert('La composición debe tener al menos 1 jugador.');
+                return;
+            }
+
+            const result = generateRosterFromAvailable(tankCount, healerCount, dpsCount);
+            generatedFixedRoster = result.fixedRoster;
+            generatedSubstitutes = result.substitutes;
+
+            const builder = document.getElementById('roster-builder');
+            builder.style.display = '';
+            renderRosterBuilder();
+            builder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
         // Initialize when DOM is ready
-        window.addEventListener('load', function() {
-            updateAdminUI();
+        window.addEventListener('load', function() {            updateAdminUI();
 
             // Setup instructions constant
             const FIREBASE_SETUP_INSTRUCTIONS = '\n\nPara configurar Firebase:\n\n' +
