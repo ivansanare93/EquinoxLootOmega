@@ -865,7 +865,7 @@
         <!-- =============================================
              ROSTER GENERATOR SECTION
              ============================================= -->
-        <div class="roster-generator" id="roster-generator-section">
+        <div class="roster-generator" id="roster-generator-section" style="display:none;">
             <h2>⚙️ Generador de Roster Fijo</h2>
 
             <p class="generator-info">
@@ -1028,11 +1028,27 @@
             const status = document.getElementById('admin-status');
             const button = document.getElementById('btn-admin-auth');
             const actionsHeader = document.getElementById('actions-header');
+            const rosterGenerator = document.getElementById('roster-generator-section');
 
             status.textContent = isAdmin ? 'Modo administrador activo' : 'Modo usuario';
             status.style.color = isAdmin ? '#10b981' : '#fbbf24';
             button.textContent = isAdmin ? '🚪 Cerrar Sesión Admin' : '🔐 Acceso Administrador';
             actionsHeader.style.display = isAdmin ? '' : 'none';
+
+            // El Generador de Roster Fijo es exclusivo de administradores.
+            // Se oculta completamente para usuarios normales.
+            if (rosterGenerator) {
+                rosterGenerator.style.display = isAdmin ? '' : 'none';
+            }
+
+            // Al cerrar sesión, ocultamos también cualquier roster generado
+            // que pudiera estar visible antes del cambio de sesión.
+            if (!isAdmin) {
+                generatedFixedRoster = [];
+                generatedSubstitutes = [];
+                const builder = document.getElementById('roster-builder');
+                if (builder) builder.style.display = 'none';
+            }
         }
 
         function requestAdminPassword() {
@@ -2181,6 +2197,7 @@
         }
 
         function movePlayerToFixed(playerName) {
+            if (!isAdmin) return;
             const idx = generatedSubstitutes.findIndex(p => p.name === playerName);
             if (idx === -1) return;
 
@@ -2196,6 +2213,7 @@
         }
 
         function movePlayerToSubs(playerName) {
+            if (!isAdmin) return;
             const idx = generatedFixedRoster.findIndex(p => p.name === playerName);
             if (idx === -1) return;
 
@@ -2225,6 +2243,7 @@
         }
 
         function renderRosterBuilder() {
+            if (!isAdmin) return;
             const listFixed = document.getElementById('list-fixed');
             const listSubs = document.getElementById('list-subs');
             listFixed.innerHTML = '';
@@ -2277,6 +2296,7 @@
         }
 
         function setupDropZones() {
+            if (!isAdmin) return;
             if (dropZonesInitialized) return;
             dropZonesInitialized = true;
 
@@ -2340,6 +2360,10 @@
         document.getElementById('comp-healers').addEventListener('input', updateDpsCount);
 
         document.getElementById('btn-generate-roster').addEventListener('click', function() {
+            if (!isAdmin) {
+                alert('Esta función es exclusiva del administrador.');
+                return;
+            }
             if (rosterSignups.length === 0) {
                 alert('No hay jugadores inscritos en el roster aún.');
                 return;
