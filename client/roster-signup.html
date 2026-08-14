@@ -2396,25 +2396,22 @@
             const healerCount = parseInt(document.getElementById('comp-healers').value) || 0;
             const dpsCount = parseInt(document.getElementById('comp-dps').value) || 0;
 
-            const buildRows = (players) => players.map((player, index) => {
-                const availability = analyzeAvailability(player);
-                return [
-                    index + 1,
-                    player.name,
-                    player.class,
-                    player.specialization,
-                    getMainRoleFromSpec(player.specialization),
-                    player.roles.join(', '),
-                    availability.label.replace(/^\S+\s*/, ''),
-                    availability.score,
-                    availability.reasons.join(' '),
-                    player.notes || ''
-                ];
-            });
+            // Exportamos solo la información útil para el roster.
+            // La disponibilidad y su puntuación se utilizan internamente para generar
+            // el roster, pero NO se incluyen como columnas en el Excel.
+            const buildRows = (players) => players.map((player, index) => [
+                index + 1,
+                player.name,
+                player.class,
+                player.specialization,
+                getMainRoleFromSpec(player.specialization),
+                player.roles.join(', '),
+                player.notes || ''
+            ]);
 
             const headers = [
                 'Posición', 'Personaje', 'Clase', 'Especialización', 'Rol principal',
-                'Roles disponibles', 'Disponibilidad', 'Puntuación', 'Análisis', 'Notas'
+                'Roles disponibles', 'Notas'
             ];
 
             const workbook = XLSX.utils.book_new();
@@ -2428,8 +2425,8 @@
             const fixedSheet = XLSX.utils.aoa_to_sheet(fixedData);
             fixedSheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
             fixedSheet['!cols'] = [
-                { wch: 10 }, { wch: 22 }, { wch: 25 }, { wch: 20 }, { wch: 15 },
-                { wch: 25 }, { wch: 18 }, { wch: 12 }, { wch: 55 }, { wch: 45 }
+                { wch: 10 }, { wch: 22 }, { wch: 25 }, { wch: 20 }, { wch: 16 },
+                { wch: 28 }, { wch: 50 }
             ];
 
             const subsData = [
@@ -2451,19 +2448,13 @@
                 ['Healers', healerCount],
                 ['DPS', dpsCount],
                 ['Jugadores fijos', generatedFixedRoster.length],
-                ['Suplentes', generatedSubstitutes.length],
-                [],
-                ['Disponibilidad', 'Fijos', 'Suplentes', 'Total'],
-                ['Alta', generatedFixedRoster.filter(p => analyzeAvailability(p).level === 'high').length, generatedSubstitutes.filter(p => analyzeAvailability(p).level === 'high').length, [...generatedFixedRoster, ...generatedSubstitutes].filter(p => analyzeAvailability(p).level === 'high').length],
-                ['Condicionada', generatedFixedRoster.filter(p => analyzeAvailability(p).level === 'conditioned').length, generatedSubstitutes.filter(p => analyzeAvailability(p).level === 'conditioned').length, [...generatedFixedRoster, ...generatedSubstitutes].filter(p => analyzeAvailability(p).level === 'conditioned').length],
-                ['Baja', generatedFixedRoster.filter(p => analyzeAvailability(p).level === 'low').length, generatedSubstitutes.filter(p => analyzeAvailability(p).level === 'low').length, [...generatedFixedRoster, ...generatedSubstitutes].filter(p => analyzeAvailability(p).level === 'low').length],
-                ['No indicada', generatedFixedRoster.filter(p => analyzeAvailability(p).level === 'unknown').length, generatedSubstitutes.filter(p => analyzeAvailability(p).level === 'unknown').length, [...generatedFixedRoster, ...generatedSubstitutes].filter(p => analyzeAvailability(p).level === 'unknown').length]
+                ['Suplentes', generatedSubstitutes.length]
             ];
             const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-            summarySheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-            summarySheet['!cols'] = [{ wch: 28 }, { wch: 18 }, { wch: 18 }, { wch: 18 }];
+            summarySheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+            summarySheet['!cols'] = [{ wch: 28 }, { wch: 18 }];
 
-            // Estilos básicos para facilitar la lectura del Excel.
+            // Estilos para facilitar la lectura del Excel.
             const titleStyle = {
                 font: { bold: true, sz: 15, color: { rgb: 'FFFFFF' } },
                 fill: { fgColor: { rgb: '1F4E78' } },
@@ -2474,18 +2465,63 @@
                 fill: { fgColor: { rgb: '4472C4' } },
                 alignment: { horizontal: 'center', vertical: 'center' }
             };
+            const roleStyles = {
+                Tank:   { bg: '3B82F6', text: 'FFFFFF' },
+                Healer: { bg: '10B981', text: 'FFFFFF' },
+                DPS:    { bg: 'EF4444', text: 'FFFFFF' }
+            };
 
             ['A1'].forEach(addr => {
                 if (fixedSheet[addr]) fixedSheet[addr].s = titleStyle;
                 if (subsSheet[addr]) subsSheet[addr].s = titleStyle;
                 if (summarySheet[addr]) summarySheet[addr].s = titleStyle;
             });
-            for (let col = 0; col < headers.length; col++) {
-                const addr = XLSX.utils.encode_cell({ r: 2, c: col });
-                if (fixedSheet[addr]) fixedSheet[addr].s = headerStyle;
-                if (subsSheet[addr]) subsSheet[addr].s = headerStyle;
+
+            // Cabeceras y filtros: Excel permite ordenar/filtrar cualquier columna,
+            // incluida "Rol principal".
+            for (const sheet of [fixedSheet, subsSheet]) {
+                for (let col = 0; col < headers.length; col++) {
+                    const addr = XLSX.utils.encode_cell({ r: 2, c: col });
+                    if (sheet[addr]) sheet[addr].s = headerStyle;
+                }
+                const lastRow = sheet['!ref'] ? XLSX.utils.decode_range(sheet['!ref']).e.r + 1 : 3;
+                const lastCol = XLSX.utils.encode_col(headers.length - 1);
+                sheet['!autofilter'] = { ref: `A3:${lastCol}${lastRow}` };
+
+                // Colores de clase y de rol principal.
+                for (let row = 3; row < lastRow; row++) {
+                    const classCell = sheet[XLSX.utils.encode_cell({ r: row, c: 2 })];
+                    const roleCell = sheet[XLSX.utils.encode_cell({ r: row, c: 4 })];
+                    const rolesCell = sheet[XLSX.utils.encode_cell({ r: row, c: 5 })];
+
+                    if (classCell && classColors[classCell.v]) {
+                        const clr = classColors[classCell.v];
+                        classCell.s = {
+                            font: { bold: true, color: { rgb: clr.text } },
+                            fill: { fgColor: { rgb: clr.bg } },
+                            alignment: { horizontal: 'center', vertical: 'center' }
+                        };
+                    }
+
+                    if (roleCell && roleStyles[roleCell.v]) {
+                        const roleStyle = roleStyles[roleCell.v];
+                        roleCell.s = {
+                            font: { bold: true, color: { rgb: roleStyle.text } },
+                            fill: { fgColor: { rgb: roleStyle.bg } },
+                            alignment: { horizontal: 'center', vertical: 'center' }
+                        };
+                    }
+
+                    if (rolesCell) {
+                        rolesCell.s = {
+                            font: { bold: true, color: { rgb: '334155' } },
+                            alignment: { horizontal: 'center', vertical: 'center', wrapText: true }
+                        };
+                    }
+                }
             }
-            for (let col = 0; col < 4; col++) {
+
+            for (let col = 0; col < 2; col++) {
                 const addr = XLSX.utils.encode_cell({ r: 2, c: col });
                 if (summarySheet[addr]) summarySheet[addr].s = headerStyle;
             }
