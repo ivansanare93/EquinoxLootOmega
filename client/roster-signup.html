@@ -582,9 +582,8 @@
             background: rgba(167, 139, 250, 0.25);
             border-color: #a78bfa;
             color: #fff;
+            transform: none;
         }
-
-        .move-btn:hover { transform: none; }
 
         .move-to-fixed { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
         .move-to-fixed:hover { background: rgba(16, 185, 129, 0.2); border-color: #10b981; }
@@ -1842,30 +1841,72 @@
             const mainRole = getMainRoleFromSpec(signup.specialization) || 'DPS';
             const roleClass = mainRole.toLowerCase();
 
-            const extraBadges = signup.roles
+            // Player name (user data — set via textContent to prevent XSS)
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'player-card-name';
+            nameSpan.textContent = signup.name;
+            card.appendChild(nameSpan);
+
+            // Class badge (user data)
+            const classSpan = document.createElement('span');
+            classSpan.className = 'player-card-class';
+            classSpan.style.background = classBg;
+            classSpan.style.color = clsTxt;
+            classSpan.textContent = signup.class;
+            card.appendChild(classSpan);
+
+            // Specialization (user data)
+            const specSpan = document.createElement('span');
+            specSpan.className = 'player-card-spec';
+            specSpan.textContent = signup.specialization;
+            card.appendChild(specSpan);
+
+            // Main role badge (derived from trusted SPEC_TO_ROLE map — safe)
+            const mainRoleBadge = document.createElement('span');
+            mainRoleBadge.className = `role-badge role-${roleClass}`;
+            mainRoleBadge.style.fontSize = '0.75em';
+            mainRoleBadge.textContent = mainRole;
+            card.appendChild(mainRoleBadge);
+
+            // Extra role badges for secondary roles (role names are from a controlled set)
+            signup.roles
                 .filter(r => r !== mainRole)
-                .map(r => `<span class="role-badge role-${r.toLowerCase()}" style="font-size:0.72em">${r}</span>`)
-                .join('');
+                .forEach(r => {
+                    const badge = document.createElement('span');
+                    badge.className = `role-badge role-${r.toLowerCase()}`;
+                    badge.style.fontSize = '0.72em';
+                    badge.textContent = r;
+                    card.appendChild(badge);
+                });
 
-            const moveBtnHtml = listName === 'subs'
-                ? `<button class="move-btn move-to-fixed" title="Mover al Roster Fijo">→ Fijo</button>`
-                : `<button class="move-btn move-to-subs" title="Mover a Suplentes">→ Suplente</button>`;
+            // Notes (user data)
+            if (signup.notes) {
+                const notesSpan = document.createElement('span');
+                notesSpan.className = 'player-card-notes';
+                notesSpan.textContent = '📝 ' + signup.notes;
+                card.appendChild(notesSpan);
+            }
 
-            card.innerHTML = `
-                <span class="player-card-name">${signup.name}</span>
-                <span class="player-card-class" style="background:${classBg};color:${clsTxt}">${signup.class}</span>
-                <span class="player-card-spec">${signup.specialization}</span>
-                <span class="role-badge role-${roleClass}" style="font-size:0.75em">${mainRole}</span>
-                ${extraBadges}
-                ${signup.notes ? `<span class="player-card-notes">📝 ${signup.notes}</span>` : ''}
-                <div class="player-card-actions">${moveBtnHtml}</div>
-            `;
-
-            card.querySelector('.move-btn').addEventListener('click', (e) => {
+            // Action button
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'player-card-actions';
+            const moveBtn = document.createElement('button');
+            if (listName === 'subs') {
+                moveBtn.className = 'move-btn move-to-fixed';
+                moveBtn.title = 'Mover al Roster Fijo';
+                moveBtn.textContent = '→ Fijo';
+            } else {
+                moveBtn.className = 'move-btn move-to-subs';
+                moveBtn.title = 'Mover a Suplentes';
+                moveBtn.textContent = '→ Suplente';
+            }
+            moveBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (listName === 'subs') movePlayerToFixed(signup.name);
                 else movePlayerToSubs(signup.name);
             });
+            actionsDiv.appendChild(moveBtn);
+            card.appendChild(actionsDiv);
 
             card.addEventListener('dragstart', (e) => {
                 dragSrcCard = { name: signup.name, from: listName };
