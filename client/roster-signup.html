@@ -385,6 +385,288 @@
             margin-top: 3px;
             font-weight: bold;
         }
+
+        /* =============================================
+           ROSTER GENERATOR SECTION
+           ============================================= */
+        .roster-generator {
+            background-color: rgba(30, 41, 59, 0.8);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--dorado);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .roster-generator h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--dorado);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .generator-controls {
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .comp-inputs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .comp-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .comp-input-group label {
+            color: var(--dorado);
+            font-weight: bold;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .comp-input-group input {
+            width: 72px;
+            text-align: center;
+            padding: 8px 6px;
+        }
+
+        .comp-input-group input[readonly] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .generator-info {
+            font-size: 0.85em;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+
+        .roster-builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .roster-builder {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .roster-column {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            min-height: 200px;
+        }
+
+        .roster-column h3 {
+            margin: 0 0 12px 0;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+            padding-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        #col-fixed h3 { color: #10b981; }
+        #col-subs h3  { color: #f59e0b; }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 80px;
+            padding: 4px 0;
+            transition: background 0.15s;
+        }
+
+        .player-list.drag-over {
+            background: rgba(167, 139, 250, 0.1);
+            border-radius: 6px;
+            outline: 2px dashed #a78bfa;
+        }
+
+        .role-group-header {
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            padding: 6px 0 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 4px;
+        }
+
+        .role-group-header:first-child {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .player-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: grab;
+            flex-wrap: wrap;
+            transition: border-color 0.15s, background 0.15s;
+            user-select: none;
+        }
+
+        .player-card:hover {
+            border-color: rgba(167, 139, 250, 0.5);
+            background: rgba(44, 56, 78, 0.9);
+        }
+
+        .player-card.dragging {
+            opacity: 0.45;
+            cursor: grabbing;
+        }
+
+        .player-card-name {
+            font-weight: bold;
+            flex: 1;
+            min-width: 80px;
+            font-size: 0.95em;
+        }
+
+        .player-card-class {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.78em;
+            font-weight: bold;
+        }
+
+        .player-card-spec {
+            font-size: 0.82em;
+            color: #94a3b8;
+        }
+
+        .player-card-notes {
+            font-size: 0.76em;
+            color: #64748b;
+            font-style: italic;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .player-card-actions {
+            margin-left: auto;
+        }
+
+        .move-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 3px 9px;
+            font-size: 0.78em;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        .move-btn:hover {
+            background: rgba(167, 139, 250, 0.25);
+            border-color: #a78bfa;
+            color: #fff;
+            transform: none;
+        }
+
+        .move-to-fixed { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+        .move-to-fixed:hover { background: rgba(16, 185, 129, 0.2); border-color: #10b981; }
+
+        .move-to-subs  { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+        .move-to-subs:hover  { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; }
+
+        .vacant-slot {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            color: #64748b;
+            font-style: italic;
+            font-size: 0.88em;
+            text-align: center;
+        }
+
+        .generator-availability-note {
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #fbbf24;
+        }
+
+        .generator-analysis {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            color: #cbd5e1;
+            font-size: 0.86em;
+            line-height: 1.5;
+        }
+
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 0.72em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .availability-high {
+            background: rgba(16, 185, 129, 0.16);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .availability-conditioned {
+            background: rgba(245, 158, 11, 0.16);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .availability-low {
+            background: rgba(239, 68, 68, 0.16);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .availability-unknown {
+            background: rgba(100, 116, 139, 0.16);
+            color: #94a3b8;
+            border: 1px solid rgba(100, 116, 139, 0.35);
+        }
+
+        .player-card-reasons {
+            width: 100%;
+            font-size: 0.72em;
+            color: #94a3b8;
+            margin-top: 1px;
+        }
+
+        .player-card-over-capacity {
+            border-color: rgba(239, 68, 68, 0.7);
+        }
     </style>
 </head>
 <body>
@@ -579,6 +861,57 @@
                 </div>
             </div>
         </div>
+
+        <!-- =============================================
+             ROSTER GENERATOR SECTION
+             ============================================= -->
+        <div class="roster-generator" id="roster-generator-section">
+            <h2>⚙️ Generador de Roster Fijo</h2>
+
+            <p class="generator-info">
+                Define el tamaño del roster y la composición de roles. El generador asignará automáticamente
+                a los jugadores según su especialización y roles disponibles. Después puedes reordenar
+                arrastrando las tarjetas o usando los botones.
+            </p>
+
+            <div class="generator-controls">
+                <div class="comp-inputs">
+                    <div class="comp-input-group">
+                        <label for="roster-size">👥 Tamaño del roster fijo</label>
+                        <input type="number" id="roster-size" min="1" max="40" value="20">
+                    </div>
+                    <div class="comp-input-group">
+                        <label for="comp-tanks">🛡️ Tanks</label>
+                        <input type="number" id="comp-tanks" min="0" max="10" value="2">
+                    </div>
+                    <div class="comp-input-group">
+                        <label for="comp-healers">💚 Healers</label>
+                        <input type="number" id="comp-healers" min="0" max="15" value="4">
+                    </div>
+                    <div class="comp-input-group">
+                        <label for="comp-dps">⚔️ DPS (auto)</label>
+                        <input type="number" id="comp-dps" min="0" max="30" value="14" readonly>
+                    </div>
+                </div>
+                <button id="btn-generate-roster">⚙️ Generar Roster</button>
+            </div>
+
+            <div id="generator-analysis" class="generator-analysis" style="display:none;"></div>
+
+            <div id="roster-builder" class="roster-builder" style="display:none;">
+                <div class="roster-column" id="col-fixed">
+                    <h3>✅ Roster Fijo (<span id="fixed-count">0</span>)</h3>
+                    <div class="player-list" id="list-fixed" data-list="fixed">
+                    </div>
+                </div>
+                <div class="roster-column" id="col-subs">
+                    <h3>🔄 Suplentes (<span id="subs-count">0</span>)</h3>
+                    <div class="player-list" id="list-subs" data-list="subs">
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -1507,9 +1840,539 @@
             XLSX.writeFile(workbook, fileName);
         });
 
+        // =============================================
+        // ROSTER GENERATOR
+        // =============================================
+        let generatedFixedRoster = [];
+        let generatedSubstitutes = [];
+        let dragSrcCard = null;
+        let dropZonesInitialized = false;
+
+        function suggestComposition(totalSize) {
+            let tanks = totalSize >= 2 ? 2 : totalSize;
+            let healers = Math.min(Math.max(2, Math.round(totalSize * 0.2)), Math.max(0, totalSize - tanks));
+            let dps = Math.max(0, totalSize - tanks - healers);
+            return { tanks, healers, dps };
+        }
+
+        /*
+         * Analiza la disponibilidad a partir de las notas introducidas por el jugador.
+         * No inventa disponibilidad: si no hay información suficiente, la marca como
+         * "No indicada" y no penaliza al jugador de forma agresiva.
+         */
+        function analyzeAvailability(player) {
+            const notes = String(player.notes || '').trim().toLowerCase();
+            if (!notes) {
+                return {
+                    score: 50,
+                    level: 'unknown',
+                    label: '⚪ No indicada',
+                    reasons: ['No hay información de disponibilidad en las notas.']
+                };
+            }
+
+            let score = 70;
+            const reasons = [];
+
+            const severeAbsence = [
+                /ausent[oe]/i, /no (?:podr[eé]|puedo|est(?:aré|are))/i,
+                /no estar[ée]/i, /fuera/i, /vacaciones/i,
+                /falt(?:aré|are|a|an)/i, /no disponible/i
+            ];
+
+            const longAbsence = [
+                /gran parte/i, /todo (?:el )?mes/i, /todo agosto/i,
+                /todo septiembre/i, /todo octubre/i, /durante agosto/i,
+                /durante septiembre/i
+            ];
+
+            const conditioned = [
+                /altern/i, /depende/i, /condicion/i, /según/i, /segun/i,
+                /algunos/i, /algunas/i, /a veces/i, /no todos/i,
+                /solo viernes/i, /sólo viernes/i, /solo sábado/i,
+                /sólo sábado/i, /viernes sí/i, /viernes si/i,
+                /sábado altern/i, /sabado altern/i
+            ];
+
+            const positive = [
+                /disponible/i, /disponibilidad/i, /puedo/i, /estaré/i,
+                /estare/i, /siempre/i, /fijo/i, /todos los/i, /cualquier/i
+            ];
+
+            if (longAbsence.some(r => r.test(notes))) {
+                score -= 50;
+                reasons.push('La nota indica una ausencia prolongada.');
+            } else if (severeAbsence.some(r => r.test(notes))) {
+                score -= 35;
+                reasons.push('La nota indica una ausencia o imposibilidad de asistencia.');
+            }
+
+            if (conditioned.some(r => r.test(notes))) {
+                score -= 20;
+                reasons.push('La disponibilidad está condicionada por días o circunstancias.');
+            }
+
+            if (positive.some(r => r.test(notes))) {
+                score += 10;
+                reasons.push('La nota contiene una indicación de disponibilidad.');
+            }
+
+            // Días concretos: disponer de al menos un día concreto suele ser mejor
+            // que una ausencia completa, pero sigue siendo disponibilidad condicionada.
+            const dayMatches = ['lunes','martes','miércoles','miercoles','jueves','viernes','sábado','sabado','domingo']
+                .filter(day => notes.includes(day));
+            if (dayMatches.length > 0) {
+                reasons.push(`Días mencionados: ${[...new Set(dayMatches)].join(', ')}.`);
+                if (!conditioned.some(r => r.test(notes)) && score >= 70) {
+                    score += 5;
+                }
+            }
+
+            score = Math.max(0, Math.min(100, score));
+
+            let level = 'high';
+            let label = '🟢 Alta';
+            if (score < 45) {
+                level = 'low';
+                label = '🔴 Baja';
+            } else if (score < 75) {
+                level = 'conditioned';
+                label = '🟡 Condicionada';
+            }
+
+            if (reasons.length === 0) {
+                reasons.push('Disponibilidad indicada de forma general.');
+            }
+
+            return { score, level, label, reasons };
+        }
+
+        function getRoleFitScore(player, roleFilter) {
+            const mainRole = getMainRoleFromSpec(player.specialization);
+            if (mainRole === roleFilter) return 35;
+            if (player.roles.includes(roleFilter)) return 20;
+            return -1000;
+        }
+
+        function getPlayerSelectionScore(player, roleFilter) {
+            const availability = analyzeAvailability(player);
+            const roleFit = getRoleFitScore(player, roleFilter);
+            if (roleFit < 0) return -Infinity;
+
+            const notes = String(player.notes || '').toLowerCase();
+            let priority = 0;
+
+            // Preferencias explícitas, sin convertir cualquier texto en una regla dura.
+            if (notes.includes('fijo') || notes.includes('prioridad')) priority += 8;
+            if (notes.includes('oficial')) priority += 2;
+
+            // La disponibilidad pesa más que la antigüedad del registro.
+            return availability.score + roleFit + priority;
+        }
+
+        function sortCandidatesForRole(players, roleFilter) {
+            return [...players].sort((a, b) => {
+                const scoreDiff = getPlayerSelectionScore(b, roleFilter) - getPlayerSelectionScore(a, roleFilter);
+                if (scoreDiff !== 0) return scoreDiff;
+
+                // Desempate: rol principal antes que secundario.
+                const aPrimary = getMainRoleFromSpec(a.specialization) === roleFilter ? 1 : 0;
+                const bPrimary = getMainRoleFromSpec(b.specialization) === roleFilter ? 1 : 0;
+                if (aPrimary !== bPrimary) return bPrimary - aPrimary;
+
+                return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+            });
+        }
+
+        function generateRosterFromAvailable(tankCount, healerCount, dpsCount) {
+            const used = new Set();
+            const fixedRoster = [];
+
+            function pickFromPool(count, roleFilter) {
+                const available = rosterSignups.filter(p => !used.has(p.name));
+                const candidates = sortCandidatesForRole(
+                    available.filter(p => getRoleFitScore(p, roleFilter) > -1000),
+                    roleFilter
+                );
+
+                const chosen = [];
+                for (const player of candidates) {
+                    if (chosen.length >= count) break;
+                    chosen.push(player);
+                    used.add(player.name);
+                }
+
+                return chosen;
+            }
+
+            // Primero se cubren tanks/healers y después DPS.
+            fixedRoster.push(...pickFromPool(tankCount, 'Tank'));
+            fixedRoster.push(...pickFromPool(healerCount, 'Healer'));
+            fixedRoster.push(...pickFromPool(dpsCount, 'DPS'));
+
+            const substitutes = rosterSignups
+                .filter(p => !used.has(p.name))
+                .sort((a, b) => {
+                    const availabilityDiff = analyzeAvailability(b).score - analyzeAvailability(a).score;
+                    if (availabilityDiff !== 0) return availabilityDiff;
+                    return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+                });
+
+            return { fixedRoster, substitutes };
+        }
+
+        function updateRosterCounts() {
+            const rosterSize = parseInt(document.getElementById('roster-size').value) || 0;
+            const fixedCount = generatedFixedRoster.length;
+
+            document.getElementById('fixed-count').textContent = fixedCount;
+            document.getElementById('subs-count').textContent = generatedSubstitutes.length;
+
+            const colFixed = document.getElementById('col-fixed');
+            colFixed.classList.toggle('player-card-over-capacity', fixedCount > rosterSize);
+
+            renderGeneratorAnalysis();
+        }
+
+        function renderGeneratorAnalysis() {
+            const panel = document.getElementById('generator-analysis');
+            if (!panel) return;
+
+            const requested = parseInt(document.getElementById('roster-size').value) || 0;
+            const fixed = generatedFixedRoster.length;
+            const substitutes = generatedSubstitutes.length;
+
+            const levels = { high: 0, conditioned: 0, low: 0, unknown: 0 };
+            [...generatedFixedRoster, ...generatedSubstitutes].forEach(player => {
+                levels[analyzeAvailability(player).level]++;
+            });
+
+            const missing = Math.max(0, requested - fixed);
+            const over = Math.max(0, fixed - requested);
+
+            let capacityText = `🧮 Fijos: <strong>${fixed}/${requested}</strong> · Suplentes: <strong>${substitutes}</strong>`;
+            if (missing > 0) {
+                capacityText += ` · ⚠️ Faltan <strong>${missing}</strong> plazas por falta de candidatos válidos.`;
+            } else if (over > 0) {
+                capacityText += ` · 🔴 El roster supera el tamaño configurado en <strong>${over}</strong>.`;
+            } else {
+                capacityText += ' · ✅ Tamaño del roster cubierto.';
+            }
+
+            panel.innerHTML =
+                `<div>${capacityText}</div>` +
+                `<div style="margin-top:5px;">` +
+                `Disponibilidad analizada: 🟢 ${levels.high} alta · ` +
+                `🟡 ${levels.conditioned} condicionada · ` +
+                `🔴 ${levels.low} baja · ` +
+                `⚪ ${levels.unknown} no indicada` +
+                `</div>` +
+                `<div style="margin-top:5px;color:#94a3b8;">` +
+                `El generador prioriza disponibilidad + rol principal + roles secundarios. Las notas se interpretan como apoyo, no como una certeza absoluta.` +
+                `</div>`;
+
+            panel.style.display = '';
+        }
+
+        function createPlayerCard(signup, listName) {
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.draggable = true;
+            card.dataset.playerName = signup.name;
+
+            const clr = classColors[signup.class];
+            const classBg = clr ? `#${clr.bg}` : '#334155';
+            const clsTxt = clr ? `#${clr.text}` : '#ffffff';
+            const mainRole = getMainRoleFromSpec(signup.specialization) || 'DPS';
+            const roleClass = mainRole.toLowerCase();
+            const availability = analyzeAvailability(signup);
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'player-card-name';
+            nameSpan.textContent = signup.name;
+            card.appendChild(nameSpan);
+
+            const classSpan = document.createElement('span');
+            classSpan.className = 'player-card-class';
+            classSpan.style.background = classBg;
+            classSpan.style.color = clsTxt;
+            classSpan.textContent = signup.class;
+            card.appendChild(classSpan);
+
+            const specSpan = document.createElement('span');
+            specSpan.className = 'player-card-spec';
+            specSpan.textContent = signup.specialization;
+            card.appendChild(specSpan);
+
+            const mainRoleBadge = document.createElement('span');
+            mainRoleBadge.className = `role-badge role-${roleClass}`;
+            mainRoleBadge.style.fontSize = '0.75em';
+            mainRoleBadge.textContent = mainRole;
+            card.appendChild(mainRoleBadge);
+
+            signup.roles
+                .filter(r => r !== mainRole)
+                .forEach(r => {
+                    const badge = document.createElement('span');
+                    const safeRoleClass = ['tank', 'offtank', 'healer', 'dps'].includes(String(r).toLowerCase())
+                        ? String(r).toLowerCase()
+                        : 'dps';
+                    badge.className = `role-badge role-${safeRoleClass}`;
+                    badge.style.fontSize = '0.72em';
+                    badge.textContent = r;
+                    card.appendChild(badge);
+                });
+
+            const availabilityBadge = document.createElement('span');
+            availabilityBadge.className = `availability-badge availability-${availability.level}`;
+            availabilityBadge.textContent = availability.label;
+            availabilityBadge.title = availability.reasons.join(' ');
+            card.appendChild(availabilityBadge);
+
+            if (signup.notes) {
+                const notesSpan = document.createElement('span');
+                notesSpan.className = 'player-card-notes';
+                notesSpan.textContent = '📝 ' + signup.notes;
+                card.appendChild(notesSpan);
+            }
+
+            const reasonsSpan = document.createElement('span');
+            reasonsSpan.className = 'player-card-reasons';
+            reasonsSpan.textContent = `Disponibilidad: ${availability.reasons.join(' ')}`;
+            card.appendChild(reasonsSpan);
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'player-card-actions';
+
+            const moveBtn = document.createElement('button');
+            if (listName === 'subs') {
+                moveBtn.className = 'move-btn move-to-fixed';
+                moveBtn.title = 'Mover al Roster Fijo';
+                moveBtn.textContent = '→ Fijo';
+            } else {
+                moveBtn.className = 'move-btn move-to-subs';
+                moveBtn.title = 'Mover a Suplentes';
+                moveBtn.textContent = '→ Suplente';
+            }
+
+            moveBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (listName === 'subs') movePlayerToFixed(signup.name);
+                else movePlayerToSubs(signup.name);
+            });
+
+            actionsDiv.appendChild(moveBtn);
+            card.appendChild(actionsDiv);
+
+            card.addEventListener('dragstart', (e) => {
+                dragSrcCard = { name: signup.name, from: listName };
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', signup.name);
+            });
+
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+                dragSrcCard = null;
+                document.querySelectorAll('.player-list').forEach(zone => zone.classList.remove('drag-over'));
+            });
+
+            return card;
+        }
+
+        function movePlayerToFixed(playerName) {
+            const idx = generatedSubstitutes.findIndex(p => p.name === playerName);
+            if (idx === -1) return;
+
+            const rosterSize = parseInt(document.getElementById('roster-size').value) || 0;
+            if (generatedFixedRoster.length >= rosterSize) {
+                alert(`El Roster Fijo ya tiene ${rosterSize} jugadores. Mueve primero a alguien a Suplentes para liberar una plaza.`);
+                return;
+            }
+
+            const [player] = generatedSubstitutes.splice(idx, 1);
+            generatedFixedRoster.push(player);
+            renderRosterBuilder();
+        }
+
+        function movePlayerToSubs(playerName) {
+            const idx = generatedFixedRoster.findIndex(p => p.name === playerName);
+            if (idx === -1) return;
+
+            const [player] = generatedFixedRoster.splice(idx, 1);
+            generatedSubstitutes.push(player);
+            renderRosterBuilder();
+        }
+
+        function reorderPlayerWithinList(playerName, targetPlayerName, listName, insertAfter) {
+            const list = listName === 'fixed' ? generatedFixedRoster : generatedSubstitutes;
+            const fromIndex = list.findIndex(p => p.name === playerName);
+            const targetIndex = list.findIndex(p => p.name === targetPlayerName);
+
+            if (fromIndex === -1 || targetIndex === -1 || fromIndex === targetIndex) return;
+
+            const [player] = list.splice(fromIndex, 1);
+            let destinationIndex = list.findIndex(p => p.name === targetPlayerName);
+
+            if (destinationIndex === -1) {
+                list.push(player);
+                return;
+            }
+
+            if (insertAfter) destinationIndex++;
+            list.splice(destinationIndex, 0, player);
+            renderRosterBuilder();
+        }
+
+        function renderRosterBuilder() {
+            const listFixed = document.getElementById('list-fixed');
+            const listSubs = document.getElementById('list-subs');
+            listFixed.innerHTML = '';
+            listSubs.innerHTML = '';
+
+            const roleOrder = ['Tank', 'Healer', 'DPS'];
+            const roleIcons = { Tank: '🛡️ Tanks', Healer: '💚 Healers', DPS: '⚔️ DPS' };
+            const grouped = { Tank: [], Healer: [], DPS: [] };
+
+            generatedFixedRoster.forEach(p => {
+                const role = getMainRoleFromSpec(p.specialization) || 'DPS';
+                (grouped[role] || grouped.DPS).push(p);
+            });
+
+            let hasContent = false;
+            roleOrder.forEach(role => {
+                if (grouped[role].length === 0) return;
+                hasContent = true;
+
+                const header = document.createElement('div');
+                header.className = 'role-group-header';
+                header.textContent = roleIcons[role];
+                listFixed.appendChild(header);
+
+                grouped[role].forEach(player => {
+                    listFixed.appendChild(createPlayerCard(player, 'fixed'));
+                });
+            });
+
+            if (!hasContent) {
+                const empty = document.createElement('div');
+                empty.className = 'vacant-slot';
+                empty.textContent = 'Sin jugadores asignados';
+                listFixed.appendChild(empty);
+            }
+
+            generatedSubstitutes.forEach(player => {
+                listSubs.appendChild(createPlayerCard(player, 'subs'));
+            });
+
+            if (generatedSubstitutes.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'vacant-slot';
+                empty.textContent = 'Sin suplentes';
+                listSubs.appendChild(empty);
+            }
+
+            updateRosterCounts();
+            setupDropZones();
+        }
+
+        function setupDropZones() {
+            if (dropZonesInitialized) return;
+            dropZonesInitialized = true;
+
+            document.querySelectorAll('.player-list').forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                    e.dataTransfer.dropEffect = 'move';
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+
+                    if (!dragSrcCard) return;
+
+                    const targetList = zone.dataset.list;
+                    const targetCard = e.target.closest('.player-card');
+
+                    // Drop dentro de la misma lista: reordenar.
+                    if (dragSrcCard.from === targetList) {
+                        if (targetCard && targetCard.dataset.playerName !== dragSrcCard.name) {
+                            const rect = targetCard.getBoundingClientRect();
+                            const insertAfter = e.clientY > rect.top + rect.height / 2;
+                            reorderPlayerWithinList(
+                                dragSrcCard.name,
+                                targetCard.dataset.playerName,
+                                targetList,
+                                insertAfter
+                            );
+                        }
+                        return;
+                    }
+
+                    // Drop entre listas: mover.
+                    if (targetList === 'fixed') movePlayerToFixed(dragSrcCard.name);
+                    else if (targetList === 'subs') movePlayerToSubs(dragSrcCard.name);
+                });
+            });
+        }
+
+        function updateDpsCount() {
+            const size    = parseInt(document.getElementById('roster-size').value)  || 0;
+            const tanks   = parseInt(document.getElementById('comp-tanks').value)   || 0;
+            const healers = parseInt(document.getElementById('comp-healers').value) || 0;
+            document.getElementById('comp-dps').value = Math.max(0, size - tanks - healers);
+        }
+
+        document.getElementById('roster-size').addEventListener('input', function() {
+            const size = parseInt(this.value) || 20;
+            const suggested = suggestComposition(size);
+            document.getElementById('comp-tanks').value   = suggested.tanks;
+            document.getElementById('comp-healers').value = suggested.healers;
+            updateDpsCount();
+        });
+        document.getElementById('comp-tanks').addEventListener('input', updateDpsCount);
+        document.getElementById('comp-healers').addEventListener('input', updateDpsCount);
+
+        document.getElementById('btn-generate-roster').addEventListener('click', function() {
+            if (rosterSignups.length === 0) {
+                alert('No hay jugadores inscritos en el roster aún.');
+                return;
+            }
+
+            const rosterSize = parseInt(document.getElementById('roster-size').value) || 0;
+            const tankCount = parseInt(document.getElementById('comp-tanks').value) || 0;
+            const healerCount = parseInt(document.getElementById('comp-healers').value) || 0;
+            const dpsCount = parseInt(document.getElementById('comp-dps').value) || 0;
+            const compositionTotal = tankCount + healerCount + dpsCount;
+
+            if (rosterSize < 1) {
+                alert('El tamaño del roster debe ser al menos 1.');
+                return;
+            }
+
+            if (compositionTotal !== rosterSize) {
+                alert(`La composición no coincide con el tamaño del roster: ${compositionTotal} / ${rosterSize}.`);
+                return;
+            }
+
+            const result = generateRosterFromAvailable(tankCount, healerCount, dpsCount);
+            generatedFixedRoster = result.fixedRoster;
+            generatedSubstitutes = result.substitutes;
+
+            const builder = document.getElementById('roster-builder');
+            builder.style.display = '';
+            renderRosterBuilder();
+            builder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
         // Initialize when DOM is ready
-        window.addEventListener('load', function() {
-            updateAdminUI();
+        window.addEventListener('load', function() {            updateAdminUI();
 
             // Setup instructions constant
             const FIREBASE_SETUP_INSTRUCTIONS = '\n\nPara configurar Firebase:\n\n' +
