@@ -12,7 +12,9 @@ const bosses = [
     { id: 5, name: 'Sszorak', description: 'Jefe de la nueva banda.' },
     { id: 6, name: 'Los Colmillos Gemelos', description: 'Jefe de la nueva banda.' },
     { id: 7, name: 'El Altar Enroscado', description: 'Jefe de la nueva banda.' },
-    { id: 8, name: 'Ula\'tek', description: 'Jefe final de la nueva banda.' }
+    { id: 8, name: 'Ula\'tek', description: 'Jefe final de la nueva banda.' },
+    { id: 9, name: 'Nymrissa', description: 'Jefe boss de mundo.' }
+    
 ];
 
 // ==========================================
