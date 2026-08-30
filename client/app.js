@@ -17,23 +17,23 @@ function extractDataArray(docSnap) {
         console.log('extractDataArray: Document does not exist or is null');
         return [];
     }
-    
+
     try {
         const docData = docSnap.data();
-        
+
         if (!docData) {
             console.warn('extractDataArray: Document exists but data() returned null/undefined');
             return [];
         }
-        
+
         const dataField = docData.data;
-        
+
         // Validate that the data field is actually an array
         if (!Array.isArray(dataField)) {
             console.warn('extractDataArray: Invalid data format - expected array, got:', typeof dataField);
             return [];
         }
-        
+
         return dataField;
     } catch (error) {
         console.error('extractDataArray: Error extracting data array:', error);
@@ -122,23 +122,23 @@ function isItemCompatibleWithClass(item, className, characterSpec = null) {
     // Verificar si es un trinket con compatibilidad específica de especializaciones
     if (item.type === 'Trinket' && trinketSpecializationCompatibility[item.name] && characterSpec) {
         const specCompat = trinketSpecializationCompatibility[item.name];
-        
+
         // Si la clase no tiene especializaciones definidas, usa compatibilidad a nivel de clase
         if (!specCompat[className]) {
             const compatList = trinketCompatibility[item.name] || [];
             return compatList.includes(className) || compatList.includes('Todas');
         }
-        
+
         // Verificar si la especialización está en la lista de compatibles
         return specCompat[className].includes(characterSpec);
     }
-    
+
     // Verificar si es un trinket con compatibilidad simple (solo clases)
     if (item.type === 'Trinket' && trinketCompatibility[item.name]) {
         const compatList = trinketCompatibility[item.name];
         return compatList.includes(className) || compatList.includes('Todas');
     }
-    
+
     // Para otros tipos de items, usar la compatibilidad de armadura estándar
     const compatList = armorCompatibility[item.type] || [];
     return compatList.includes(className) || compatList.includes('Todas');
@@ -169,18 +169,18 @@ function formatSelectOption(text, parentText) {
 function updateSpecializationsForClass(className) {
     const especSelect = document.getElementById('especializacion');
     especSelect.innerHTML = '';
-    
+
     if (!className) {
         especSelect.appendChild(createOption('', 'Selecciona clase primero'));
         return;
     }
-    
+
     const specs = classSpecializations[className] || [];
     if (specs.length === 0) {
         especSelect.appendChild(createOption('', 'No hay especializaciones'));
         return;
     }
-    
+
     specs.forEach(spec => {
         especSelect.appendChild(createOption(spec, spec));
     });
@@ -191,14 +191,14 @@ function updateSpecializationsForClass(className) {
 function updateCharacterList() {
     const lista = document.getElementById('lista-personajes');
     lista.innerHTML = '';
-    
+
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
         console.error('updateCharacterList: characters is not an array, type:', typeof characters);
         characters = []; // Reset to empty array
         return;
     }
-    
+
     characters.forEach((char, index) => {
         const li = document.createElement('li');
         li.innerHTML = `${char.name} - ${char.class} (${char.specialization}) 
@@ -217,29 +217,29 @@ function editCharacter(index) {
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
-    
+
     const char = characters[index];
     if (!char) {
         console.error('editCharacter: Character not found at index:', index);
         return;
     }
-    
+
     document.getElementById('nombre').value = char.name;
     document.getElementById('clase').value = char.class;
-    
+
     // Actualizar especializaciones según clase y luego seleccionar la actual
     updateSpecializationsForClass(char.class);
     document.getElementById('especializacion').value = char.specialization;
-    
+
     // Update button text to indicate edit mode
     document.getElementById('btn-submit-personaje').textContent = 'Guardar Cambios';
-    
-    document.getElementById('form-personaje').onsubmit = function(e) {
+
+    document.getElementById('form-personaje').onsubmit = function (e) {
         e.preventDefault();
         const charData = getCharacterFormData();
         const error = validateCharacterData(charData);
         if (error) return alert(error);
-        
+
         characters[index] = charData;
         saveData();
         invalidateTableCache();
@@ -259,13 +259,13 @@ function deleteCharacter(index) {
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
-    
+
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
         console.error('deleteCharacter: assignments is not an array, type:', typeof assignments);
         assignments = [];
     }
-    
+
     const charName = characters[index]?.name;
     assignments = assignments.filter(a => a.character !== charName);
     characters.splice(index, 1);
@@ -280,22 +280,22 @@ function addCharacter(e) {
     const charData = getCharacterFormData();
     const error = validateCharacterData(charData);
     if (error) return alert(error);
-    
+
     // Validate that characters is an array before using .some()
     if (!Array.isArray(characters)) {
         console.error('addCharacter: characters is not an array, type:', typeof characters);
         characters = [];
     }
-    
+
     if (characters.some(c => c.name === charData.name)) {
         return alert('Nombre duplicado');
     }
-    
+
     characters.push(charData);
     saveData();
     invalidateTableCache();
     updateCharacterList();
-    
+
     // Resetear formulario y especialización
     this.reset();
     updateSpecializationsForClass(''); // Limpiar especialización
@@ -314,12 +314,12 @@ function showLoot(bossId) {
     lista.innerHTML = '';
     const filtroTipo = document.getElementById('filtro-tipo-loot').value;
     const items = (lootByBoss[bossId] || []).filter(item => !filtroTipo || item.type === filtroTipo);
-    
+
     items.forEach(item => {
         const li = document.createElement('li');
         li.classList.add('tooltip');
         li.textContent = item.name;
-        
+
         const tooltip = document.createElement('span');
         tooltip.classList.add('tooltiptext');
         tooltip.innerHTML = `
@@ -339,30 +339,30 @@ function updateSelects() {
     const selectPersonaje = document.getElementById('select-personaje');
     const selectJefe = document.getElementById('select-jefe-asignacion');
     const selectItem = document.getElementById('select-item');
-    
+
     // Llenar selects de personajes
     selectPersonaje.innerHTML = '<option value="">Selecciona Personaje</option>';
-    
+
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
         console.error('updateSelects: characters is not an array, type:', typeof characters);
         characters = []; // Reset to empty array
     }
-    
+
     characters.forEach(char => {
         selectPersonaje.appendChild(createOption(char.name, char.name));
     });
-    
+
     // Llenar selects de jefes
     selectJefe.innerHTML = '<option value="">Selecciona Jefe</option>';
     bosses.forEach(boss => {
         selectJefe.appendChild(createOption(boss.id, boss.name));
     });
-    
+
     // Llenar selects de items (sin filtro inicialmente)
     selectItem.innerHTML = '<option value="">Selecciona Item</option>';
     selectItem.disabled = true;
-    
+
     filterItemsByCharacter();
 }
 
@@ -409,24 +409,24 @@ function filterItemsByCharacter() {
     const selectItem = document.getElementById('select-item');
     const charName = selectPersonaje.value;
     const bossId = selectJefe.value;
-    
+
     selectItem.innerHTML = '<option value="">Selecciona Item</option>';
     selectItem.disabled = false;
-    
+
     // Si no hay personaje seleccionado, desactivar el select
     if (!charName) {
         selectItem.innerHTML = '<option value="">Primero selecciona un personaje</option>';
         selectItem.disabled = true;
         return;
     }
-    
+
     // Si no hay jefe seleccionado, desactivar el select
     if (!bossId) {
         selectItem.innerHTML = '<option value="">Primero selecciona un jefe</option>';
         selectItem.disabled = true;
         return;
     }
-    
+
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
         console.error('filterItemsByCharacter: characters is not an array, type:', typeof characters);
@@ -434,25 +434,25 @@ function filterItemsByCharacter() {
         selectItem.disabled = true;
         return;
     }
-    
+
     const char = characters.find(c => c.name === charName);
     if (!char) return;
-    
+
     // Obtener tipos equipables
     const equippableTypes = getEquippableItemTypes();
-    
+
     // Filtrar items compatibles con la clase del personaje Y del jefe seleccionado Y que sean equipables
     const bossItems = lootByBoss[bossId] || [];
-    const compatibleItems = bossItems.filter(item => 
-        equippableTypes.has(item.type) && 
+    const compatibleItems = bossItems.filter(item =>
+        equippableTypes.has(item.type) &&
         isItemCompatibleWithClass(item, char.class, char.specialization)
     );
-    
+
     if (compatibleItems.length === 0) {
         selectItem.appendChild(createOption('', 'No hay ítems compatibles para esta clase en este jefe'));
         return;
     }
-    
+
     compatibleItems.forEach(item => {
         const bossName = bossIndexById.get(item.bossId)?.name || 'Unknown';
         selectItem.appendChild(createOption(item.name, formatSelectOption(item.name, bossName)));
@@ -462,23 +462,23 @@ function filterItemsByCharacter() {
 function updateFilters() {
     const filtroClase = document.getElementById('filtro-clase');
     const filtroJefe = document.getElementById('filtro-jefe');
-    
+
     // Resetear filtros
     filtroClase.innerHTML = '<option value="">Todas</option>';
     filtroJefe.innerHTML = '<option value="">Todos</option>';
-    
+
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
         console.error('updateFilters: characters is not an array, type:', typeof characters);
         characters = []; // Reset to empty array
     }
-    
+
     // Agregar clases únicas
     const classes = [...new Set(characters.map(c => c.class))];
     classes.forEach(cl => {
         filtroClase.appendChild(createOption(cl, cl));
     });
-    
+
     // Agregar bosses
     bosses.forEach(b => {
         filtroJefe.appendChild(createOption(b.id, b.name));
@@ -491,44 +491,44 @@ function assignItem() {
     const dificultad = document.getElementById('select-dificultad').value;
     const bossSelectValue = document.getElementById('select-jefe-asignacion').value;
     const selectedBossId = bossSelectValue !== '' ? parseInt(bossSelectValue, 10) : NaN;
-    
+
     // Validación
     if (!charName || !itemName || !dificultad) {
         return alert('Selecciona todos los campos');
     }
-    
+
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
         console.error('assignItem: characters is not an array, type:', typeof characters);
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
-    
+
     // Validate that assignments is an array
     if (!Array.isArray(assignments)) {
         console.error('assignItem: assignments is not an array, type:', typeof assignments);
         assignments = [];
     }
-    
+
     const item = itemIndexByName.get(itemName);
     const char = characters.find(c => c.name === charName);
-    
+
     // Validar que el personaje exista
     if (!char) {
         console.error('assignItem: Character not found in characters array');
         return alert('Error: Personaje no encontrado. Por favor intenta de nuevo.');
     }
-    
+
     // Validar que el item exista
     if (!item) {
         console.error('assignItem: Item not found in itemIndexByName map');
         return alert('Error: Item no encontrado. Por favor intenta de nuevo.');
     }
-    
+
     if (!isItemCompatibleWithClass(item, char.class, char.specialization)) {
         return alert('Este item no es compatible con la clase o especialización del personaje');
     }
-    
+
     // Crear asignación con iLvl calculado
     const assignment = {
         character: charName,
@@ -539,12 +539,12 @@ function assignItem() {
         tipo: 'Necesidad',
         note: ''
     };
-    
+
     assignments.push(assignment);
     saveData();
     invalidateTableCache();
     updateTable();
-    
+
     // Resetear selects para nueva asignación limpia
     document.getElementById('select-personaje').value = '';
     document.getElementById('select-jefe-asignacion').value = '';
@@ -592,7 +592,7 @@ function getFilterKey() {
  */
 function generateCharacterRow(char, assigned) {
     const row = document.createElement('tr');
-    
+
     // Create a map of assignment to global index for O(1) lookups
     // This prevents O(n²) complexity from repeated findIndex calls
     const assignmentIndexMap = new Map();
@@ -600,22 +600,22 @@ function generateCharacterRow(char, assigned) {
         const globalIndex = assignments.findIndex(assign => assign === a);
         assignmentIndexMap.set(a, globalIndex);
     });
-    
+
     // Generar HTML de items asignados con caching de búsquedas
     const assignedHtml = assigned.map((a) => {
         const item = itemIndexByName.get(a.item);
         const bossName = bossIndexById.get(a.boss)?.name || 'Unknown';
         const description = item ? item.description : 'Item no encontrado';
-        
+
         // Get the pre-calculated global index
         const globalIndex = assignmentIndexMap.get(a);
-        
+
         // Validate that we found a valid index
         if (globalIndex === undefined || globalIndex === -1) {
             console.error(`generateCharacterRow: Could not find global index for assignment ${a.item} for ${char.name}`);
             return ''; // Skip this assignment if index not found
         }
-        
+
         return `
             <span class="tooltip">
                 ${a.item} (${a.dificultad}, ilvl ${a.ilvl})
@@ -624,18 +624,18 @@ function generateCharacterRow(char, assigned) {
             <button class="btn-delete-assign" data-index="${globalIndex}">Eliminar</button><br>
         `;
     }).join('');
-    
+
     // Generar HTML de notas y tipo
     const notesHtml = assigned.map((a) => {
         // Get the pre-calculated global index
         const globalIndex = assignmentIndexMap.get(a);
-        
+
         // Validate that we found a valid index
         if (globalIndex === undefined || globalIndex === -1) {
             console.error(`generateCharacterRow: Could not find global index for assignment ${a.item} for ${char.name}`);
             return ''; // Skip this assignment if index not found
         }
-        
+
         return `
             <div style="margin-bottom: 8px;">
                 <select class="tipo-select" data-index="${globalIndex}" style="padding: 4px; margin-right: 5px;">
@@ -646,7 +646,7 @@ function generateCharacterRow(char, assigned) {
             </div>
         `;
     }).join('');
-    
+
     row.innerHTML = `
         <td>${char.name}</td>
         <td>${char.class} (${char.specialization})</td>
@@ -654,7 +654,7 @@ function generateCharacterRow(char, assigned) {
         <td>${assigned.length > 0 ? 'Varios' : ''}</td>
         <td>${notesHtml || ''}</td>
     `;
-    
+
     return row;
 }
 
@@ -664,7 +664,7 @@ function updateTable() {
     const filtroClase = document.getElementById('filtro-clase').value;
     const filtroJefe = document.getElementById('filtro-jefe').value;
     const filtroDificultad = document.getElementById('filtro-dificultad').value;
-    
+
     // Validate that characters is an array
     if (!Array.isArray(characters)) {
         console.error('updateTable: characters is not an array, type:', typeof characters);
@@ -672,7 +672,7 @@ function updateTable() {
         tbody.innerHTML = '';
         return;
     }
-    
+
     // Verify assignments is also an array
     if (!Array.isArray(assignments)) {
         console.error('updateTable: assignments is not an array, type:', typeof assignments);
@@ -680,29 +680,29 @@ function updateTable() {
         tbody.innerHTML = '';
         return;
     }
-    
+
     // Verificar si la tabla necesita reconstrucción
     const filterChanged = tableCache.lastFilters !== currentFilterKey;
-    const dataChanged = 
+    const dataChanged =
         tableCache.lastCharacterCount !== characters.length ||
         tableCache.lastAssignmentCount !== assignments.length;
-    
+
     // Si los datos base no cambiaron y solo cambiaron filtros, actualización parcial
     if (!dataChanged && filterChanged) {
         // Actualización parcial: mantener estructura, actualizar visibilidad
         tbody.innerHTML = '';
-        
-        const filteredCharacters = characters.filter(char => 
+
+        const filteredCharacters = characters.filter(char =>
             !filtroClase || char.class === filtroClase
         );
-        
+
         filteredCharacters.forEach((char) => {
-            const assigned = assignments.filter(a => 
-                a.character === char.name && 
-                (!filtroJefe || a.boss == filtroJefe) && 
+            const assigned = assignments.filter(a =>
+                a.character === char.name &&
+                (!filtroJefe || a.boss == filtroJefe) &&
                 (!filtroDificultad || a.dificultad === filtroDificultad)
             );
-            
+
             // Solo mostrar si hay asignaciones o si no hay filtros aplicados
             if (assigned.length > 0 || (!filtroClase && !filtroJefe && !filtroDificultad)) {
                 tbody.appendChild(generateCharacterRow(char, assigned));
@@ -711,29 +711,29 @@ function updateTable() {
     } else if (dataChanged || !tableCache.lastFilters) {
         // Reconstrucción completa solo si los datos cambiaron
         tbody.innerHTML = '';
-        
-        const filteredCharacters = characters.filter(char => 
+
+        const filteredCharacters = characters.filter(char =>
             !filtroClase || char.class === filtroClase
         );
-        
+
         filteredCharacters.forEach((char) => {
-            const assigned = assignments.filter(a => 
-                a.character === char.name && 
-                (!filtroJefe || a.boss == filtroJefe) && 
+            const assigned = assignments.filter(a =>
+                a.character === char.name &&
+                (!filtroJefe || a.boss == filtroJefe) &&
                 (!filtroDificultad || a.dificultad === filtroDificultad)
             );
-            
+
             // Solo mostrar si hay asignaciones o si no hay filtros aplicados
             if (assigned.length > 0 || (!filtroClase && !filtroJefe && !filtroDificultad)) {
                 tbody.appendChild(generateCharacterRow(char, assigned));
             }
         });
-        
+
         // Actualizar caché
         tableCache.lastCharacterCount = characters.length;
         tableCache.lastAssignmentCount = assignments.length;
     }
-    
+
     // Actualizar estado de filtros
     tableCache.lastFilters = currentFilterKey;
 }
@@ -744,7 +744,7 @@ function updateNote(assignIndex, note) {
         console.error('updateNote: assignments is not an array, type:', typeof assignments);
         return;
     }
-    
+
     if (assignIndex >= 0 && assignIndex < assignments.length) {
         assignments[assignIndex].note = note;
         // Solo guardar datos sin recrear tabla (optimización: nota es solo visual, sin impacto en filtros)
@@ -761,7 +761,7 @@ function updateTipo(assignIndex, tipo) {
         console.error('updateTipo: assignments is not an array, type:', typeof assignments);
         return;
     }
-    
+
     if (assignIndex >= 0 && assignIndex < assignments.length) {
         assignments[assignIndex].tipo = tipo;
         saveData();
@@ -778,7 +778,7 @@ function deleteAssignment(index) {
         alert('Error: Los datos de asignaciones no están disponibles.');
         return;
     }
-    
+
     assignments.splice(index, 1);
     saveData();
     invalidateTableCache();
@@ -793,12 +793,12 @@ function clearAllAssignments() {
         saveData();
         return;
     }
-    
+
     if (assignments.length === 0) {
         alert('No hay asignaciones para limpiar');
         return;
     }
-    
+
     if (confirm('¿Estás seguro de que quieres eliminar TODAS las asignaciones? Los personajes se mantendrán intactos.')) {
         assignments = [];
         saveData();
@@ -834,7 +834,7 @@ async function loadDataFromFirebase() {
     try {
         if (isFirebaseReady()) {
             console.log('loadDataFromFirebase: Starting data load from Firestore...');
-            
+
             // Run both reads in parallel for better performance
             const [assignmentsSnap, charactersSnap] = await Promise.all([
                 window.firestoreGetDoc(window.firestoreDoc(window.firestoreDB, "appData", "assignments")),
@@ -844,7 +844,7 @@ async function loadDataFromFirebase() {
             console.log('loadDataFromFirebase: Document snapshots retrieved');
             console.log('  - Assignments exists:', assignmentsSnap.exists());
             console.log('  - Characters exists:', charactersSnap.exists());
-            
+
             // Log metadata only (not sensitive data)
             if (assignmentsSnap.exists()) {
                 const assignmentsData = assignmentsSnap.data();
@@ -868,7 +868,7 @@ async function loadDataFromFirebase() {
             // Extract data arrays from document snapshots
             assignments = extractDataArray(assignmentsSnap);
             characters = extractDataArray(charactersSnap);
-            
+
             console.log('loadDataFromFirebase: Data extracted successfully');
             console.log('  - Assignments count:', assignments.length);
             console.log('  - Characters count:', characters.length);
@@ -905,7 +905,7 @@ function setupFirebaseListener() {
         window.firestoreOnSnapshot(assignmentsDocRef, (docSnap) => {
             console.log('setupFirebaseListener: Assignments snapshot received');
             console.log('  - Document exists:', docSnap.exists());
-            
+
             // Log metadata only (not sensitive data)
             if (docSnap.exists()) {
                 const docData = docSnap.data();
@@ -916,12 +916,12 @@ function setupFirebaseListener() {
                     length: Array.isArray(docData.data) ? docData.data.length : 'N/A'
                 });
             }
-            
+
             // Update local data from Firestore
             assignments = extractDataArray(docSnap);
-            
+
             console.log('  - Extracted assignments count:', assignments.length);
-            
+
             // Update UI when data changes
             invalidateTableCache();
             updateTable();
@@ -933,7 +933,7 @@ function setupFirebaseListener() {
         window.firestoreOnSnapshot(charactersDocRef, (docSnap) => {
             console.log('setupFirebaseListener: Characters snapshot received');
             console.log('  - Document exists:', docSnap.exists());
-            
+
             // Log metadata only (not sensitive data)
             if (docSnap.exists()) {
                 const docData = docSnap.data();
@@ -944,12 +944,12 @@ function setupFirebaseListener() {
                     length: Array.isArray(docData.data) ? docData.data.length : 'N/A'
                 });
             }
-            
+
             // Update local data from Firestore
             characters = extractDataArray(docSnap);
-            
+
             console.log('  - Extracted characters count:', characters.length);
-            
+
             // Update UI when data changes
             invalidateTableCache();
             updateCharacterList();
@@ -969,13 +969,13 @@ function exportToExcel() {
         alert('Error: Los datos de personajes no están disponibles.');
         return;
     }
-    
+
     if (!Array.isArray(assignments)) {
         console.error('exportToExcel: assignments is not an array, type:', typeof assignments);
         alert('Error: Los datos de asignaciones no están disponibles.');
         return;
     }
-    
+
     // 1. Get current date for header and filename
     const currentDate = new Date();
     // Use robust date formatting for filename
@@ -983,14 +983,14 @@ function exportToExcel() {
     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
     const day = String(currentDate.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`; // Format: YYYY-MM-DD
-    
+
     // Display date in Spanish format
     const displayDate = currentDate.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     }); // Format: DD de MMMM de YYYY
-    
+
     // 2. Get filtered data
     const filtroClase = document.getElementById('filtro-clase').value;
     const filtroJefe = document.getElementById('filtro-jefe').value;
@@ -1003,7 +1003,7 @@ function exportToExcel() {
         const bossMatch = !filtroJefe || a.boss == filtroJefe;
         const difficultyMatch = !filtroDificultad || a.dificultad === filtroDificultad;
         const classMatch = !filtroClase || char.class === filtroClase;
-        
+
         return bossMatch && difficultyMatch && classMatch;
     });
 
@@ -1037,15 +1037,15 @@ function exportToExcel() {
 
     // 4. Create worksheet and workbook
     const workbook = XLSX.utils.book_new();
-    
+
     // 5. Create worksheet with title header and data
     // First, create an array with the title, empty row, and then the data
     const titleRow = [`RAID EQUINOX - ${displayDate}`];
     const emptyRow = [];
-    
+
     // Create header row from the first data object keys
     const headers = Object.keys(exportData[0] || {});
-    
+
     // Build the complete data array with title, spacing, headers, and data rows
     const worksheetData = [
         titleRow,
@@ -1053,16 +1053,16 @@ function exportToExcel() {
         headers,
         ...exportData.map(obj => headers.map(key => obj[key]))
     ];
-    
+
     // Create worksheet from the complete array
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
     XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
-    
+
     // Get the range of the worksheet
     const newRange = XLSX.utils.decode_range(worksheet['!ref']);
-    
+
     // 6. Apply styling to the worksheet
-    
+
     // Define reusable border styles
     const thinBorder = { style: "thin" };
     const createBorder = (color) => ({
@@ -1071,52 +1071,52 @@ function exportToExcel() {
         left: { ...thinBorder, color: { rgb: color } },
         right: { ...thinBorder, color: { rgb: color } }
     });
-    
+
     // Style the title header row (row 0)
     const titleCell = worksheet['A1'];
     if (titleCell) {
         titleCell.s = {
-            font: { 
-                bold: true, 
+            font: {
+                bold: true,
                 sz: 16,
                 color: { rgb: "FFFFFF" }
             },
-            fill: { 
+            fill: {
                 patternType: "solid",
                 fgColor: { rgb: "1F4E78" } // Dark blue background
             },
-            alignment: { 
-                horizontal: "center", 
-                vertical: "center" 
+            alignment: {
+                horizontal: "center",
+                vertical: "center"
             }
         };
     }
-    
+
     // Merge cells for title header across all columns
     worksheet['!merges'] = worksheet['!merges'] || [];
     worksheet['!merges'].push({
         s: { r: 0, c: 0 },
         e: { r: 0, c: newRange.e.c }
     });
-    
+
     // Define column header row styling (row 2, after title and empty row)
     const headerStyle = {
-        font: { 
-            bold: true, 
+        font: {
+            bold: true,
             sz: 12,
             color: { rgb: "FFFFFF" }
         },
-        fill: { 
+        fill: {
             patternType: "solid",
             fgColor: { rgb: "4472C4" } // Blue background
         },
-        alignment: { 
-            horizontal: "center", 
-            vertical: "center" 
+        alignment: {
+            horizontal: "center",
+            vertical: "center"
         },
         border: createBorder("000000")
     };
-    
+
     // Apply header styling to column headers (row 2)
     for (let col = newRange.s.c; col <= newRange.e.c; col++) {
         const cellAddress = XLSX.utils.encode_cell({ r: 2, c: col });
@@ -1124,39 +1124,39 @@ function exportToExcel() {
         if (!cell) continue;
         cell.s = headerStyle;
     }
-    
+
     // Apply zebra striping and other cell styling (data starts at row 3)
     for (let row = 3; row <= newRange.e.r; row++) {
         // Determine if this is an even row (for zebra striping)
         // Adjust for offset since data starts at row 3
         const isEvenRow = ((row - 3) % 2) === 0;
-        
+
         for (let col = newRange.s.c; col <= newRange.e.c; col++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
             const cell = worksheet[cellAddress];
             if (!cell) continue;
-            
+
             // Get column header to determine which column we're in (headers are now at row 2)
             const headerAddress = XLSX.utils.encode_cell({ r: 2, c: col });
             const headerValue = worksheet[headerAddress]?.v || '';
-            
+
             // Base style for data cells
             const cellStyle = {
                 font: {},
                 alignment: {},
                 border: createBorder("D0D0D0")
             };
-            
+
             // Apply zebra striping (alternating gray for even rows)
             if (isEvenRow) {
                 cellStyle.fill = { patternType: "solid", fgColor: { rgb: "F2F2F2" } };
             }
-            
+
             // Apply bold to important columns (Personaje and Objeto)
             if (headerValue === 'Personaje' || headerValue === 'Objeto') {
                 cellStyle.font.bold = true;
             }
-            
+
             // Center align specific columns (Dificultad)
             if (headerValue === 'Dificultad') {
                 cellStyle.alignment.horizontal = "center";
@@ -1164,11 +1164,11 @@ function exportToExcel() {
             } else {
                 cellStyle.alignment.vertical = "center";
             }
-            
+
             cell.s = cellStyle;
         }
     }
-    
+
     // 7. Auto-adjust column widths based on content
     const columnWidths = [];
     for (let col = newRange.s.c; col <= newRange.e.c; col++) {
@@ -1176,10 +1176,10 @@ function exportToExcel() {
         const headerAddress = XLSX.utils.encode_cell({ r: 2, c: col });
         const headerCell = worksheet[headerAddress];
         const headerValue = headerCell?.v || '';
-        
+
         // Calculate max width for this column
         let maxWidth = String(headerValue).length;
-        
+
         // Check data rows (starting at row 3)
         for (let row = 3; row <= newRange.e.r; row++) {
             const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
@@ -1189,11 +1189,11 @@ function exportToExcel() {
                 maxWidth = Math.max(maxWidth, cellLength);
             }
         }
-        
+
         // Add some padding and cap at a reasonable maximum
         columnWidths.push({ wch: Math.min(maxWidth + 2, 50) });
     }
-    
+
     worksheet['!cols'] = columnWidths;
 
     // 8. Add AutoFilter to header row so users can sort/filter by each column
@@ -1323,20 +1323,20 @@ function exportToExcel() {
 }
 
 // ===== INICIALIZACIÓN =====
-document.addEventListener('DOMContentLoaded', function() {
+function initAppModules() {
     // Firebase setup instructions constant
     const FIREBASE_SETUP_INSTRUCTIONS = 'Para configurar Firebase:\n\n' +
         '1. Copia el archivo client/firebase-config.js.example a client/firebase-config.js\n' +
         '2. Edita firebase-config.js con tus credenciales de Firebase\n' +
         '3. Recarga la página\n\n' +
         'Para más información, consulta docs/FIREBASE_SETUP.md';
-    
+
     // Wait for Firebase to be ready, then load data and set up listeners
     const FIREBASE_INIT_TIMEOUT_MS = 5000; // 5 seconds timeout
     const RETRY_INTERVAL_MS = 100; // Check every 100ms
     const maxRetries = FIREBASE_INIT_TIMEOUT_MS / RETRY_INTERVAL_MS;
     let initRetries = 0;
-    
+
     const initializeApp = async () => {
         // Check if Firebase configuration failed
         if (window.firebaseConfigured === false) {
@@ -1348,17 +1348,17 @@ document.addEventListener('DOMContentLoaded', function() {
             updateTable();
             return;
         }
-        
+
         if (isFirebaseReady()) {
             // Load initial data from Firestore
             try {
                 await loadDataFromFirebase();
-                
+
                 // Initialize UI with loaded data
                 updateBossSelect();
                 updateCharacterList();
                 updateTable();
-                
+
                 // Set up real-time listener for future changes
                 setupFirebaseListener();
             } catch (error) {
@@ -1382,7 +1382,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateTable();
         }
     };
-    
+
     // Registrar event listeners para elementos estáticos
     document.getElementById('form-personaje').onsubmit = addCharacter;
     document.getElementById('btn-asignar').onclick = assignItem;
@@ -1393,12 +1393,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('select-personaje').onchange = filterItemsByCharacter;
     document.getElementById('select-jefe-asignacion').onchange = filterItemsByCharacter;
     document.getElementById('btn-exportar-excel').addEventListener('click', exportToExcel);
-    
+
     // Event listener para actualizar especializaciones dinámicamente
     document.getElementById('clase').onchange = (e) => {
         updateSpecializationsForClass(e.target.value);
     };
-    
+
     // Event Delegation para botones de personajes (editar/eliminar)
     document.getElementById('lista-personajes').addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-edit-char')) {
@@ -1409,7 +1409,7 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteCharacter(index);
         }
     });
-    
+
     // Event Delegation para la tabla de asignaciones (eliminar asignación, actualizar nota)
     document.getElementById('tabla-asignaciones').addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-delete-assign')) {
@@ -1417,10 +1417,10 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteAssignment(index);
         }
     });
-    
+
     // Botón para limpiar todas las asignaciones
     document.getElementById('btn-limpiar-todo').addEventListener('click', clearAllAssignments);
-    
+
     // Event Delegation para actualizar nota y tipo en campos
     document.getElementById('tabla-asignaciones').addEventListener('change', (e) => {
         if (e.target.classList.contains('note-input')) {
@@ -1432,7 +1432,13 @@ document.addEventListener('DOMContentLoaded', function() {
             updateTipo(index, e.target.value);
         }
     });
-    
+
     // Inicializar interfaz
     initializeApp();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAppModules);
+} else {
+    initAppModules();
+}

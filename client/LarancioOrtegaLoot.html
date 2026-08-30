@@ -65,6 +65,20 @@
         sessionKey: "officer_authenticated",
       };
 
+      // Inyectar funcionalidad solo al acceder
+      function loadAppScripts() {
+        if (window.scriptsLoaded) return;
+        window.scriptsLoaded = true;
+        const dataScript = document.createElement("script");
+        dataScript.src = "data.js";
+        dataScript.onload = () => {
+          const appScript = document.createElement("script");
+          appScript.src = "app.js";
+          document.body.appendChild(appScript);
+        };
+        document.body.appendChild(dataScript);
+      }
+
       // Create password modal function
       function createPasswordModal() {
         const modal = document.createElement("div");
@@ -150,21 +164,6 @@
         });
       }
 
-      const loadAppContent = () => {
-        document.getElementById("appContainerWrapper").style.display = "";
-
-        // Cargar data.js
-        const dataJs = document.createElement("script");
-        dataJs.src = "data.js";
-        dataJs.onload = () => {
-          // Luego cargar app.js
-          const appJs = document.createElement("script");
-          appJs.src = "app.js";
-          document.body.appendChild(appJs);
-        };
-        document.body.appendChild(dataJs);
-      };
-
       window.addEventListener("DOMContentLoaded", async function () {
         console.log("🔒 Authentication check started");
 
@@ -187,7 +186,8 @@
         if (window.isOfficerAuthenticated()) {
           console.log("✅ User already authenticated via Firebase");
           sessionStorage.setItem(AUTH_CONFIG.sessionKey, "true");
-          loadAppContent();
+          document.getElementById("appContainer").style.display = "flex";
+          loadAppScripts();
           return;
         }
 
@@ -204,7 +204,8 @@
               sessionStorage.setItem(AUTH_CONFIG.sessionKey, "true");
               console.log("✅ Authentication successful");
               alert("✅ Acceso concedido. Bienvenido, oficial!");
-              loadAppContent();
+              document.getElementById("appContainer").style.display = "flex";
+              loadAppScripts();
               return;
             } else {
               attempts++;
@@ -228,7 +229,7 @@
     </script>
   </head>
   <body>
-    <div class="app-container" id="appContainerWrapper" style="display: none">
+    <div class="app-container" id="appContainer" style="display: none">
       <div class="main-content">
         <div class="back-to-home-wrapper">
           <a href="index.html" class="back-to-home">← Volver al Inicio</a>
@@ -349,8 +350,5 @@
         </section>
       </div>
     </div>
-
-    <!-- Scripts: External - Cargar datos primero, luego la aplicación -->
-    <!-- Scripts are dynamically loaded via login success to prevent unauthenticated data access -->
   </body>
 </html>
