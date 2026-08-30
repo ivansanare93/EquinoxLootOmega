@@ -1,76 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Larancio Loot Manager</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-        
-        try {
-            // Import Firebase configuration from external file
-            // To set up: Copy firebase-config.js.example to firebase-config.js and add your credentials
-            const { firebaseConfig } = await import('./firebase-config.js');
-            
-            // Initialize Firebase
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            const auth = getAuth(app);
-            
-            // Officer email constant
-            const OFFICER_EMAIL = 'ofi@equinox.com';
-            
-            // Make Firebase Firestore functions globally accessible
-            window.firestoreDB = db;
-            window.firestoreDoc = doc;
-            window.firestoreSetDoc = setDoc;
-            window.firestoreGetDoc = getDoc;
-            window.firestoreOnSnapshot = onSnapshot;
-            window.firebaseConfigured = true;
-            
-            // Make Firebase Auth globally accessible
-            window.firebaseAuth = auth;
-            
-            // Global function to verify officer password using Firebase Auth
-            window.verifyOfficerPassword = async function(password) {
-                try {
-                    await signInWithEmailAndPassword(auth, OFFICER_EMAIL, password);
-                    return true;
-                } catch (error) {
-                    console.error('Error de autenticación:', error.code);
-                    return false;
-                }
-            };
-            
-            // Global function to check if officer is authenticated
-            window.isOfficerAuthenticated = function() {
-                return auth.currentUser !== null;
-            };
-        } catch (error) {
-            console.error('Firebase configuration error:', error);
-            window.firebaseConfigured = false;
-            window.firebaseConfigError = error.message;
-        }
-    </script>
-        <!-- 🔒 PROTECCIÓN DE ACCESO PARA OFICIALES -->
-    <script>
-        // Authentication configuration
-        const AUTH_CONFIG = {
-            maxAttempts: 3,
-            sessionKey: 'officer_authenticated'
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+      try {
+        // Import Firebase configuration from external file
+        // To set up: Copy firebase-config.js.example to firebase-config.js and add your credentials
+        const { firebaseConfig } = await import("./firebase-config.js");
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Officer email constant
+        const OFFICER_EMAIL = "ofi@equinox.com";
+
+        // Make Firebase Firestore functions globally accessible
+        window.firestoreDB = db;
+        window.firestoreDoc = doc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreGetDoc = getDoc;
+        window.firestoreOnSnapshot = onSnapshot;
+        window.firebaseConfigured = true;
+
+        // Make Firebase Auth globally accessible
+        window.firebaseAuth = auth;
+
+        // Global function to verify officer password using Firebase Auth
+        window.verifyOfficerPassword = async function (password) {
+          try {
+            await signInWithEmailAndPassword(auth, OFFICER_EMAIL, password);
+            return true;
+          } catch (error) {
+            console.error("Error de autenticación:", error.code);
+            return false;
+          }
         };
-        
-        // Create password modal function
-        function createPasswordModal() {
-            const modal = document.createElement('div');
-            modal.className = 'password-modal';
-            modal.id = 'passwordModal';
-            modal.innerHTML = `
+
+        // Global function to check if officer is authenticated
+        window.isOfficerAuthenticated = function () {
+          return auth.currentUser !== null;
+        };
+      } catch (error) {
+        console.error("Firebase configuration error:", error);
+        window.firebaseConfigured = false;
+        window.firebaseConfigError = error.message;
+      }
+    </script>
+    <!-- 🔒 PROTECCIÓN DE ACCESO PARA OFICIALES -->
+    <script>
+      // Authentication configuration
+      const AUTH_CONFIG = {
+        maxAttempts: 3,
+        sessionKey: "officer_authenticated",
+      };
+
+      // Create password modal function
+      function createPasswordModal() {
+        const modal = document.createElement("div");
+        modal.className = "password-modal";
+        modal.id = "passwordModal";
+        modal.innerHTML = `
                 <div class="password-modal-content">
                     <h2>🔒 ACCESO RESTRINGIDO A OFICIALES</h2>
                     <p>Introduce la contraseña para acceder al Loot Manager:</p>
@@ -83,246 +83,274 @@
                     </div>
                 </div>
             `;
-            document.body.appendChild(modal);
-            return modal;
-        }
+        document.body.appendChild(modal);
+        return modal;
+      }
 
-        // Show password modal
-        function showPasswordModal(attempts, maxAttempts) {
-            return new Promise((resolve, reject) => {
-                const modal = document.getElementById('passwordModal') || createPasswordModal();
-                const passwordInput = document.getElementById('passwordInput');
-                const submitButton = document.getElementById('submitButton');
-                const cancelButton = document.getElementById('cancelButton');
-                const errorDiv = document.getElementById('passwordError');
-                
-                // Clear previous input and error
-                passwordInput.value = '';
-                errorDiv.style.display = 'none';
-                errorDiv.textContent = '';
-                
-                // Show modal
-                modal.style.display = 'block';
-                
-                // Focus on input
-                setTimeout(() => passwordInput.focus(), 100);
-                
-                // Handle submit
-                const handleSubmit = () => {
-                    const password = passwordInput.value;
-                    if (!password || password.trim() === '') {
-                        errorDiv.textContent = 'Por favor, introduce la contraseña';
-                        errorDiv.style.display = 'block';
-                        return;
-                    }
-                    cleanup();
-                    modal.style.display = 'none';
-                    resolve(password);
-                };
-                
-                // Handle cancel
-                const handleCancel = () => {
-                    cleanup();
-                    modal.style.display = 'none';
-                    reject(new Error('User cancelled'));
-                };
-                
-                // Handle keyboard events
-                const handleKeyPress = (e) => {
-                    if (e.key === 'Enter') {
-                        handleSubmit();
-                    } else if (e.key === 'Escape') {
-                        handleCancel();
-                    }
-                };
-                
-                // Cleanup function to remove event listeners
-                const cleanup = () => {
-                    submitButton.removeEventListener('click', handleSubmit);
-                    cancelButton.removeEventListener('click', handleCancel);
-                    passwordInput.removeEventListener('keydown', handleKeyPress);
-                };
-                
-                // Event listeners
-                submitButton.addEventListener('click', handleSubmit);
-                cancelButton.addEventListener('click', handleCancel);
-                passwordInput.addEventListener('keydown', handleKeyPress);
-            });
-        }
+      // Show password modal
+      function showPasswordModal(attempts, maxAttempts) {
+        return new Promise((resolve, reject) => {
+          const modal = document.getElementById("passwordModal") || createPasswordModal();
+          const passwordInput = document.getElementById("passwordInput");
+          const submitButton = document.getElementById("submitButton");
+          const cancelButton = document.getElementById("cancelButton");
+          const errorDiv = document.getElementById("passwordError");
 
-        window.addEventListener('DOMContentLoaded', async function() {
-            console.log('🔒 Authentication check started');
-            
-            // Wait for Firebase to be ready (with timeout)
-            let retries = 0;
-            const maxRetries = 50; // 5 seconds maximum wait
-            while (!window.firebaseAuth && retries < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                retries++;
+          // Clear previous input and error
+          passwordInput.value = "";
+          errorDiv.style.display = "none";
+          errorDiv.textContent = "";
+
+          // Show modal
+          modal.style.display = "block";
+
+          // Focus on input
+          setTimeout(() => passwordInput.focus(), 100);
+
+          // Handle submit
+          const handleSubmit = () => {
+            const password = passwordInput.value;
+            if (!password || password.trim() === "") {
+              errorDiv.textContent = "Por favor, introduce la contraseña";
+              errorDiv.style.display = "block";
+              return;
             }
-            
-            if (!window.firebaseAuth) {
-                console.error('❌ Firebase Auth failed to initialize');
-                alert("Error de configuración. Por favor, contacta al administrador.");
+            cleanup();
+            modal.style.display = "none";
+            resolve(password);
+          };
+
+          // Handle cancel
+          const handleCancel = () => {
+            cleanup();
+            modal.style.display = "none";
+            reject(new Error("User cancelled"));
+          };
+
+          // Handle keyboard events
+          const handleKeyPress = (e) => {
+            if (e.key === "Enter") {
+              handleSubmit();
+            } else if (e.key === "Escape") {
+              handleCancel();
+            }
+          };
+
+          // Cleanup function to remove event listeners
+          const cleanup = () => {
+            submitButton.removeEventListener("click", handleSubmit);
+            cancelButton.removeEventListener("click", handleCancel);
+            passwordInput.removeEventListener("keydown", handleKeyPress);
+          };
+
+          // Event listeners
+          submitButton.addEventListener("click", handleSubmit);
+          cancelButton.addEventListener("click", handleCancel);
+          passwordInput.addEventListener("keydown", handleKeyPress);
+        });
+      }
+
+      const loadAppContent = () => {
+        document.getElementById("appContainerWrapper").style.display = "";
+
+        // Cargar data.js
+        const dataJs = document.createElement("script");
+        dataJs.src = "data.js";
+        dataJs.onload = () => {
+          // Luego cargar app.js
+          const appJs = document.createElement("script");
+          appJs.src = "app.js";
+          document.body.appendChild(appJs);
+        };
+        document.body.appendChild(dataJs);
+      };
+
+      window.addEventListener("DOMContentLoaded", async function () {
+        console.log("🔒 Authentication check started");
+
+        // Wait for Firebase to be ready (with timeout)
+        let retries = 0;
+        const maxRetries = 50; // 5 seconds maximum wait
+        while (!window.firebaseAuth && retries < maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          retries++;
+        }
+
+        if (!window.firebaseAuth) {
+          console.error("❌ Firebase Auth failed to initialize");
+          alert("Error de configuración. Por favor, contacta al administrador.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Check if user is already authenticated (Firebase session)
+        if (window.isOfficerAuthenticated()) {
+          console.log("✅ User already authenticated via Firebase");
+          sessionStorage.setItem(AUTH_CONFIG.sessionKey, "true");
+          loadAppContent();
+          return;
+        }
+
+        let attempts = 0;
+
+        while (attempts < AUTH_CONFIG.maxAttempts) {
+          try {
+            const userPassword = await showPasswordModal(attempts, AUTH_CONFIG.maxAttempts);
+
+            // Use Firebase Authentication
+            const authResult = await window.verifyOfficerPassword(userPassword);
+
+            if (authResult) {
+              sessionStorage.setItem(AUTH_CONFIG.sessionKey, "true");
+              console.log("✅ Authentication successful");
+              alert("✅ Acceso concedido. Bienvenido, oficial!");
+              loadAppContent();
+              return;
+            } else {
+              attempts++;
+              if (attempts < AUTH_CONFIG.maxAttempts) {
+                alert(`❌ Contraseña incorrecta.\nVerifica que no incluyas comillas ni espacios.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
+              } else {
+                console.log("❌ Max attempts reached, redirecting");
+                alert("❌ Demasiados intentos fallidos. Serás redirigido al inicio.");
                 window.location.href = "index.html";
                 return;
+              }
             }
-            
-            // Check if user is already authenticated (Firebase session)
-            if (window.isOfficerAuthenticated()) {
-                console.log('✅ User already authenticated via Firebase');
-                sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
-                return;
-            }
-            
-            let attempts = 0;
-            
-            while (attempts < AUTH_CONFIG.maxAttempts) {
-                try {
-                    const userPassword = await showPasswordModal(attempts, AUTH_CONFIG.maxAttempts);
-                    
-                    // Use Firebase Authentication
-                    const authResult = await window.verifyOfficerPassword(userPassword);
-                    
-                    if (authResult) {
-                        sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
-                        console.log('✅ Authentication successful');
-                        alert("✅ Acceso concedido. Bienvenido, oficial!");
-                        return;
-                    } else {
-                        attempts++;
-                        if (attempts < AUTH_CONFIG.maxAttempts) {
-                            alert(`❌ Contraseña incorrecta.\nVerifica que no incluyas comillas ni espacios.\nIntentos restantes: ${AUTH_CONFIG.maxAttempts - attempts}`);
-                        } else {
-                            console.log('❌ Max attempts reached, redirecting');
-                            alert("❌ Demasiados intentos fallidos. Serás redirigido al inicio.");
-                            window.location.href = "index.html";
-                            return;
-                        }
-                    }
-                } catch (error) {
-                    console.log('❌ User cancelled authentication');
-                    alert("❌ Acceso cancelado. Serás redirigido al inicio.");
-                    window.location.href = "index.html";
-                    return;
-                }
-            }
-        });
+          } catch (error) {
+            console.log("❌ User cancelled authentication");
+            alert("❌ Acceso cancelado. Serás redirigido al inicio.");
+            window.location.href = "index.html";
+            return;
+          }
+        }
+      });
     </script>
-</head>
-<body>
-    <div class="app-container">
-        <div class="main-content">
-            <div class="back-to-home-wrapper">
-                <a href="index.html" class="back-to-home">← Volver al Inicio</a>
-            </div>
-            <h1>Equinox's Loot Manager - Forja de Mana Omega</h1>
-
-            <!-- Sistema de Loot por Jefes (Interno, Oculta) -->
-            <section id="sistema-loot">
-                <h2>Sistema de Loot por Jefes (Datos Internos Optimizados)</h2>
-                <select id="select-jefe">
-                    <option value="">Selecciona un Jefe</option>
-                </select>
-                <select id="filtro-tipo-loot">
-                    <option value="">Todos los Tipos</option>
-                    <option>Cloth Armor</option>
-                    <option>Leather Armor</option>
-                    <option>Mail Armor</option>
-                    <option>Plate Armor</option>
-                    <option>Weapon</option>
-                    <option>Trinket</option>
-                    <option>Accessories</option>
-                    <option>Tier Set</option>
-                    <option>Cosmetic</option>
-                    <option>Material</option>
-                    <option>Pattern</option>
-                    <option>Plans</option>
-                    <option>Formula</option>
-                    <option>Consumable</option>
-                    <option>Currency</option>
-                    <option>Toy</option>
-                    <option>Mount</option>
-                </select>
-                <ul id="lista-loot"></ul>
-            </section>
-
-            <!-- Asignación de Objetos -->
-            <section id="asignacion-objetos">
-                <h2>Asignación de Objetos</h2>
-                <select id="select-personaje"></select>
-                <select id="select-jefe-asignacion"></select>
-                <select id="select-item"></select>
-                <select id="select-dificultad">
-                    <option value="Normal">Normal</option>
-                    <option value="Heroic">Heroico</option>
-                    <option value="Mythic">Mítico</option>
-                </select>
-                <button id="btn-asignar">Asignar</button>
-            </section>
-
-            <!-- Visualización Intuitiva -->
-            <section id="visualizacion">
-                <h2>Visualización de Asignaciones</h2>
-                <div class="filters">
-                    <label>Filtro por Clase:</label><select id="filtro-clase"><option value="">Todas</option></select>
-                    <label>Por Jefe:</label><select id="filtro-jefe"><option value="">Todos</option></select>
-                    <label>Por Dificultad:</label><select id="filtro-dificultad"><option value="">Todas</option><option value="Normal">Normal</option><option value="Heroic">Heroico</option><option value="Mythic">Mítico</option></select>
-                    <button id="btn-exportar-excel" style="margin-left: 20px;">Exportar a Excel</button>
-                    <button id="btn-limpiar-todo" class="btn-danger" style="margin-left: 20px;">🗑️ Limpiar Todo</button>
-                </div>
-                <table id="tabla-asignaciones">
-                    <thead>
-                        <tr>
-                            <th>Personaje</th>
-                            <th>Clase/Espec</th>
-                            <th>Objetos Asignados (con Dificultad)</th>
-                            <th>Jefe</th>
-                            <th>Notas</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
+  </head>
+  <body>
+    <div class="app-container" id="appContainerWrapper" style="display: none">
+      <div class="main-content">
+        <div class="back-to-home-wrapper">
+          <a href="index.html" class="back-to-home">← Volver al Inicio</a>
         </div>
+        <h1>Equinox's Loot Manager - Forja de Mana Omega</h1>
 
-        <!-- Sidebar with Character Management -->
-        <div class="sidebar">
-            <section id="gestion-personajes">
-                <h2>Personajes de la Raid</h2>
-                <form id="form-personaje">
-                    <label>Nombre:</label>
-                    <input type="text" id="nombre" required>
-                    <label>Clase:</label>
-                    <select id="clase" required>
-                        <option value="">Selecciona</option>
-                        <option>Guerrero</option>
-                        <option>Mago</option>
-                        <option>Sacerdote</option>
-                        <option>Paladín</option>
-                        <option>Cazador</option>
-                        <option>Brujo</option>
-                        <option>Chamán</option>
-                        <option>Druida</option>
-                        <option>Pícaro</option>
-                        <option>Caballero de la Muerte</option>
-                        <option>Monje</option>
-                        <option>Cazador de Demonios</option>
-                        <option>Evocador</option>
-                    </select>
-                    <label>Especialización:</label>
-                    <select id="especializacion" required>
-                        <option value="">Selecciona clase primero</option>
-                    </select>
-                    <button type="submit" id="btn-submit-personaje">Añadir Personaje</button>
-                </form>
-                <ul id="lista-personajes"></ul>
-            </section>
-        </div>
+        <!-- Sistema de Loot por Jefes (Interno, Oculta) -->
+        <section id="sistema-loot">
+          <h2>Sistema de Loot por Jefes (Datos Internos Optimizados)</h2>
+          <select id="select-jefe">
+            <option value="">Selecciona un Jefe</option>
+          </select>
+          <select id="filtro-tipo-loot">
+            <option value="">Todos los Tipos</option>
+            <option>Cloth Armor</option>
+            <option>Leather Armor</option>
+            <option>Mail Armor</option>
+            <option>Plate Armor</option>
+            <option>Weapon</option>
+            <option>Trinket</option>
+            <option>Accessories</option>
+            <option>Tier Set</option>
+            <option>Cosmetic</option>
+            <option>Material</option>
+            <option>Pattern</option>
+            <option>Plans</option>
+            <option>Formula</option>
+            <option>Consumable</option>
+            <option>Currency</option>
+            <option>Toy</option>
+            <option>Mount</option>
+          </select>
+          <ul id="lista-loot"></ul>
+        </section>
+
+        <!-- Asignación de Objetos -->
+        <section id="asignacion-objetos">
+          <h2>Asignación de Objetos</h2>
+          <select id="select-personaje"></select>
+          <select id="select-jefe-asignacion"></select>
+          <select id="select-item"></select>
+          <select id="select-dificultad">
+            <option value="Normal">Normal</option>
+            <option value="Heroic">Heroico</option>
+            <option value="Mythic">Mítico</option>
+          </select>
+          <button id="btn-asignar">Asignar</button>
+        </section>
+
+        <!-- Visualización Intuitiva -->
+        <section id="visualizacion">
+          <h2>Visualización de Asignaciones</h2>
+          <div class="filters">
+            <label>Filtro por Clase:</label
+            ><select id="filtro-clase">
+              <option value="">Todas</option>
+            </select>
+            <label>Por Jefe:</label
+            ><select id="filtro-jefe">
+              <option value="">Todos</option>
+            </select>
+            <label>Por Dificultad:</label
+            ><select id="filtro-dificultad">
+              <option value="">Todas</option>
+              <option value="Normal">Normal</option>
+              <option value="Heroic">Heroico</option>
+              <option value="Mythic">Mítico</option>
+            </select>
+            <button id="btn-exportar-excel" style="margin-left: 20px">Exportar a Excel</button>
+            <button id="btn-limpiar-todo" class="btn-danger" style="margin-left: 20px">🗑️ Limpiar Todo</button>
+          </div>
+          <table id="tabla-asignaciones">
+            <thead>
+              <tr>
+                <th>Personaje</th>
+                <th>Clase/Espec</th>
+                <th>Objetos Asignados (con Dificultad)</th>
+                <th>Jefe</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- Sidebar with Character Management -->
+      <div class="sidebar">
+        <section id="gestion-personajes">
+          <h2>Personajes de la Raid</h2>
+          <form id="form-personaje">
+            <label>Nombre:</label>
+            <input type="text" id="nombre" required />
+            <label>Clase:</label>
+            <select id="clase" required>
+              <option value="">Selecciona</option>
+              <option>Guerrero</option>
+              <option>Mago</option>
+              <option>Sacerdote</option>
+              <option>Paladín</option>
+              <option>Cazador</option>
+              <option>Brujo</option>
+              <option>Chamán</option>
+              <option>Druida</option>
+              <option>Pícaro</option>
+              <option>Caballero de la Muerte</option>
+              <option>Monje</option>
+              <option>Cazador de Demonios</option>
+              <option>Evocador</option>
+            </select>
+            <label>Especialización:</label>
+            <select id="especializacion" required>
+              <option value="">Selecciona clase primero</option>
+            </select>
+            <button type="submit" id="btn-submit-personaje">Añadir Personaje</button>
+          </form>
+          <ul id="lista-personajes"></ul>
+        </section>
+      </div>
     </div>
 
     <!-- Scripts: External - Cargar datos primero, luego la aplicación -->
-    <script src="data.js"></script>
-    <script src="app.js"></script>
-</body>
+    <!-- Scripts are dynamically loaded via login success to prevent unauthenticated data access -->
+  </body>
 </html>
