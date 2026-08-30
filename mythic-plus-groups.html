@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equinox - Organizador de Grupos Míticas+</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+        try {
+            const { firebaseConfig } = await import('./firebase-config.js');
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const auth = getAuth(app);
+
+            window.firestoreDB = db;
+            window.firestoreDoc = doc;
+            window.firestoreSetDoc = setDoc;
+            window.firestoreOnSnapshot = onSnapshot;
+            window.firebaseAuth = auth;
+            window.firebaseOnAuthStateChanged = onAuthStateChanged;
+            window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.firebaseSignOut = signOut;
+            window.firebaseConfigured = true;
+        } catch (error) {
+            console.error('Firebase configuration error:', error);
+            window.firebaseConfigured = false;
+        }
+    </script>
+
+    <style>
+        .mythic-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-to-home-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-section h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            font-size: 1.2em;
+            color: #a78bfa;
+        }
+
+        /* Layout principal */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Panel izquierdo: formulario + cola */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-card {
+            background-color: rgba(30, 41, 59, 0.8);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--dorado);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-card h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--dorado);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 1.4em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--dorado);
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--purpura);
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95em;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--dorado);
+        }
+
+        .form-group select option {
+            background-color: #1e293b;
+        }
+
+        /* Role selector buttons */
+        .role-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 10px 5px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            background-color: rgba(15, 23, 42, 0.9);
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .role-btn:hover {
+            border-color: var(--purpura);
+            color: white;
+        }
+
+        .role-btn.active[data-role="tank"] {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        .role-btn.active[data-role="healer"] {
+            border-color: var(--verde-epico);
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .role-btn.active[data-role="dps"] {
+            border-color: var(--rojo-legendario);
+            background-color: rgba(255, 69, 0, 0.2);
+            color: #fca5a5;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dorado);
+            color: var(--azul-profundo-1);
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            margin-top: 5px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--purpura);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        /* Cola de jugadores */
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .queue-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background-color: rgba(15, 23, 42, 0.7);
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .queue-player[data-role="tank"] { border-left-color: #3b82f6; }
+        .queue-player[data-role="healer"] { border-left-color: var(--verde-epico); }
+        .queue-player[data-role="dps"] { border-left-color: var(--rojo-legendario); }
+
+        .queue-player .player-name {
+            flex: 1;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        .queue-player .player-class {
+            font-size: 0.8em;
+            color: #9ca3af;
+        }
+
+        .queue-player .role-badge {
+            font-size: 0.75em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .role-badge.tank { background-color: rgba(59,130,246,0.2); color: #93c5fd; }
+        .role-badge.healer { background-color: rgba(16,185,129,0.2); color: #6ee7b7; }
+        .role-badge.dps { background-color: rgba(255,69,0,0.2); color: #fca5a5; }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.1em;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .remove-btn:hover {
+            background-color: rgba(239, 68, 68, 0.15);
+        }
+
+        .empty-queue {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9em;
+            padding: 20px 0;
+        }
+
+        /* Acciones de grupos */
+        .groups-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            padding: 10px 18px;
+            background-color: transparent;
+            color: var(--dorado);
+            border: 2px solid var(--dorado);
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--dorado);
+            color: var(--azul-profundo-1);
+        }
+
+        .btn-danger {
+            padding: 10px 18px;
+            background-color: transparent;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        /* Tablero de grupos */
+        .groups-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .group-card {
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .group-card.complete {
+            border-color: var(--verde-epico);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background-color: rgba(139, 92, 246, 0.15);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .group-card.complete .group-header {
+            background-color: rgba(16, 185, 129, 0.15);
+            border-bottom-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .group-title {
+            font-weight: bold;
+            font-size: 1.05em;
+            color: var(--dorado);
+        }
+
+        .group-count {
+            font-size: 0.85em;
+            color: #9ca3af;
+        }
+
+        .group-card.complete .group-count {
+            color: var(--verde-epico);
+            font-weight: bold;
+        }
+
+        .delete-group-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .delete-group-btn:hover {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .group-slots {
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Slot de rol dentro del grupo */
+        .role-slot {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            min-height: 42px;
+        }
+
+        .role-slot.tank-slot { background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .role-slot.healer-slot { background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .role-slot.dps-slot { background-color: rgba(255, 69, 0, 0.08); border: 1px solid rgba(255, 69, 0, 0.25); }
+
+        .slot-icon {
+            font-size: 1.2em;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .slot-content {
+            flex: 1;
+        }
+
+        .slot-label {
+            font-size: 0.75em;
+            color: #6b7280;
+            margin-bottom: 1px;
+        }
+
+        .role-slot.tank-slot .slot-label { color: #60a5fa; }
+        .role-slot.healer-slot .slot-label { color: #34d399; }
+        .role-slot.dps-slot .slot-label { color: #f87171; }
+
+        .slot-player-name {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #e5e7eb;
+        }
+
+        .slot-player-class {
+            font-size: 0.75em;
+            color: #9ca3af;
+        }
+
+        .slot-empty {
+            font-size: 0.85em;
+            color: #4b5563;
+            font-style: italic;
+        }
+
+        .slot-assign-btn {
+            background: none;
+            border: 1px solid #4b5563;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .slot-assign-btn:hover {
+            border-color: var(--dorado);
+            color: var(--dorado);
+        }
+
+        .slot-remove-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .slot-remove-btn:hover {
+            color: #ef4444;
+        }
+
+        /* Estadísticas */
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 20px;
+            font-size: 0.85em;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .stat-pill .stat-value {
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .stat-pill.tank-stat { border-color: rgba(59, 130, 246, 0.5); }
+        .stat-pill.healer-stat { border-color: rgba(16, 185, 129, 0.5); }
+        .stat-pill.dps-stat { border-color: rgba(255, 69, 0, 0.4); }
+        .stat-pill.total-stat { border-color: rgba(245, 158, 11, 0.5); }
+
+        /* Modal de asignación */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background-color: #1e293b;
+            border: 2px solid var(--dorado);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-box h3 {
+            margin-top: 0;
+            color: var(--dorado);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal-player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .modal-player-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background-color: rgba(15, 23, 42, 0.8);
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .modal-player-item:hover {
+            border-color: var(--dorado);
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .modal-empty {
+            color: #6b7280;
+            text-align: center;
+            padding: 15px 0;
+            font-style: italic;
+        }
+
+        .modal-cancel-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: transparent;
+            border: 2px solid #6b7280;
+            color: #9ca3af;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+
+        .modal-cancel-btn:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* Auto-fill badge */
+        .complete-badge {
+            display: inline-block;
+            background-color: var(--verde-epico);
+            color: var(--azul-profundo-1);
+            font-size: 0.7em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* Sección de horario en la tarjeta del grupo */
+        .group-schedule {
+            padding: 10px 16px;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82em;
+        }
+
+        .group-card.complete .group-schedule {
+            border-top-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .schedule-days-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .schedule-day-pill {
+            background-color: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 10px;
+            padding: 1px 7px;
+            color: #c4b5fd;
+            font-size: 0.9em;
+        }
+
+        .schedule-time-display {
+            color: var(--dorado);
+            font-weight: bold;
+        }
+
+        .schedule-notes-display {
+            color: #9ca3af;
+            font-style: italic;
+            flex-basis: 100%;
+            margin-top: 2px;
+        }
+
+        .schedule-empty {
+            color: #4b5563;
+            font-style: italic;
+            flex: 1;
+        }
+
+        .schedule-btn {
+            background: none;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+            cursor: pointer;
+            font-size: 0.75em;
+            padding: 3px 9px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            margin-left: auto;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .schedule-btn:hover {
+            border-color: var(--dorado);
+            color: var(--dorado);
+        }
+
+        /* Modal de horario */
+        .schedule-days-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .day-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 8px;
+            background-color: rgba(15, 23, 42, 0.8);
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-size: 0.88em;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .day-checkbox-label:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .day-checkbox-label input[type="checkbox"] {
+            accent-color: var(--purpura);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .day-checkbox-label.checked {
+            background-color: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.6);
+            color: #c4b5fd;
+        }
+
+        .schedule-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .schedule-modal-actions .btn-primary {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .schedule-modal-actions .modal-cancel-btn {
+            flex: 1;
+        }
+
+        /* ===== SEPARADOR EN MODAL ===== */
+        .modal-section-title {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: var(--dorado);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+            padding-bottom: 6px;
+            margin: 16px 0 10px;
+        }
+        .modal-section-title:first-child {
+            margin-top: 0;
+        }
+
+        /* ===== INFO DE RUN EN TARJETA DE GRUPO ===== */
+        .group-run-info {
+            padding: 8px 16px;
+            border-top: 1px solid rgba(139, 92, 246, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.8em;
+            align-items: center;
+            min-height: 34px;
+        }
+        .group-card.complete .group-run-info {
+            border-top-color: rgba(16, 185, 129, 0.15);
+        }
+        .run-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+        .run-badge.key-level {
+            background-color: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+            color: #fcd34d;
+        }
+        .run-badge.run-type-push    { background-color: rgba(239, 68, 68, 0.15);   border: 1px solid rgba(239, 68, 68, 0.4);   color: #fca5a5; }
+        .run-badge.run-type-farm    { background-color: rgba(16, 185, 129, 0.15);  border: 1px solid rgba(16, 185, 129, 0.4);  color: #6ee7b7; }
+        .run-badge.run-type-boost   { background-color: rgba(59, 130, 246, 0.15);  border: 1px solid rgba(59, 130, 246, 0.4);  color: #93c5fd; }
+        .run-badge.run-type-aprendizaje { background-color: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); color: #c4b5fd; }
+        .run-badge.afijo {
+            background-color: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #d8b4fe;
+        }
+        .run-badge.duracion {
+            background-color: rgba(100, 116, 139, 0.2);
+            border: 1px solid rgba(100, 116, 139, 0.4);
+            color: #cbd5e1;
+        }
+        .run-info-empty {
+            color: #4b5563;
+            font-style: italic;
+        }
+        .run-info-edit-btn {
+            background: none;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+            cursor: pointer;
+            font-size: 0.75em;
+            padding: 3px 9px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            margin-left: auto;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .run-info-edit-btn:hover { border-color: var(--dorado); color: var(--dorado); }
+
+        /* ===== PRIORIDAD DEL JUGADOR ===== */
+        .priority-badge {
+            font-size: 0.72em;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        .priority-badge.alta    { background-color: rgba(239, 68, 68, 0.2);    color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4);    }
+        .priority-badge.media   { background-color: rgba(245, 158, 11, 0.2);   color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4);   }
+        .priority-badge.baja    { background-color: rgba(100, 116, 139, 0.2);  color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4);  }
+
+        /* ===== DISPONIBILIDAD DEL JUGADOR ===== */
+        .availability-badge {
+            display: inline-block;
+            font-size: 0.72em;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 10px;
+            white-space: nowrap;
+            cursor: default;
+        }
+        .availability-badge.libre       { background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .availability-badge.confirmado  { background-color: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .availability-badge.pendiente   { background-color: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .availability-badge.fuera       { background-color: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
+
+        .avail-edit-btn {
+            background: none;
+            border: none;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: #6b7280;
+            transition: color 0.2s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .avail-edit-btn:hover { color: var(--dorado); }
+
+        /* ===== VISTA SEMANAL DE DISPONIBILIDAD ===== */
+        .weekly-view {
+            padding: 8px 16px 12px;
+            border-top: 1px solid rgba(139, 92, 246, 0.15);
+            font-size: 0.8em;
+        }
+        .group-card.complete .weekly-view {
+            border-top-color: rgba(16, 185, 129, 0.15);
+        }
+        .weekly-view-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            color: #a78bfa;
+            font-weight: bold;
+            user-select: none;
+            padding: 2px 0;
+        }
+        .weekly-view-toggle:hover { color: var(--dorado); }
+        .weekly-view-content {
+            margin-top: 8px;
+        }
+        .weekly-view-content.hidden { display: none; }
+        .weekly-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .weekly-day-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .weekly-day-label {
+            font-weight: bold;
+            color: #c4b5fd;
+            font-size: 0.85em;
+            margin-bottom: 2px;
+        }
+        .weekly-player-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65em;
+            font-weight: bold;
+            border: 1px solid transparent;
+            cursor: default;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .weekly-player-dot.libre       { background-color: rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.6); color: #6ee7b7; }
+        .weekly-player-dot.confirmado  { background-color: rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.6); color: #93c5fd; }
+        .weekly-player-dot.pendiente   { background-color: rgba(245, 158, 11, 0.3); border-color: rgba(245, 158, 11, 0.5); color: #fcd34d; }
+        .weekly-player-dot.fuera       { background-color: rgba(100, 116, 139, 0.2); border-color: rgba(100, 116, 139, 0.4); color: #94a3b8; }
+        .weekly-player-dot.no-data     { background-color: rgba(30, 41, 59, 0.5);   border-color: rgba(100, 116, 139, 0.25); color: #4b5563; }
+        .weekly-time-hint {
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .left-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .groups-board {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                gap: 8px;
+            }
+        }
+
+        /* Admin */
+        .admin-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            justify-content: flex-end;
+        }
+
+        #admin-status {
+            font-weight: bold;
+            color: #fbbf24;
+            font-size: 0.9em;
+        }
+
+        .admin-auth-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .admin-auth-modal-content {
+            width: min(90vw, 380px);
+            background-color: #1e293b;
+            border: 2px solid var(--dorado);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .admin-auth-modal-content input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #6b7280;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1em;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .admin-auth-modal-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="mythic-container">
+        <div class="back-to-home-wrapper">
+            <a href="index.html" class="back-to-home">← Volver al Inicio</a>
+        </div>
+
+        <div class="header-section">
+            <h1>⚔️ Organizador de Grupos Míticas+ ⚔️</h1>
+            <p>Organiza grupos de 5 para hacer Míticas+: 1 Tanque, 1 Healer y 3 DPS</p>
+        </div>
+
+        <div class="content-layout">
+            <!-- Panel izquierdo -->
+            <div class="left-panel">
+                <!-- Formulario para añadir jugador -->
+                <div class="panel-card">
+                    <h2>➕ Añadir Jugador</h2>
+                    <div class="form-group">
+                        <label for="player-name">Nombre del Personaje</label>
+                        <input type="text" id="player-name" placeholder="Ej: Arthas, Thrall..." maxlength="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="player-class">Clase</label>
+                        <select id="player-class">
+                            <option value="">-- Selecciona clase --</option>
+                            <option value="Guerrero">⚔️ Guerrero</option>
+                            <option value="Paladín">🛡️ Paladín</option>
+                            <option value="Cazador">🏹 Cazador</option>
+                            <option value="Pícaro">🗡️ Pícaro</option>
+                            <option value="Sacerdote">✨ Sacerdote</option>
+                            <option value="Chamán">🌊 Chamán</option>
+                            <option value="Mago">🔥 Mago</option>
+                            <option value="Brujo">👁️ Brujo</option>
+                            <option value="Monje">☯️ Monje</option>
+                            <option value="Druida">🌿 Druida</option>
+                            <option value="Cazador de Demonios">😈 Cazador de Demonios</option>
+                            <option value="Caballero de la Muerte">💀 Caballero de la Muerte</option>
+                            <option value="Evocador">🐉 Evocador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Rol</label>
+                        <div class="role-buttons">
+                            <button class="role-btn" data-role="tank" onclick="selectRole(this)">🛡️ Tanque</button>
+                            <button class="role-btn" data-role="healer" onclick="selectRole(this)">💚 Healer</button>
+                            <button class="role-btn" data-role="dps" onclick="selectRole(this)">⚔️ DPS</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="player-priority">Prioridad</label>
+                        <select id="player-priority">
+                            <option value="media">⭐ Media</option>
+                            <option value="alta">🔴 Alta</option>
+                            <option value="baja">⚪ Baja</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="addPlayer()">Añadir a la Cola</button>
+                </div>
+
+                <!-- Cola de jugadores -->
+                <div class="panel-card">
+                    <h2>📋 Cola de Jugadores</h2>
+                    <div id="queue-list" class="queue-list">
+                        <div class="empty-queue">No hay jugadores en la cola.<br>¡Añade jugadores para empezar!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel derecho: tablero de grupos -->
+            <div>
+                <!-- Estadísticas -->
+                <div class="stats-bar">
+                    <div class="stat-pill total-stat">
+                        👥 Cola: <span class="stat-value" id="stat-queue">0</span>
+                    </div>
+                    <div class="stat-pill tank-stat">
+                        🛡️ Tanques: <span class="stat-value" id="stat-tanks">0</span>
+                    </div>
+                    <div class="stat-pill healer-stat">
+                        💚 Healers: <span class="stat-value" id="stat-healers">0</span>
+                    </div>
+                    <div class="stat-pill dps-stat">
+                        ⚔️ DPS: <span class="stat-value" id="stat-dps">0</span>
+                    </div>
+                    <div class="stat-pill total-stat">
+                        ✅ Grupos completos: <span class="stat-value" id="stat-complete">0</span>
+                    </div>
+                </div>
+
+                <!-- Admin -->
+                <div class="admin-bar">
+                    <span id="admin-status">Modo usuario</span>
+                    <button id="btn-admin-auth" class="btn-secondary">🔐 Acceso Administrador</button>
+                </div>
+
+                <!-- Acciones -->
+                <div class="groups-actions">
+                    <button id="btn-add-group" class="btn-secondary" onclick="addGroup()">➕ Nuevo Grupo</button>
+                    <button id="btn-auto-fill" class="btn-secondary" onclick="autoFillGroups()" style="display:none;">⚡ Rellenar Automático</button>
+                    <button id="btn-clear-all" class="btn-danger" onclick="clearAll()" style="display:none;">🗑️ Limpiar Todo</button>
+                    <span id="groups-actions-user-hint" style="color:#6b7280; font-size:0.85em;">Añade jugadores a la cola y únete a los grupos disponibles.</span>
+                </div>
+
+                <!-- Tablero de grupos -->
+                <div id="groups-board" class="groups-board">
+                    <!-- Los grupos se renderizan aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de horario del grupo -->
+    <div class="modal-overlay" id="schedule-modal">
+        <div class="modal-box" style="max-width:480px;">
+            <h3>⚙️ Configurar Grupo</h3>
+            <p id="schedule-modal-group-name" style="color:#a78bfa; margin:0 0 10px; font-weight:bold;"></p>
+
+            <!-- Sección: Info de la Run -->
+            <div class="modal-section-title">🎮 Información de la Run</div>
+            <div class="form-group">
+                <label for="run-key-level-input">Key Level objetivo</label>
+                <input type="number" id="run-key-level-input" min="2" max="35" placeholder="Ej: 10" style="width:100%;box-sizing:border-box;">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="run-tipo-input">Tipo de run</label>
+                    <select id="run-tipo-input">
+                        <option value="">-- Sin especificar --</option>
+                        <option value="push">🚀 Push</option>
+                        <option value="farm">🌾 Farm</option>
+                        <option value="boost">⚡ Boost</option>
+                        <option value="aprendizaje">📚 Aprendizaje</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="run-duracion-input">Duración estimada</label>
+                    <select id="run-duracion-input">
+                        <option value="">-- Sin especificar --</option>
+                        <option value="30 min">30 min</option>
+                        <option value="45 min">45 min</option>
+                        <option value="1 hora">1 hora</option>
+                        <option value="1.5 horas">1.5 horas</option>
+                        <option value="2+ horas">2+ horas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:10px;">
+                <label for="run-afijo-input">Afijo semanal</label>
+                <input type="text" id="run-afijo-input" placeholder="Ej: Tirano / Robustecido / Sangrante..." maxlength="60" style="width:100%;box-sizing:border-box;">
+            </div>
+
+            <!-- Sección: Horario -->
+            <div class="modal-section-title">📅 Horario</div>
+            <div class="form-group">
+                <label>Días de la semana</label>
+                <div class="schedule-days-grid" id="schedule-days-grid">
+                    <!-- Checkboxes rendered by JS -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="schedule-time-input">Hora de inicio</label>
+                <input type="time" id="schedule-time-input">
+            </div>
+            <div class="form-group">
+                <label for="schedule-notes-input">Notas</label>
+                <input type="text" id="schedule-notes-input" placeholder="Ej: Farm de llaves, alta prioridad..." maxlength="80">
+            </div>
+            <div class="schedule-modal-actions">
+                <button class="btn-primary" onclick="saveSchedule()">💾 Guardar</button>
+                <button class="modal-cancel-btn" onclick="closeScheduleModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de selección de jugador -->
+    <div class="modal-overlay" id="assign-modal">
+        <div class="modal-box">
+            <h3 id="modal-title">Selecciona un jugador</h3>
+            <div id="modal-player-list" class="modal-player-list"></div>
+            <button class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal de disponibilidad del jugador -->
+    <div class="modal-overlay" id="availability-modal">
+        <div class="modal-box" style="max-width:460px;">
+            <h3>📆 Disponibilidad</h3>
+            <p id="avail-modal-player-name" style="color:#a78bfa; margin:0 0 10px; font-weight:bold;"></p>
+
+            <div class="modal-section-title">Estado actual</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="libre">
+                    <input type="radio" name="avail-status" value="libre" style="accent-color:var(--verde-epico);">
+                    <span class="availability-badge libre">Libre</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="confirmado">
+                    <input type="radio" name="avail-status" value="confirmado" style="accent-color:#3b82f6;">
+                    <span class="availability-badge confirmado">Confirmado</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="pendiente">
+                    <input type="radio" name="avail-status" value="pendiente" style="accent-color:#f59e0b;">
+                    <span class="availability-badge pendiente">Pendiente</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(15,23,42,0.8);border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:0.88em;transition:all 0.2s;user-select:none;" class="avail-status-option" data-val="fuera">
+                    <input type="radio" name="avail-status" value="fuera" style="accent-color:#64748b;">
+                    <span class="availability-badge fuera">Fuera</span>
+                </label>
+            </div>
+
+            <div class="modal-section-title">Días disponibles</div>
+            <div class="schedule-days-grid" id="avail-days-grid" style="margin-bottom:14px;">
+                <!-- Checkboxes rendered by JS -->
+            </div>
+
+            <div class="form-group">
+                <label for="avail-time-input">Horario preferido</label>
+                <input type="time" id="avail-time-input">
+            </div>
+
+            <div class="schedule-modal-actions">
+                <button class="btn-primary" onclick="saveAvailability()">💾 Guardar</button>
+                <button class="modal-cancel-btn" onclick="closeAvailabilityModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación: Limpiar Todo -->
+    <div class="modal-overlay" id="clear-all-modal">
+        <div class="modal-box">
+            <h3>⚠️ Limpiar Todo</h3>
+            <p style="color:#f87171; margin-bottom:12px;">Esta acción eliminará <strong>TODOS</strong> los jugadores y grupos de forma permanente y no se puede deshacer.</p>
+            <p style="color:#9ca3af; margin-bottom:10px;">Para confirmar, escribe <strong style="color:#ef4444;">CONFIRMAR</strong> en el campo de abajo:</p>
+            <input type="text" id="clear-all-confirm-input" placeholder="Escribe CONFIRMAR" autocomplete="off"
+                aria-label="Campo de confirmación: escribe CONFIRMAR para habilitar el botón de eliminar"
+                style="width:100%; padding:10px; border-radius:8px; border:2px solid #6b7280; background:#0f172a; color:#e2e8f0; font-size:1em; box-sizing:border-box; margin-bottom:15px;">
+            <div style="display:flex; gap:10px;">
+                <button id="clear-all-confirm-btn" class="btn-danger" disabled onclick="confirmClearAll()" style="flex:1;">🗑️ Eliminar Todo</button>
+                <button class="modal-cancel-btn" onclick="closeClearAllModal()" style="flex:1; width:auto;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== Identidad del usuario (sesión local) ====================
+        function getCurrentUserId() {
+            let uid = localStorage.getItem('mythicPlusUserId');
+            if (!uid) {
+                uid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+                    ? crypto.randomUUID()
+                    : 'user_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+                localStorage.setItem('mythicPlusUserId', uid);
+            }
+            return uid;
+        }
+        const currentUserId = getCurrentUserId();
+
+        // ==================== Admin ====================
+        let isAdmin = false;
+        const ADMIN_EMAIL = window.MYTHIC_ADMIN_EMAIL || 'ofi@equinox.com';
+
+        function updateAdminUI() {
+            const status = document.getElementById('admin-status');
+            const button = document.getElementById('btn-admin-auth');
+            const addGroupBtn = document.getElementById('btn-add-group');
+            const autoFillBtn = document.getElementById('btn-auto-fill');
+            const clearAllBtn = document.getElementById('btn-clear-all');
+            const hint = document.getElementById('groups-actions-user-hint');
+
+            status.textContent = isAdmin ? 'Modo administrador activo' : 'Modo usuario';
+            status.style.color = isAdmin ? '#10b981' : '#fbbf24';
+            button.textContent = isAdmin ? '🚪 Cerrar Sesión Admin' : '🔐 Acceso Administrador';
+
+            autoFillBtn.style.display = isAdmin ? '' : 'none';
+            clearAllBtn.style.display = isAdmin ? '' : 'none';
+            hint.style.display = isAdmin ? 'none' : '';
+
+            renderGroups();
+        }
+
+        function requestAdminPassword() {
+            return new Promise((resolve, reject) => {
+                const modal = document.createElement('div');
+                modal.className = 'admin-auth-modal';
+                modal.innerHTML = `
+                    <div class="admin-auth-modal-content">
+                        <h3 style="margin-top:0;">🔐 Acceso Administrador</h3>
+                        <p>Introduce la contraseña del administrador:</p>
+                        <label for="admin-password-input" style="display:block; margin-bottom:6px; color: var(--dorado);">Contraseña</label>
+                        <input id="admin-password-input" type="password" placeholder="Contraseña" autocomplete="new-password">
+                        <div class="admin-auth-modal-buttons">
+                            <button id="admin-auth-cancel" class="modal-cancel-btn">Cancelar</button>
+                            <button id="admin-auth-submit" class="btn-primary">Entrar</button>
+                        </div>
+                    </div>
+                `;
+                const cleanup = () => modal.remove();
+                document.body.appendChild(modal);
+                const input = modal.querySelector('#admin-password-input');
+                input.focus();
+                modal.querySelector('#admin-auth-cancel').addEventListener('click', () => {
+                    cleanup();
+                    reject(new Error('cancelled'));
+                });
+                modal.querySelector('#admin-auth-submit').addEventListener('click', () => {
+                    const password = input.value.trim();
+                    cleanup();
+                    resolve(password);
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const password = input.value.trim();
+                        cleanup();
+                        resolve(password);
+                    } else if (e.key === 'Escape') {
+                        cleanup();
+                        reject(new Error('cancelled'));
+                    }
+                });
+            });
+        }
+
+        // ==================== Estado de la aplicación ====================
+        let players = [];          // Cola de jugadores sin asignar
+        let groups = [];           // Array de grupos
+        let nextPlayerId = 1;
+        let nextGroupId = 1;
+
+        // Contexto para el modal de asignación
+        let modalContext = null;   // { groupId, slotRole, slotIndex }
+
+        // Contexto para el modal de horario/config
+        let scheduleModalContext = null; // { groupId }
+
+        // Contexto para el modal de disponibilidad
+        let availabilityModalContext = null; // { playerId }
+
+        // Días de la semana (abreviatura para mostrar, nombre completo para formulario)
+        const DAYS_OF_WEEK = [
+            { label: 'Lunes',     short: 'Lun' },
+            { label: 'Martes',    short: 'Mar' },
+            { label: 'Miércoles', short: 'Mié' },
+            { label: 'Jueves',    short: 'Jue' },
+            { label: 'Viernes',   short: 'Vie' },
+            { label: 'Sábado',    short: 'Sáb' },
+            { label: 'Domingo',   short: 'Dom' }
+        ];
+
+        // ==================== Utilidades ====================
+        function getRoleIcon(role) {
+            const icons = { tank: '🛡️', healer: '💚', dps: '⚔️' };
+            return icons[role] || '❓';
+        }
+
+        function getRoleLabel(role) {
+            const labels = { tank: 'Tanque', healer: 'Healer', dps: 'DPS' };
+            return labels[role] || role;
+        }
+
+        function selectedRole() {
+            const btn = document.querySelector('.role-btn.active');
+            return btn ? btn.dataset.role : null;
+        }
+
+        function selectRole(btn) {
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // ==================== Gestión de jugadores en cola ====================
+        function addPlayer() {
+            const nameInput = document.getElementById('player-name');
+            const classSelect = document.getElementById('player-class');
+            const role = selectedRole();
+
+            const name = nameInput.value.trim();
+            const playerClass = classSelect.value;
+
+            if (!name) {
+                alert('Por favor, introduce el nombre del personaje.');
+                nameInput.focus();
+                return;
+            }
+            if (!playerClass) {
+                alert('Por favor, selecciona una clase.');
+                classSelect.focus();
+                return;
+            }
+            if (!role) {
+                alert('Por favor, selecciona un rol.');
+                return;
+            }
+
+            const player = {
+                id: nextPlayerId++,
+                name,
+                class: playerClass,
+                role,
+                priority: document.getElementById('player-priority').value || 'media',
+                availability: {
+                    status: 'libre',   // libre | confirmado | pendiente | fuera
+                    days: [],          // Array de nombres de días disponibles
+                    timePreference: '' // HH:MM preferido
+                },
+                ownerId: currentUserId
+            };
+
+            players.push(player);
+
+            // Limpiar formulario
+            nameInput.value = '';
+            classSelect.value = '';
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+
+            renderQueue();
+            updateStats();
+            saveData();
+        }
+
+        function removePlayerFromQueue(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+            if (!isAdmin && player.ownerId && player.ownerId !== currentUserId) return;
+            players = players.filter(p => p.id !== playerId);
+            renderQueue();
+            updateStats();
+            saveData();
+        }
+
+        function renderQueue() {
+            const container = document.getElementById('queue-list');
+            if (players.length === 0) {
+                container.innerHTML = '<div class="empty-queue">No hay jugadores en la cola.<br>¡Añade jugadores para empezar!</div>';
+                return;
+            }
+
+            container.innerHTML = players.map(p => {
+                const avail = p.availability || {};
+                const status = avail.status || 'libre';
+                const priority = p.priority || 'media';
+                const priorityLabel = { alta: '🔴 Alta', media: '⭐ Media', baja: '⚪ Baja' }[priority] || priority;
+                const availLabel = { libre: 'Libre', confirmado: 'Confirmado', pendiente: 'Pendiente', fuera: 'Fuera' }[status] || status;
+                const isOwn = isAdmin || p.ownerId === currentUserId;
+
+                return `
+                <div class="queue-player" data-role="${p.role}">
+                    <span style="font-size:1.3em">${getRoleIcon(p.role)}</span>
+                    <div style="flex:1; min-width:0;">
+                        <div class="player-name">${escapeHtml(p.name)}</div>
+                        <div class="player-class">${escapeHtml(p.class)}</div>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;">
+                            <span class="priority-badge ${priority}">${priorityLabel}</span>
+                            <span class="availability-badge ${status}">${availLabel}</span>
+                        </div>
+                    </div>
+                    ${isOwn
+                        ? `<button class="avail-edit-btn" onclick="openAvailabilityModal(${p.id})" title="Editar disponibilidad">📆</button>`
+                        : ''}
+                    ${(isAdmin || p.ownerId === currentUserId)
+                        ? `<button class="remove-btn" onclick="removePlayerFromQueue(${p.id})" title="Eliminar de la cola">✕</button>`
+                        : ''}
+                </div>`;
+            }).join('');
+        }
+
+        // ==================== Gestión de grupos ====================
+        function findPlayerById(id) {
+            const inQueue = players.find(p => p.id === id);
+            if (inQueue) return inQueue;
+            for (const g of groups) {
+                for (const role of ['tank', 'healer', 'dps']) {
+                    for (const slot of (g.slots[role] || [])) {
+                        if (slot && slot.id === id) return slot;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function createGroup() {
+            const id = nextGroupId++;
+            return {
+                id,
+                name: `Grupo ${id}`,
+                creatorId: currentUserId,
+                slots: {
+                    tank: [null],          // 1 tanque
+                    healer: [null],        // 1 healer
+                    dps: [null, null, null] // 3 DPS
+                },
+                runInfo: {
+                    keyLevel: '',   // Número de llave objetivo
+                    afijo: '',      // Afijo semanal
+                    tipo: '',       // push | farm | boost | aprendizaje
+                    duracion: ''    // Duración estimada
+                },
+                schedule: {
+                    days: [],   // Nombres de días seleccionados
+                    time: '',   // HH:MM
+                    notes: ''   // Notas opcionales
+                }
+            };
+        }
+
+        function addGroup() {
+            groups.push(createGroup());
+            renderGroups();
+            saveData();
+        }
+
+        function deleteGroup(groupId) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            if (!isAdmin && group.creatorId && group.creatorId !== currentUserId) return;
+
+            // Devolver los jugadores asignados a la cola
+            ['tank', 'healer', 'dps'].forEach(role => {
+                group.slots[role].forEach(slot => {
+                    if (slot) players.push(slot);
+                });
+            });
+
+            groups = groups.filter(g => g.id !== groupId);
+            renderQueue();
+            renderGroups();
+            updateStats();
+            saveData();
+        }
+
+        function removePlayerFromSlot(groupId, role, slotIndex) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+
+            const player = group.slots[role][slotIndex];
+            if (!player) return;
+
+            const isCreator = group.creatorId === currentUserId;
+            const isSlotOwner = player.ownerId === currentUserId;
+            if (!isAdmin && !isCreator && !isSlotOwner) return;
+
+            group.slots[role][slotIndex] = null;
+            players.push(player);
+
+            renderQueue();
+            renderGroups();
+            updateStats();
+            saveData();
+        }
+
+        function isGroupComplete(group) {
+            return group.slots.tank[0] !== null &&
+                   group.slots.healer[0] !== null &&
+                   group.slots.dps.every(s => s !== null);
+        }
+
+        function countFilledSlots(group) {
+            let count = 0;
+            ['tank', 'healer', 'dps'].forEach(role => {
+                group.slots[role].forEach(s => { if (s) count++; });
+            });
+            return count;
+        }
+
+        function renderGroups() {
+            const board = document.getElementById('groups-board');
+            if (groups.length === 0) {
+                board.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; color:#6b7280; padding:40px 0;">
+                        No hay grupos creados todavía.<br>
+                        Pulsa <strong style="color:var(--dorado)">➕ Nuevo Grupo</strong> para crear uno,
+                        o <strong style="color:var(--dorado)">⚡ Rellenar Automático</strong> para crearlos automáticamente.
+                    </div>`;
+                updateStats();
+                return;
+            }
+
+            board.innerHTML = groups.map(group => {
+                const complete = isGroupComplete(group);
+                const filled = countFilledSlots(group);
+
+                const slotsHtml = [
+                    renderRoleSlots(group, 'tank', 'Tanque', 'tank-slot'),
+                    renderRoleSlots(group, 'healer', 'Healer', 'healer-slot'),
+                    ...renderDpsSlots(group)
+                ].join('');
+
+                return `
+                <div class="group-card ${complete ? 'complete' : ''}" id="group-${group.id}">
+                    <div class="group-header">
+                        <span class="group-title">${escapeHtml(group.name)}${complete ? '<span class="complete-badge">✓ Completo</span>' : ''}</span>
+                        <span class="group-count">${filled}/5</span>
+                        ${(isAdmin || group.creatorId === currentUserId)
+                            ? `<button class="delete-group-btn" onclick="deleteGroup(${group.id})" title="Eliminar grupo">✕</button>`
+                            : ''}
+                    </div>
+                    <div class="group-run-info">
+                        ${renderRunInfoSection(group)}
+                    </div>
+                    <div class="group-slots">
+                        ${slotsHtml}
+                    </div>
+                    <div class="group-schedule">
+                        ${renderScheduleSection(group)}
+                    </div>
+                    <div class="weekly-view">
+                        ${renderWeeklyView(group)}
+                    </div>
+                </div>`;
+            }).join('');
+
+            updateStats();
+        }
+
+        function renderRoleSlots(group, role, label, slotClass) {
+            const slot = group.slots[role][0];
+            const isCreator = group.creatorId === currentUserId;
+            let actionBtns = '';
+            if (slot) {
+                const isSlotOwner = slot.ownerId === currentUserId;
+                if (isSlotOwner || isAdmin) {
+                    actionBtns += `<button class="avail-edit-btn" onclick="openAvailabilityModal(${slot.id})" title="Editar disponibilidad">📆</button>`;
+                }
+                if (isAdmin || isCreator || isSlotOwner) {
+                    actionBtns += `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, '${role}', 0)" title="Quitar jugador">✕</button>`;
+                }
+            } else {
+                if (isAdmin || isCreator) {
+                    actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0)">Asignar</button>`;
+                } else {
+                    const hasOwnPlayer = players.some(p => p.role === role && p.ownerId === currentUserId);
+                    if (hasOwnPlayer) {
+                        actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, '${role}', 0, true)" title="Unirte a este grupo">Unirme</button>`;
+                    }
+                }
+            }
+            let slotInfoHtml = '';
+            if (slot) {
+                const avail = slot.availability || {};
+                const status = avail.status || 'libre';
+                const availLabel = { libre: 'Libre', confirmado: '✓ Listo', pendiente: '⏳', fuera: '✗ Fuera' }[status] || status;
+                slotInfoHtml = `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
+                    <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;">
+                        <span class="slot-player-class">${escapeHtml(slot.class)}</span>
+                        <span class="availability-badge ${status}" style="font-size:0.68em;">${availLabel}</span>
+                    </div>`;
+            }
+            return `
+                <div class="role-slot ${slotClass}">
+                    <span class="slot-icon">${getRoleIcon(role)}</span>
+                    <div class="slot-content">
+                        <div class="slot-label">${label}</div>
+                        ${slot ? slotInfoHtml : `<div class="slot-empty">Vacío</div>`}
+                    </div>
+                    ${actionBtns ? `<div style="display:flex;gap:2px;flex-shrink:0;">${actionBtns}</div>` : ''}
+                </div>`;
+        }
+
+        function renderDpsSlots(group) {
+            const isCreator = group.creatorId === currentUserId;
+            return group.slots.dps.map((slot, i) => {
+                let actionBtns = '';
+                if (slot) {
+                    const isSlotOwner = slot.ownerId === currentUserId;
+                    if (isSlotOwner || isAdmin) {
+                        actionBtns += `<button class="avail-edit-btn" onclick="openAvailabilityModal(${slot.id})" title="Editar disponibilidad">📆</button>`;
+                    }
+                    if (isAdmin || isCreator || isSlotOwner) {
+                        actionBtns += `<button class="slot-remove-btn" onclick="removePlayerFromSlot(${group.id}, 'dps', ${i})" title="Quitar jugador">✕</button>`;
+                    }
+                } else {
+                    if (isAdmin || isCreator) {
+                        actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i})">Asignar</button>`;
+                    } else {
+                        const hasOwnPlayer = players.some(p => p.role === 'dps' && p.ownerId === currentUserId);
+                        if (hasOwnPlayer) {
+                            actionBtns = `<button class="slot-assign-btn" onclick="openModal(${group.id}, 'dps', ${i}, true)" title="Unirte a este grupo">Unirme</button>`;
+                        }
+                    }
+                }
+                let slotInfoHtml = '';
+                if (slot) {
+                    const avail = slot.availability || {};
+                    const status = avail.status || 'libre';
+                    const availLabel = { libre: 'Libre', confirmado: '✓ Listo', pendiente: '⏳', fuera: '✗ Fuera' }[status] || status;
+                    slotInfoHtml = `<div class="slot-player-name">${escapeHtml(slot.name)}</div>
+                        <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;">
+                            <span class="slot-player-class">${escapeHtml(slot.class)}</span>
+                            <span class="availability-badge ${status}" style="font-size:0.68em;">${availLabel}</span>
+                        </div>`;
+                }
+                return `
+                <div class="role-slot dps-slot">
+                    <span class="slot-icon">⚔️</span>
+                    <div class="slot-content">
+                        <div class="slot-label">DPS ${i + 1}</div>
+                        ${slot ? slotInfoHtml : `<div class="slot-empty">Vacío</div>`}
+                    </div>
+                    ${actionBtns ? `<div style="display:flex;gap:2px;flex-shrink:0;">${actionBtns}</div>` : ''}
+                </div>`;
+            });
+        }
+
+        // ==================== Sección de info de run en la tarjeta ====================
+        function renderRunInfoSection(group) {
+            const r = group.runInfo || {};
+            const isCreator = group.creatorId === currentUserId;
+            const hasInfo = r.keyLevel || r.tipo || r.afijo || r.duracion;
+
+            const tipoLabels = { push: '🚀 Push', farm: '🌾 Farm', boost: '⚡ Boost', aprendizaje: '📚 Aprendizaje' };
+
+            let badgesHtml = '';
+            if (r.keyLevel) {
+                badgesHtml += `<span class="run-badge key-level">🔑 +${escapeHtml(String(r.keyLevel))}</span>`;
+            }
+            if (r.tipo) {
+                badgesHtml += `<span class="run-badge run-type-${escapeHtml(r.tipo)}">${escapeHtml(tipoLabels[r.tipo] || r.tipo)}</span>`;
+            }
+            if (r.afijo) {
+                badgesHtml += `<span class="run-badge afijo">⚙️ ${escapeHtml(r.afijo)}</span>`;
+            }
+            if (r.duracion) {
+                badgesHtml += `<span class="run-badge duracion">⏱️ ${escapeHtml(r.duracion)}</span>`;
+            }
+            if (!hasInfo) {
+                badgesHtml = '<span class="run-info-empty">Sin info de run</span>';
+            }
+
+            const editBtn = (isAdmin || isCreator)
+                ? `<button class="run-info-edit-btn" onclick="openScheduleModal(${group.id})">✏️ Configurar</button>`
+                : '';
+
+            return `${badgesHtml}${editBtn}`;
+        }
+
+        // ==================== Vista semanal de disponibilidad ====================
+        function renderWeeklyView(group) {
+            // Recopilar todos los jugadores asignados al grupo
+            const assigned = [
+                ...(group.slots.tank || []),
+                ...(group.slots.healer || []),
+                ...(group.slots.dps || [])
+            ].filter(Boolean);
+
+            if (assigned.length === 0) {
+                return `<div class="weekly-view-toggle" onclick="toggleWeeklyView(${group.id})">
+                    📅 Vista semanal <span>▸</span>
+                </div>`;
+            }
+
+            return `
+                <div class="weekly-view-toggle" onclick="toggleWeeklyView(${group.id})">
+                    📅 Vista semanal de disponibilidad <span id="weekly-arrow-${group.id}">▸</span>
+                </div>
+                <div class="weekly-view-content hidden" id="weekly-content-${group.id}">
+                    <div class="weekly-grid">
+                        ${DAYS_OF_WEEK.map(day => {
+                            const dots = assigned.map(p => {
+                                const avail = p.availability || {};
+                                const availDays = avail.days || [];
+                                const status = avail.status || 'libre';
+                                const inDay = availDays.includes(day.label);
+                                const dotStatus = inDay ? status : 'no-data';
+                                const initials = escapeHtml(p.name.charAt(0).toUpperCase());
+                                const roleIcon = getRoleIcon(p.role);
+                                return `<div class="weekly-player-dot ${dotStatus}" title="${escapeHtml(p.name)} — ${inDay ? dotStatus : 'sin datos'}">${initials}</div>`;
+                            }).join('');
+                            return `<div class="weekly-day-col">
+                                <div class="weekly-day-label">${escapeHtml(day.short)}</div>
+                                ${dots}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <div class="weekly-time-hint">
+                        ${group.schedule && group.schedule.time ? `🕐 Hora del grupo: <strong>${escapeHtml(group.schedule.time)}</strong>` : 'Sin hora de grupo definida'}
+                    </div>
+                </div>`;
+        }
+
+        function toggleWeeklyView(groupId) {
+            const content = document.getElementById(`weekly-content-${groupId}`);
+            const arrow = document.getElementById(`weekly-arrow-${groupId}`);
+            if (!content) return;
+            const hidden = content.classList.toggle('hidden');
+            if (arrow) arrow.textContent = hidden ? '▸' : '▾';
+        }
+
+        // ==================== Sección de horario en la tarjeta ====================
+        function renderScheduleSection(group) {
+            const s = group.schedule;
+            const hasSchedule = s.days.length > 0 || s.time;
+            const isCreator = group.creatorId === currentUserId;
+
+            const validDays = s.days.filter(d => DAYS_OF_WEEK.some(x => x.label === d));
+            const daysHtml = validDays.length > 0
+                ? `<div class="schedule-days-display">${validDays.map(d => {
+                    const day = DAYS_OF_WEEK.find(x => x.label === d);
+                    return `<span class="schedule-day-pill">${escapeHtml(day.short)}</span>`;
+                }).join('')}</div>`
+                : '';
+
+            const timeHtml = s.time
+                ? `<span class="schedule-time-display">🕐 ${escapeHtml(s.time)}</span>`
+                : '';
+
+            const notesHtml = s.notes
+                ? `<span class="schedule-notes-display">📝 ${escapeHtml(s.notes)}</span>`
+                : '';
+
+            const contentHtml = hasSchedule
+                ? `${daysHtml}${timeHtml}${notesHtml}`
+                : `<span class="schedule-empty">Sin horario asignado</span>`;
+
+            const editBtnHtml = (isAdmin || isCreator)
+                ? `<button class="schedule-btn" onclick="openScheduleModal(${group.id})">📅 ${hasSchedule ? 'Editar horario' : 'Añadir horario'}</button>`
+                : '';
+
+            return `${contentHtml}${editBtnHtml}`;
+        }
+
+        // ==================== Modal de horario ====================
+        function openScheduleModal(groupId) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            if (!isAdmin && group.creatorId && group.creatorId !== currentUserId) return;
+            scheduleModalContext = { groupId };
+
+            document.getElementById('schedule-modal-group-name').textContent = group.name;
+
+            // Poblar campos de run info
+            const r = group.runInfo || {};
+            document.getElementById('run-key-level-input').value = r.keyLevel || '';
+            document.getElementById('run-tipo-input').value = r.tipo || '';
+            document.getElementById('run-duracion-input').value = r.duracion || '';
+            document.getElementById('run-afijo-input').value = r.afijo || '';
+
+            // Poblar campos de horario
+            document.getElementById('schedule-time-input').value = group.schedule.time || '';
+            document.getElementById('schedule-notes-input').value = group.schedule.notes || '';
+
+            // Renderizar checkboxes de días
+            const grid = document.getElementById('schedule-days-grid');
+            grid.innerHTML = DAYS_OF_WEEK.map(day => {
+                const checked = group.schedule.days.includes(day.label);
+                return `
+                    <label class="day-checkbox-label ${checked ? 'checked' : ''}">
+                        <input type="checkbox" value="${escapeHtml(day.label)}" ${checked ? 'checked' : ''}
+                            onchange="toggleDayLabel(this)">
+                        ${escapeHtml(day.label)}
+                    </label>`;
+            }).join('');
+
+            document.getElementById('schedule-modal').classList.add('active');
+        }
+
+        function toggleDayLabel(checkbox) {
+            const label = checkbox.parentElement;
+            if (checkbox.checked) {
+                label.classList.add('checked');
+            } else {
+                label.classList.remove('checked');
+            }
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('schedule-modal').classList.remove('active');
+            scheduleModalContext = null;
+        }
+
+        function saveSchedule() {
+            if (!scheduleModalContext) return;
+            const group = groups.find(g => g.id === scheduleModalContext.groupId);
+            if (!group) return;
+            if (!isAdmin && group.creatorId && group.creatorId !== currentUserId) return;
+
+            // Guardar run info
+            if (!group.runInfo) group.runInfo = {};
+            const rawKeyLevel = document.getElementById('run-key-level-input').value;
+            group.runInfo.keyLevel = rawKeyLevel !== '' ? parseInt(rawKeyLevel, 10) : '';
+            group.runInfo.tipo = document.getElementById('run-tipo-input').value;
+            group.runInfo.duracion = document.getElementById('run-duracion-input').value;
+            group.runInfo.afijo = document.getElementById('run-afijo-input').value.trim();
+
+            // Guardar horario
+            const checkedBoxes = document.querySelectorAll('#schedule-days-grid input[type="checkbox"]:checked');
+            const validDayLabels = new Set(DAYS_OF_WEEK.map(d => d.label));
+            group.schedule.days = Array.from(checkedBoxes)
+                .map(cb => cb.value)
+                .filter(v => validDayLabels.has(v));
+            group.schedule.time = document.getElementById('schedule-time-input').value;
+            group.schedule.notes = document.getElementById('schedule-notes-input').value.trim();
+
+            closeScheduleModal();
+            renderGroups();
+            saveData();
+        }
+
+        // Cerrar modal de horario al hacer clic fuera
+        document.getElementById('schedule-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeScheduleModal();
+        });
+
+        // ==================== Modal de disponibilidad del jugador ====================
+        function openAvailabilityModal(playerId) {
+            const player = findPlayerById(playerId);
+            if (!player) return;
+            if (!isAdmin && player.ownerId && player.ownerId !== currentUserId) return;
+            availabilityModalContext = { playerId };
+
+            document.getElementById('avail-modal-player-name').textContent =
+                `${getRoleIcon(player.role)} ${player.name} (${player.class})`;
+
+            // Seleccionar estado
+            const avail = player.availability || {};
+            const status = avail.status || 'libre';
+            document.querySelectorAll('input[name="avail-status"]').forEach(radio => {
+                radio.checked = radio.value === status;
+                radio.closest('.avail-status-option').style.borderColor =
+                    radio.checked ? 'rgba(139, 92, 246, 0.6)' : 'transparent';
+            });
+
+            // Renderizar días
+            const availDays = avail.days || [];
+            const grid = document.getElementById('avail-days-grid');
+            grid.innerHTML = DAYS_OF_WEEK.map(day => {
+                const checked = availDays.includes(day.label);
+                return `
+                    <label class="day-checkbox-label ${checked ? 'checked' : ''}">
+                        <input type="checkbox" value="${escapeHtml(day.label)}" ${checked ? 'checked' : ''}
+                            onchange="toggleDayLabel(this)">
+                        ${escapeHtml(day.label)}
+                    </label>`;
+            }).join('');
+
+            document.getElementById('avail-time-input').value = avail.timePreference || '';
+
+            // Listener para highlight del radio seleccionado
+            document.querySelectorAll('input[name="avail-status"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    document.querySelectorAll('.avail-status-option').forEach(opt => {
+                        opt.style.borderColor = 'transparent';
+                    });
+                    radio.closest('.avail-status-option').style.borderColor = 'rgba(139, 92, 246, 0.6)';
+                });
+            });
+
+            document.getElementById('availability-modal').classList.add('active');
+        }
+
+        function closeAvailabilityModal() {
+            document.getElementById('availability-modal').classList.remove('active');
+            availabilityModalContext = null;
+        }
+
+        function saveAvailability() {
+            if (!availabilityModalContext) return;
+            const player = findPlayerById(availabilityModalContext.playerId);
+            if (!player) return;
+            if (!isAdmin && player.ownerId && player.ownerId !== currentUserId) return;
+
+            if (!player.availability) player.availability = {};
+
+            const selectedStatus = document.querySelector('input[name="avail-status"]:checked');
+            player.availability.status = selectedStatus ? selectedStatus.value : 'libre';
+
+            const checkedBoxes = document.querySelectorAll('#avail-days-grid input[type="checkbox"]:checked');
+            const validDayLabels = new Set(DAYS_OF_WEEK.map(d => d.label));
+            player.availability.days = Array.from(checkedBoxes)
+                .map(cb => cb.value)
+                .filter(v => validDayLabels.has(v));
+
+            player.availability.timePreference = document.getElementById('avail-time-input').value;
+
+            closeAvailabilityModal();
+            renderQueue();
+            renderGroups(); // Refrescar vista semanal
+            saveData();
+        }
+
+        // Cerrar modal de disponibilidad al hacer clic fuera
+        document.getElementById('availability-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeAvailabilityModal();
+        });
+
+        // ==================== Auto-fill ====================
+        function autoFillGroups() {
+            if (!isAdmin) {
+                alert('Solo el administrador puede usar el relleno automático.');
+                return;
+            }
+            const tanks   = players.filter(p => p.role === 'tank');
+            const healers  = players.filter(p => p.role === 'healer');
+            const dpsPlayers = players.filter(p => p.role === 'dps');
+
+            if (tanks.length === 0 && healers.length === 0 && dpsPlayers.length === 0) {
+                alert('No hay jugadores en la cola para rellenar grupos.');
+                return;
+            }
+
+            const maxGroups = Math.max(tanks.length, healers.length, Math.ceil(dpsPlayers.length / 3));
+            if (maxGroups === 0) return;
+
+            // Crear grupos adicionales necesarios según la cantidad de jugadores en cola
+            const groupsNeeded = Math.max(0, maxGroups - groups.length);
+            for (let i = 0; i < groupsNeeded; i++) {
+                groups.push(createGroup());
+            }
+
+            // Asignar tanques
+            groups.forEach(group => {
+                if (group.slots.tank[0] === null && tanks.length > 0) {
+                    group.slots.tank[0] = tanks.shift();
+                }
+            });
+
+            // Asignar healers
+            groups.forEach(group => {
+                if (group.slots.healer[0] === null && healers.length > 0) {
+                    group.slots.healer[0] = healers.shift();
+                }
+            });
+
+            // Asignar DPS
+            groups.forEach(group => {
+                group.slots.dps.forEach((slot, i) => {
+                    if (slot === null && dpsPlayers.length > 0) {
+                        group.slots.dps[i] = dpsPlayers.shift();
+                    }
+                });
+            });
+
+            // Actualizar cola: quitar los asignados
+            const assignedIds = new Set();
+            groups.forEach(g => {
+                [...g.slots.tank, ...g.slots.healer, ...g.slots.dps]
+                    .filter(s => s !== null)
+                    .forEach(s => assignedIds.add(s.id));
+            });
+            players = players.filter(p => !assignedIds.has(p.id));
+
+            renderQueue();
+            renderGroups();
+            updateStats();
+            saveData();
+        }
+
+        // ==================== Modal de asignación ====================
+        function openModal(groupId, role, slotIndex, ownOnly = false) {
+            modalContext = { groupId, role, slotIndex };
+
+            let rolePlayers = players.filter(p => p.role === role);
+            if (ownOnly) {
+                rolePlayers = rolePlayers.filter(p => p.ownerId === currentUserId);
+            }
+            const title = document.getElementById('modal-title');
+            const list = document.getElementById('modal-player-list');
+
+            title.textContent = ownOnly ? `Unirte al Grupo (${getRoleLabel(role)})` : `Asignar ${getRoleLabel(role)} al Grupo`;
+
+            if (rolePlayers.length === 0) {
+                list.innerHTML = `<div class="modal-empty">No hay jugadores con rol ${getRoleLabel(role)} en la cola.</div>`;
+            } else {
+                list.innerHTML = rolePlayers.map(p => `
+                    <div class="modal-player-item" onclick="assignPlayer(${p.id})">
+                        <span style="font-size:1.3em">${getRoleIcon(p.role)}</span>
+                        <div>
+                            <div style="font-weight:bold">${escapeHtml(p.name)}</div>
+                            <div style="font-size:0.8em; color:#9ca3af">${escapeHtml(p.class)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('assign-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('assign-modal').classList.remove('active');
+            modalContext = null;
+        }
+
+        function assignPlayer(playerId) {
+            if (!modalContext) return;
+            const { groupId, role, slotIndex } = modalContext;
+
+            const playerIndex = players.findIndex(p => p.id === playerId);
+            if (playerIndex === -1) return;
+
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+
+            const player = players[playerIndex];
+            const isCreator = group.creatorId === currentUserId;
+            const isOwnPlayer = player.ownerId === currentUserId;
+            if (!isAdmin && !isCreator && !isOwnPlayer) return;
+
+            group.slots[role][slotIndex] = player;
+            players.splice(playerIndex, 1);
+
+            closeModal();
+            renderQueue();
+            renderGroups();
+            updateStats();
+            saveData();
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('assign-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ==================== Limpiar todo ====================
+        const CLEAR_ALL_CONFIRMATION_TEXT = 'CONFIRMAR';
+
+        function clearAll() {
+            if (!isAdmin) {
+                alert('Solo el administrador puede limpiar todos los grupos.');
+                return;
+            }
+            openClearAllModal();
+        }
+
+        function openClearAllModal() {
+            const input = document.getElementById('clear-all-confirm-input');
+            const btn = document.getElementById('clear-all-confirm-btn');
+            input.value = '';
+            btn.disabled = true;
+            document.getElementById('clear-all-modal').classList.add('active');
+            input.focus();
+        }
+
+        function closeClearAllModal() {
+            document.getElementById('clear-all-modal').classList.remove('active');
+        }
+
+        function confirmClearAll() {
+            if (!isAdmin) return;
+            players = [];
+            groups = [];
+            nextPlayerId = 1;
+            nextGroupId = 1;
+            renderQueue();
+            renderGroups();
+            updateStats();
+            saveData();
+            closeClearAllModal();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('clear-all-confirm-input').addEventListener('input', function () {
+                document.getElementById('clear-all-confirm-btn').disabled = this.value.trim() !== CLEAR_ALL_CONFIRMATION_TEXT;
+            });
+
+            document.getElementById('clear-all-modal').addEventListener('click', function (e) {
+                if (e.target === this) closeClearAllModal();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && document.getElementById('clear-all-modal').classList.contains('active')) {
+                    closeClearAllModal();
+                }
+                if (e.key === 'Escape' && document.getElementById('availability-modal').classList.contains('active')) {
+                    closeAvailabilityModal();
+                }
+            });
+
+            document.getElementById('btn-admin-auth').addEventListener('click', async function () {
+                if (!window.firebaseAuth) {
+                    alert('Firebase Auth no está disponible.');
+                    return;
+                }
+
+                if (isAdmin) {
+                    try {
+                        await window.firebaseSignOut(window.firebaseAuth);
+                        alert('Sesión de administrador cerrada.');
+                    } catch (error) {
+                        console.error('Error closing admin session:', error);
+                        alert('No se pudo cerrar la sesión de administrador.');
+                    }
+                    return;
+                }
+
+                let password = '';
+                try {
+                    password = await requestAdminPassword();
+                } catch (error) {
+                    return;
+                }
+
+                try {
+                    await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, ADMIN_EMAIL, password);
+                    alert('Acceso de administrador concedido.');
+                } catch (error) {
+                    console.error('Admin authentication error:', error.code);
+                    alert(`Credenciales de administrador incorrectas (${error.code || 'error-desconocido'}).`);
+                }
+            });
+        });
+
+        // ==================== Estadísticas ====================
+        function updateStats() {
+            document.getElementById('stat-queue').textContent = players.length;
+            document.getElementById('stat-tanks').textContent = players.filter(p => p.role === 'tank').length;
+            document.getElementById('stat-healers').textContent = players.filter(p => p.role === 'healer').length;
+            document.getElementById('stat-dps').textContent = players.filter(p => p.role === 'dps').length;
+            document.getElementById('stat-complete').textContent = groups.filter(g => isGroupComplete(g)).length;
+        }
+
+        // ==================== Seguridad: escapeHtml ====================
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ==================== Firebase ====================
+        async function saveData() {
+            if (!window.firestoreDB || !window.firebaseConfigured) return;
+            try {
+                const docRef = window.firestoreDoc(window.firestoreDB, 'mythicPlusGroups', 'current');
+                await window.firestoreSetDoc(docRef, {
+                    players: players,
+                    groups: groups,
+                    nextPlayerId: nextPlayerId,
+                    nextGroupId: nextGroupId
+                });
+            } catch (error) {
+                console.error('Error saving data to Firebase:', error);
+            }
+        }
+
+        function initializeFirebase() {
+            if (!window.firestoreDB || !window.firebaseConfigured) return;
+
+            if (window.firebaseAuth && window.firebaseOnAuthStateChanged) {
+                window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                    isAdmin = !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL);
+                    updateAdminUI();
+                });
+            }
+
+            const docRef = window.firestoreDoc(window.firestoreDB, 'mythicPlusGroups', 'current');
+            window.firestoreOnSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    players = data.players || [];
+                    groups = data.groups || [];
+                    nextPlayerId = data.nextPlayerId || 1;
+                    nextGroupId = data.nextGroupId || 1;
+                }
+                renderQueue();
+                renderGroups();
+                updateStats();
+            }, (error) => {
+                console.error('Error in Firebase listener:', error);
+            });
+        }
+
+        // ==================== Inicialización ====================
+        renderQueue();
+        renderGroups();
+        updateStats();
+
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (window.firestoreDB && window.firebaseConfigured) {
+                    initializeFirebase();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
