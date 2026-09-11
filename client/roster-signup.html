@@ -1403,6 +1403,10 @@
             return allowed.includes(status) ? status : 'pendiente';
         }
 
+        function normalizeRosterSource(source) {
+            return ['fixed', 'substitute', 'signup'].includes(source) ? source : 'signup';
+        }
+
         function slugifySeasonName(name) {
             return safeTrim(name)
                 .toLowerCase()
@@ -1499,7 +1503,7 @@
                 roles: Array.isArray(normalizedSignup.roles) ? normalizedSignup.roles : [],
                 role: existingMember.role || getMainRoleFromSpec(normalizedSignup.specialization) || 'DPS',
                 notes: normalizedSignup.notes || '',
-                source,
+                source: normalizeRosterSource(source),
                 status: normalizeRosterStatus(existingMember.status)
             };
         }
@@ -1553,7 +1557,7 @@
                     roles: Array.isArray(member.roles) ? member.roles : [],
                     role: member.role || getMainRoleFromSpec(member.specialization) || 'DPS',
                     notes: member.notes || '',
-                    source: member.source || 'signup',
+                    source: normalizeRosterSource(member.source),
                     status: normalizeRosterStatus(member.status)
                 });
             });
@@ -1570,7 +1574,7 @@
                 roles: Array.isArray(member.roles) ? member.roles : [],
                 role: member.role || getMainRoleFromSpec(member.specialization) || 'DPS',
                 notes: member.notes || '',
-                source: member.source || 'signup',
+                source: normalizeRosterSource(member.source),
                 status: normalizeRosterStatus(member.status)
             };
         }
@@ -1914,7 +1918,8 @@
             currentRosterState.substitutes = generatedSubstitutes.map(normalizeStoredSignup);
             currentRosterState.members = buildRosterMembersFromLists(currentRosterState.fixed, currentRosterState.substitutes, currentRosterState.members);
             currentRosterState.rosterMode = 'generated';
-            saveCurrentRoster(currentRosterState);
+            saveCurrentRoster(currentRosterState, { render: false });
+            renderSeasonManager();
         }
 
         function syncCurrentRosterWithSignups() {
@@ -2080,7 +2085,7 @@
                 <tr>
                     <td>${escapeHtml(member.name)}</td>
                     <td>${escapeHtml(member.role)}</td>
-                    <td><span class="source-badge ${member.source}">${member.source === 'fixed' ? 'Fijo' : member.source === 'substitute' ? 'Suplente' : 'Inscrito'}</span></td>
+                    <td><span class="source-badge ${normalizeRosterSource(member.source)}">${normalizeRosterSource(member.source) === 'fixed' ? 'Fijo' : normalizeRosterSource(member.source) === 'substitute' ? 'Suplente' : 'Inscrito'}</span></td>
                     <td><span class="status-badge ${member.status}">${member.status}</span></td>
                     <td>
                         <select class="status-select" data-player-name="${escapeHtml(member.name)}">
@@ -2152,13 +2157,21 @@
             if (dpsInput) dpsInput.value = config.dps || Math.max(0, (config.rosterSize || 20) - (config.tanks || 2) - (config.healers || 4));
 
             if (select) {
-                select.innerHTML = seasonsState.seasons.length === 0
-                    ? '<option value="">Sin temporadas</option>'
-                    : seasonsState.seasons.map((season) => `
-                        <option value="${season.id}" ${(selectedSeasonId ? season.id === selectedSeasonId : season.isActive) ? 'selected' : ''}>
-                            ${escapeHtml(season.name)}${season.endDate ? ' (archivada)' : ''}
-                        </option>
-                    `).join('');
+                select.innerHTML = '';
+                if (seasonsState.seasons.length === 0) {
+                    const emptyOption = document.createElement('option');
+                    emptyOption.value = '';
+                    emptyOption.textContent = 'Sin temporadas';
+                    select.appendChild(emptyOption);
+                } else {
+                    seasonsState.seasons.forEach((season) => {
+                        const option = document.createElement('option');
+                        option.value = season.id;
+                        option.selected = selectedSeasonId ? season.id === selectedSeasonId : season.isActive;
+                        option.textContent = `${season.name}${season.endDate ? ' (archivada)' : ''}`;
+                        select.appendChild(option);
+                    });
+                }
             }
 
             if (activeIndicator) {
@@ -3674,7 +3687,6 @@
 
             updateRosterCounts();
             setupDropZones();
-            syncCurrentRosterFromGeneratedState();
         }
 
         function setupDropZones() {
