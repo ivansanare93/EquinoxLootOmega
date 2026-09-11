@@ -1481,7 +1481,8 @@
                 members: [],
                 lastSavedAt: new Date().toISOString(),
                 lastArchivedSignature: null,
-                lastArchivedAt: null
+                lastArchivedAt: null,
+                rosterMode: 'empty'
             };
         }
 
@@ -1582,6 +1583,11 @@
             const normalizedMembers = Array.isArray(base.members)
                 ? base.members.map(normalizeRaidMember).filter(member => safeTrim(member.name))
                 : buildRosterMembersFromLists(fixed, substitutes, []);
+            const hasStructuredRoster = fixed.length > 0 || substitutes.length > 0;
+            const hasExplicitMembers = Array.isArray(base.members) && normalizedMembers.length > 0;
+            const rosterMode = hasStructuredRoster
+                ? 'generated'
+                : (base.rosterMode || (hasExplicitMembers ? 'restored' : 'empty'));
 
             return {
                 version: CURRENT_ROSTER_VERSION,
@@ -1598,7 +1604,8 @@
                 members: buildRosterMembersFromLists(fixed, substitutes, normalizedMembers),
                 lastSavedAt: base.lastSavedAt || new Date().toISOString(),
                 lastArchivedSignature: base.lastArchivedSignature || null,
-                lastArchivedAt: base.lastArchivedAt || null
+                lastArchivedAt: base.lastArchivedAt || null,
+                rosterMode
             };
         }
 
@@ -1906,6 +1913,7 @@
             currentRosterState.fixed = generatedFixedRoster.map(normalizeStoredSignup);
             currentRosterState.substitutes = generatedSubstitutes.map(normalizeStoredSignup);
             currentRosterState.members = buildRosterMembersFromLists(currentRosterState.fixed, currentRosterState.substitutes, currentRosterState.members);
+            currentRosterState.rosterMode = 'generated';
             saveCurrentRoster(currentRosterState);
         }
 
@@ -1917,10 +1925,13 @@
             currentRosterState.members = buildRosterMembersFromLists(currentRosterState.fixed, currentRosterState.substitutes, currentRosterState.members);
 
             if (currentRosterState.fixed.length > 0 || currentRosterState.substitutes.length > 0) {
+                currentRosterState.rosterMode = 'generated';
                 const latestByName = new Map(rosterSignups.map(signup => [signup.name.toLowerCase(), signup]));
                 currentRosterState.fixed = currentRosterState.fixed.map(player => latestByName.get(player.name.toLowerCase()) || player);
                 currentRosterState.substitutes = currentRosterState.substitutes.map(player => latestByName.get(player.name.toLowerCase()) || player);
                 syncGeneratedRosterFromCurrentState();
+            } else if (currentRosterState.rosterMode !== 'restored') {
+                currentRosterState.rosterMode = currentRosterState.members.length > 0 ? 'signup_fallback' : 'empty';
             }
 
             saveCurrentRoster(currentRosterState, { render: false });
@@ -2157,9 +2168,9 @@
             }
 
             const selectedSeason = seasonsState.seasons.find((season) => season.id === select?.value) || null;
-            const hasGeneratedRoster = Boolean((currentRosterState?.fixed?.length || 0) > 0 || (currentRosterState?.substitutes?.length || 0) > 0);
+            const canArchiveCurrentRoster = Boolean((currentRosterState?.members?.length || 0) > 0 && !['empty', 'signup_fallback'].includes(currentRosterState?.rosterMode));
             if (closeButton) {
-                closeButton.disabled = !activeSeason || isClosingCurrentRoster || !hasGeneratedRoster;
+                closeButton.disabled = !activeSeason || isClosingCurrentRoster || !canArchiveCurrentRoster;
             }
             if (archiveButton) archiveButton.disabled = !select?.value || selectedSeason?.endDate !== null;
             if (activateButton) activateButton.disabled = !select?.value || seasonsState.seasons.length === 0 || selectedSeason?.endDate !== null;
@@ -2203,8 +2214,8 @@
                 return;
             }
 
-            const hasGeneratedRoster = Boolean((rosterToArchive.fixed?.length || 0) > 0 || (rosterToArchive.substitutes?.length || 0) > 0);
-            if (!hasGeneratedRoster) {
+            const canArchiveCurrentRoster = Boolean((rosterToArchive.members?.length || 0) > 0 && !['empty', 'signup_fallback'].includes(rosterToArchive.rosterMode));
+            if (!canArchiveCurrentRoster) {
                 alert('Debes generar o cargar un roster actual antes de archivarlo.');
                 return;
             }
@@ -2378,6 +2389,7 @@
             loadCurrentRoster();
             syncGeneratedRosterFromCurrentState();
             renderSeasonManager();
+            updateAdminUI();
         }
 
 
