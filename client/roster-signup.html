@@ -1825,8 +1825,7 @@
             }
 
             if (!seasonsState.seasons.some(season => season.isActive)) {
-                const replacementSeason = seasonsState.seasons.find(season => season.id !== seasonId && !season.endDate)
-                    || seasonsState.seasons.find(season => season.id !== seasonId);
+                const replacementSeason = seasonsState.seasons.find(season => season.id !== seasonId && !season.endDate);
                 if (replacementSeason) {
                     seasonsState.seasons = seasonsState.seasons.map((season) => ({
                         ...season,
@@ -2254,8 +2253,8 @@
             const payload = {
                 exportedAt: new Date().toISOString(),
                 version: CURRENT_ROSTER_VERSION,
-                seasons: seasonsState,
-                currentRoster: currentRosterState
+                equinox_seasons: seasonsState,
+                equinox_current_roster: currentRosterState
             };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -2277,10 +2276,30 @@
                 return false;
             }
 
-            const seasonsPayload = parsed?.seasons || parsed?.equinox_seasons || parsed;
-            const currentRosterPayload = parsed?.currentRoster || parsed?.equinox_current_roster || parsed?.current_roster;
-            const hasValidSeasons = isRecognizedSeasonsPayload(seasonsPayload);
-            const hasValidRoster = currentRosterPayload ? isRecognizedRosterPayload(currentRosterPayload) : false;
+            let seasonsPayload = null;
+            if (isRecognizedSeasonsPayload(parsed?.equinox_seasons)) {
+                seasonsPayload = parsed.equinox_seasons;
+            } else if (Array.isArray(parsed?.seasons)) {
+                seasonsPayload = { seasons: parsed.seasons };
+            } else if (isRecognizedSeasonsPayload(parsed?.seasons)) {
+                seasonsPayload = parsed.seasons;
+            } else if (isRecognizedSeasonsPayload(parsed)) {
+                seasonsPayload = parsed;
+            }
+
+            let currentRosterPayload = null;
+            if (isRecognizedRosterPayload(parsed?.equinox_current_roster)) {
+                currentRosterPayload = parsed.equinox_current_roster;
+            } else if (isRecognizedRosterPayload(parsed?.currentRoster)) {
+                currentRosterPayload = parsed.currentRoster;
+            } else if (isRecognizedRosterPayload(parsed?.current_roster)) {
+                currentRosterPayload = parsed.current_roster;
+            } else if (isRecognizedRosterPayload(parsed)) {
+                currentRosterPayload = parsed;
+            }
+
+            const hasValidSeasons = Boolean(seasonsPayload);
+            const hasValidRoster = Boolean(currentRosterPayload);
 
             if (!hasValidSeasons && !hasValidRoster) {
                 alert('El archivo no contiene un respaldo válido del roster.');
