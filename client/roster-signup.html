@@ -1854,14 +1854,11 @@
             }
 
             seasonsState.seasons = updatedSeasons;
-            if (wasActive && !seasonsState.seasons.some(season => season.isActive)) {
-                const replacementSeason = seasonsState.seasons.find((season) => season.id !== seasonId && season.endDate === null);
-                if (replacementSeason) {
-                    seasonsState.seasons = seasonsState.seasons.map((season) => ({
-                        ...season,
-                        isActive: season.id === replacementSeason.id
-                    }));
-                }
+            if (!wasActive) {
+                seasonsState.seasons = seasonsState.seasons.map((season) => ({
+                    ...season,
+                    isActive: season.isActive && season.id !== seasonId
+                }));
             }
 
             saveSeasonsState();
@@ -2151,8 +2148,10 @@
             const activeSeason = getActiveSeason();
             const selectedSeasonId = select?.value || activeSeason?.id || '';
 
-            if (raidNameInput) raidNameInput.value = currentRosterState?.raidName || DEFAULT_RAID_NAME;
-            if (raidDateInput) raidDateInput.value = currentRosterState?.date || getTodayDate();
+            const desiredRaidName = currentRosterState?.raidName || DEFAULT_RAID_NAME;
+            const desiredRaidDate = currentRosterState?.date || getTodayDate();
+            if (raidNameInput && document.activeElement !== raidNameInput && raidNameInput.value !== desiredRaidName) raidNameInput.value = desiredRaidName;
+            if (raidDateInput && document.activeElement !== raidDateInput && raidDateInput.value !== desiredRaidDate) raidDateInput.value = desiredRaidDate;
             if (startDateInput && !startDateInput.value) startDateInput.value = getTodayDate();
 
             const config = currentRosterState?.config || getGeneratorConfigFromInputs();
@@ -2400,6 +2399,7 @@
             saveSeasonsState();
             saveCurrentRoster(currentRosterState, { render: false });
             syncGeneratedRosterFromCurrentState();
+            syncRosterSignupsFromCurrentRosterState();
             renderSeasonManager();
             if (isAdmin && (generatedFixedRoster.length > 0 || generatedSubstitutes.length > 0)) {
                 const builder = document.getElementById('roster-builder');
@@ -2409,6 +2409,29 @@
                 renderRosterBuilder();
             }
             return true;
+        }
+
+
+        function syncRosterSignupsFromCurrentRosterState() {
+            const sourcePlayers = currentRosterState?.fixed?.length || currentRosterState?.substitutes?.length
+                ? [...(currentRosterState.fixed || []), ...(currentRosterState.substitutes || [])]
+                : (currentRosterState?.members || []);
+            if (!Array.isArray(sourcePlayers) || sourcePlayers.length === 0) {
+                return;
+            }
+            rosterSignups = sourcePlayers
+                .map((player) => normalizeSignup({
+                    name: player.name,
+                    class: player.class,
+                    specialization: player.specialization,
+                    roles: Array.isArray(player.roles) ? player.roles : (player.role ? [player.role] : []),
+                    notes: player.notes || '',
+                    timestamp: player.timestamp || new Date().toISOString()
+                }))
+                .filter((player) => safeTrim(player.name))
+                .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+            renderRoster();
+            updateStatistics();
         }
 
         function initializeSeasonPersistence() {
