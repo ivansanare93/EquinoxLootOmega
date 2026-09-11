@@ -1854,11 +1854,14 @@
             }
 
             seasonsState.seasons = updatedSeasons;
-            if (!wasActive) {
-                seasonsState.seasons = seasonsState.seasons.map((season) => ({
-                    ...season,
-                    isActive: season.isActive && season.id !== seasonId
-                }));
+            if (wasActive) {
+                const replacementSeason = seasonsState.seasons.find((season) => season.id !== seasonId && season.endDate === null);
+                if (replacementSeason) {
+                    seasonsState.seasons = seasonsState.seasons.map((season) => ({
+                        ...season,
+                        isActive: season.id === replacementSeason.id
+                    }));
+                }
             }
 
             saveSeasonsState();
@@ -1892,10 +1895,11 @@
             let attended = 0;
 
             seasonsState.seasons.forEach((season) => {
-                totalRaids += season.raids.length;
                 season.raids.forEach((raid) => {
                     const entry = raid.members.find(member => member.name.toLowerCase() === normalizedName);
-                    if (entry?.status === 'confirmado') {
+                    if (!entry) return;
+                    totalRaids++;
+                    if (entry.status === 'confirmado') {
                         attended++;
                     }
                 });
@@ -2057,6 +2061,7 @@
                 <div class="attendance-summary-card">
                     <strong>${escapeHtml(activeSeason.name)}</strong>
                     <table class="attendance-table">
+                        <caption class="season-muted-text">Asistencia acumulada de la temporada activa ${escapeHtml(activeSeason.name)}</caption>
                         <thead>
                             <tr>
                                 <th>Jugador</th>
@@ -2212,7 +2217,8 @@
                 .map(member => `${safeTrim(member.name).toLowerCase()}:${normalizeRosterStatus(member.status)}`)
                 .sort()
                 .join('|');
-            return [seasonId, roster.date, roster.raidName, roster.members.length, membersSignature].join('::');
+            const normalizedRaidName = safeTrim(roster.raidName).replace(/\s+/g, ' ').toLowerCase();
+            return [seasonId, roster.date, normalizedRaidName, roster.members.length, membersSignature].join('::');
         }
 
         function archiveCurrentRosterToSeason() {
@@ -2417,6 +2423,9 @@
                 ? [...(currentRosterState.fixed || []), ...(currentRosterState.substitutes || [])]
                 : (currentRosterState?.members || []);
             if (!Array.isArray(sourcePlayers) || sourcePlayers.length === 0) {
+                rosterSignups = [];
+                renderRoster();
+                updateStatistics();
                 return;
             }
             rosterSignups = sourcePlayers
