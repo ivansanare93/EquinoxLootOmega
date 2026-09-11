@@ -1821,6 +1821,7 @@
                 throw new Error('Debes indicar una fecha de cierre válida para archivar la temporada.');
             }
 
+            const wasActive = seasonsState.seasons.some((season) => season.id === seasonId && season.isActive);
             let archived = null;
             const updatedSeasons = seasonsState.seasons.map((season) => {
                 if (season.id !== seasonId) return season;
@@ -1833,7 +1834,7 @@
             }
 
             seasonsState.seasons = updatedSeasons;
-            if (!seasonsState.seasons.some(season => season.isActive)) {
+            if (wasActive && !seasonsState.seasons.some(season => season.isActive)) {
                 const replacementSeason = seasonsState.seasons.find((season) => season.id !== seasonId && season.endDate === null);
                 if (replacementSeason) {
                     seasonsState.seasons = seasonsState.seasons.map((season) => ({
@@ -2172,11 +2173,11 @@
         }
 
         function buildArchiveSignature(seasonId, roster) {
-            const names = roster.members
-                .map(member => member.name.toLowerCase())
+            const membersSignature = roster.members
+                .map(member => `${safeTrim(member.name).toLowerCase()}:${normalizeRosterStatus(member.status)}`)
                 .sort()
                 .join('|');
-            return [seasonId, roster.date, roster.raidName, roster.members.length, names].join('::');
+            return [seasonId, roster.date, roster.raidName, roster.members.length, membersSignature].join('::');
         }
 
         function archiveCurrentRosterToSeason() {
@@ -2329,7 +2330,7 @@
             const normalizedSeasons = normalizeSeasonsPayload(hasValidSeasons ? seasonsPayload : { seasons: [] });
             const normalizedRoster = hasValidRoster
                 ? (transformLegacyCurrentRoster(currentRosterPayload) || normalizeCurrentRoster(currentRosterPayload))
-                : createEmptyCurrentRoster();
+                : normalizeCurrentRoster(currentRosterState || loadCurrentRoster() || createEmptyCurrentRoster());
 
             if (!Array.isArray(normalizedSeasons.seasons)) {
                 alert('El archivo no contiene una estructura de temporadas válida.');
