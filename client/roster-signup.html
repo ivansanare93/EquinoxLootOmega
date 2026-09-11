@@ -1651,7 +1651,15 @@
         }
 
         function isRecognizedRosterPayload(payload) {
-            return Array.isArray(payload) || Boolean(
+            if (Array.isArray(payload)) {
+                return payload.every((entry) => entry && typeof entry === 'object' && (
+                    Object.prototype.hasOwnProperty.call(entry, 'class') ||
+                    Object.prototype.hasOwnProperty.call(entry, 'specialization') ||
+                    Object.prototype.hasOwnProperty.call(entry, 'role') ||
+                    Array.isArray(entry.roles)
+                ));
+            }
+            return Boolean(
                 payload && typeof payload === 'object' && (
                     Array.isArray(payload.members) ||
                     Array.isArray(payload.fixed) ||
@@ -1814,7 +1822,7 @@
             }
 
             let archived = null;
-            seasonsState.seasons = seasonsState.seasons.map((season) => {
+            const updatedSeasons = seasonsState.seasons.map((season) => {
                 if (season.id !== seasonId) return season;
                 archived = { ...season, endDate, isActive: false };
                 return archived;
@@ -1824,8 +1832,9 @@
                 throw new Error('No se encontró la temporada a archivar.');
             }
 
+            seasonsState.seasons = updatedSeasons;
             if (!seasonsState.seasons.some(season => season.isActive)) {
-                const replacementSeason = seasonsState.seasons.find(season => season.id !== seasonId && season.endDate === null);
+                const replacementSeason = seasonsState.seasons.find((season) => season.id !== seasonId && season.endDate === null);
                 if (replacementSeason) {
                     seasonsState.seasons = seasonsState.seasons.map((season) => ({
                         ...season,
@@ -1917,10 +1926,15 @@
             renderSeasonManager();
         }
 
-        function resetCurrentRoster(keepRaidName = true) {
-            const raidName = keepRaidName ? safeTrim(document.getElementById('current-raid-name')?.value || currentRosterState?.raidName) : DEFAULT_RAID_NAME;
+        function resetCurrentRoster(keepRaidName = true, preserveArchiveMeta = false) {
+            const previousState = currentRosterState || createEmptyCurrentRoster();
+            const raidName = keepRaidName ? safeTrim(document.getElementById('current-raid-name')?.value || previousState.raidName) : DEFAULT_RAID_NAME;
             currentRosterState = createEmptyCurrentRoster(raidName || DEFAULT_RAID_NAME);
             currentRosterState.config = getGeneratorConfigFromInputs();
+            if (preserveArchiveMeta) {
+                currentRosterState.lastArchivedSignature = previousState.lastArchivedSignature || null;
+                currentRosterState.lastArchivedAt = previousState.lastArchivedAt || null;
+            }
             generatedFixedRoster = [];
             generatedSubstitutes = [];
             const builder = document.getElementById('roster-builder');
@@ -2247,7 +2261,7 @@
                 currentRosterState.lastArchivedSignature = signature;
                 currentRosterState.lastArchivedAt = raidRecord.closedAt;
                 saveCurrentRoster(currentRosterState, { render: false });
-                resetCurrentRoster(true);
+                resetCurrentRoster(true, true);
                 updateSeasonStatusMessage(`Roster archivado correctamente en ${activeSeason.name}.`, 'success');
             } finally {
                 isClosingCurrentRoster = false;
@@ -3687,15 +3701,15 @@
             document.getElementById('comp-tanks').value   = suggested.tanks;
             document.getElementById('comp-healers').value = suggested.healers;
             updateDpsCount();
-            saveCurrentRoster({ ...currentRosterState, config: getGeneratorConfigFromInputs() }, { render: false });
+            saveCurrentRoster({ ...(currentRosterState || createEmptyCurrentRoster()), config: getGeneratorConfigFromInputs() }, { render: false });
         });
         document.getElementById('comp-tanks').addEventListener('input', function() {
             updateDpsCount();
-            saveCurrentRoster({ ...currentRosterState, config: getGeneratorConfigFromInputs() }, { render: false });
+            saveCurrentRoster({ ...(currentRosterState || createEmptyCurrentRoster()), config: getGeneratorConfigFromInputs() }, { render: false });
         });
         document.getElementById('comp-healers').addEventListener('input', function() {
             updateDpsCount();
-            saveCurrentRoster({ ...currentRosterState, config: getGeneratorConfigFromInputs() }, { render: false });
+            saveCurrentRoster({ ...(currentRosterState || createEmptyCurrentRoster()), config: getGeneratorConfigFromInputs() }, { render: false });
         });
 
         function exportGeneratedRoster() {
@@ -3907,10 +3921,10 @@
         });
 
         document.getElementById('current-raid-name').addEventListener('change', function() {
-            saveCurrentRoster({ ...currentRosterState, raidName: this.value }, { render: false });
+            saveCurrentRoster({ ...(currentRosterState || createEmptyCurrentRoster()), raidName: this.value }, { render: false });
         });
         document.getElementById('current-raid-date').addEventListener('change', function() {
-            saveCurrentRoster({ ...currentRosterState, date: this.value }, { render: false });
+            saveCurrentRoster({ ...(currentRosterState || createEmptyCurrentRoster()), date: this.value }, { render: false });
         });
 
         document.getElementById('btn-export-roster-data').addEventListener('click', exportRosterData);
