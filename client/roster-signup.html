@@ -942,6 +942,60 @@
             }
         }
 
+
+        .admin-roster-table, .admin-raid-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .admin-roster-table th, .admin-roster-table td,
+        .admin-raid-table th, .admin-raid-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .admin-roster-table th, .admin-raid-table th {
+            color: var(--dorado);
+            font-size: 0.85em;
+        }
+
+        .admin-roster-table select, .admin-raid-table select {
+            min-width: 130px;
+        }
+
+        .management-player-inactive {
+            opacity: 0.58;
+        }
+
+        .management-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .management-stat {
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .management-stat strong {
+            display: block;
+            font-size: 1.25em;
+            color: var(--dorado);
+        }
+
+        .management-empty {
+            padding: 18px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
     </style>
 </head>
 <body>
@@ -982,70 +1036,82 @@
         </div>
 
 
-        <div class="season-management-panel">
+        <!-- =============================================
+             ROSTER / RAID MANAGEMENT (ADMIN ONLY)
+             ============================================= -->
+        <div class="season-management-panel" id="admin-roster-management" style="display:none;">
             <div class="season-card">
-                <h2>📅 Temporadas y Asistencia</h2>
-                <div id="active-season-indicator" class="season-active-badge">Sin temporada activa</div>
-                <div class="season-form-grid">
-                    <div class="form-group">
-                        <label for="season-name">Nueva temporada *</label>
-                        <input type="text" id="season-name" placeholder="Ej: The War Within - S1">
-                    </div>
-                    <div class="form-group">
-                        <label for="season-start-date">Fecha de inicio *</label>
-                        <input type="date" id="season-start-date">
-                    </div>
-                    <div class="season-actions">
-                        <button id="btn-create-season" class="season-primary-btn">➕ Crear temporada</button>
-                        <button id="btn-export-roster-data" class="season-secondary-btn">📤 Exportar datos</button>
-                        <button id="btn-import-roster-data" class="season-secondary-btn">📥 Importar datos</button>
-                        <input type="file" id="import-roster-data-input" accept="application/json" hidden>
-                    </div>
+                <h2>👥 Gestión del Roster</h2>
+                <div id="admin-roster-status-message" class="season-status-message success">
+                    Gestión del roster permanente
                 </div>
-                <div class="season-toolbar">
-                    <div class="form-group">
-                        <label for="active-season-select">Temporadas disponibles</label>
-                        <select id="active-season-select"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="archive-season-end-date">Fecha fin temporada</label>
-                        <input type="date" id="archive-season-end-date">
-                    </div>
-                    <button id="btn-set-active-season" class="season-primary-btn">✅ Activar temporada</button>
-                    <button id="btn-archive-season" class="season-danger-btn">🗄️ Archivar temporada</button>
-                </div>
-                <div class="season-toolbar">
-                    <div class="form-group">
-                        <label for="current-raid-name">Nombre de raid actual</label>
-                        <input type="text" id="current-raid-name" placeholder="Equinox Weekly">
-                    </div>
-                    <div class="form-group">
-                        <label for="current-raid-date">Fecha de raid</label>
-                        <input type="date" id="current-raid-date">
-                    </div>
-                    <button id="btn-reset-current-roster" class="season-secondary-btn">♻️ Reiniciar roster actual</button>
-                    <button id="btn-close-current-roster" class="season-primary-btn">💾 Cerrar y guardar roster</button>
-                </div>
-                <div id="season-status-message" class="season-status-message warning">
-                    Debes crear o activar una temporada antes de cerrar y guardar un roster.
-                </div>
+                <p class="season-muted-text">El roster permanente no se reinicia entre raids ni temporadas. Los jugadores inactivos conservan su historial.</p>
+                <div id="permanent-roster-members" class="current-roster-members"></div>
             </div>
 
             <div class="season-grid">
                 <div class="season-card">
-                    <h3>🕘 Histórico de la temporada activa</h3>
-                    <div id="season-history-list" class="season-list"></div>
+                    <h3>📅 Temporadas</h3>
+                    <div class="season-form-grid">
+                        <div class="form-group">
+                            <label for="management-season-name">Nueva temporada</label>
+                            <input type="text" id="management-season-name" placeholder="Ej: The War Within - S1">
+                        </div>
+                        <div class="form-group">
+                            <label for="management-season-start">Fecha de inicio</label>
+                            <input type="date" id="management-season-start">
+                        </div>
+                        <button id="btn-management-create-season" class="season-primary-btn">➕ Crear temporada</button>
+                    </div>
+                    <div class="season-toolbar">
+                        <div class="form-group">
+                            <label for="management-season-select">Temporada activa</label>
+                            <select id="management-season-select"></select>
+                        </div>
+                        <button id="btn-management-activate-season" class="season-primary-btn">✅ Activar temporada</button>
+                        <button id="btn-management-archive-season" class="season-danger-btn">🗄️ Archivar temporada</button>
+                    </div>
+                    <div id="management-season-list" class="season-list"></div>
                 </div>
+
                 <div class="season-card">
-                    <h3>📈 Asistencia por jugador</h3>
-                    <div id="attendance-summary" class="attendance-list"></div>
+                    <h3>⚔️ Nueva raid</h3>
+                    <div class="season-form-grid">
+                        <div class="form-group">
+                            <label for="management-raid-name">Nombre de la raid</label>
+                            <input type="text" id="management-raid-name" placeholder="Ej: Raid semanal">
+                        </div>
+                        <div class="form-group">
+                            <label for="management-raid-date">Fecha</label>
+                            <input type="date" id="management-raid-date">
+                        </div>
+                        <button id="btn-management-create-raid" class="season-primary-btn">➕ Crear raid</button>
+                    </div>
+                    <div id="management-raid-status" class="season-status-message warning">Selecciona una temporada activa para crear una raid.</div>
                 </div>
             </div>
 
             <div class="season-card">
-                <h3>👥 Estado del roster actual</h3>
-                <p class="season-muted-text">Marca el estado de asistencia antes de cerrar el roster. Los cambios se guardan automáticamente en este navegador.</p>
-                <div id="current-roster-members" class="current-roster-members"></div>
+                <h3>📝 Asistencia de la raid</h3>
+                <div class="season-toolbar">
+                    <div class="form-group">
+                        <label for="management-raid-select">Raid</label>
+                        <select id="management-raid-select"></select>
+                    </div>
+                    <div id="management-raid-summary" class="season-active-badge">Sin raid seleccionada</div>
+                </div>
+                <div id="management-raid-attendance" class="current-roster-members"></div>
+            </div>
+
+            <div class="season-card">
+                <h3>📊 Historial y estadísticas</h3>
+                <div class="season-toolbar">
+                    <div class="form-group">
+                        <label for="management-stats-season">Temporada</label>
+                        <select id="management-stats-season"></select>
+                    </div>
+                </div>
+                <div id="management-attendance-summary" class="attendance-list"></div>
             </div>
         </div>
 
@@ -1364,22 +1430,22 @@
                 specialization: signup.specialization || '',
                 roles: Array.isArray(signup.roles) ? signup.roles : [],
                 notes: signup.notes || '',
+                rosterStatus: ['activo', 'condicionado', 'inactivo'].includes(signup.rosterStatus) ? signup.rosterStatus : 'activo',
                 timestamp: signup.timestamp || new Date().toISOString()
             };
         }
 
 
-        const SEASONS_STORAGE_KEY = 'equinox_seasons';
         const CURRENT_ROSTER_STORAGE_KEY = 'equinox_current_roster';
         const LEGACY_STORAGE_KEYS = ['equinox_roster', 'equinox_generated_roster', 'equinox_roster_state', 'roster_current'];
         const STORAGE_BACKUP_PREFIX = 'equinox_backup_';
         const CURRENT_ROSTER_VERSION = 2;
         const DEFAULT_RAID_NAME = 'Equinox Weekly';
-        const ARCHIVE_DUPLICATE_WINDOW_MS = 15000;
+        const MANAGEMENT_STORAGE_KEY = 'equinox_raid_management';
 
-        let seasonsState = { seasons: [] };
         let currentRosterState = null;
-        let isClosingCurrentRoster = false;
+        let managementState = { seasons: [], raids: [] };
+        let selectedManagementRaidId = '';
 
         function getTodayDate() {
             return new Date().toISOString().slice(0, 10);
@@ -1442,9 +1508,7 @@
             } catch (error) {
                 console.error(`Error leyendo ${key} desde localStorage:`, error);
                 backupStorageValue(key, rawValue, 'invalid_json');
-                try { localStorage.removeItem(key); } catch (removeError) {
-                    console.warn(`No se pudo limpiar ${key}:`, removeError);
-                }
+                try { localStorage.removeItem(key); } catch (removeError) {}
                 return null;
             }
         }
@@ -1454,55 +1518,49 @@
                 localStorage.setItem(key, JSON.stringify(value));
                 return true;
             } catch (error) {
-                console.error(`Error guardando ${key} en localStorage:`, error);
-                alert('No se pudo guardar la información localmente. Revisa el espacio disponible del navegador.');
+                console.error(`Error guardando ${key}:`, error);
                 return false;
             }
         }
 
         function getGeneratorConfigFromInputs() {
-            const rosterSizeInput = document.getElementById('roster-size');
-            const tanksInput = document.getElementById('comp-tanks');
-            const healersInput = document.getElementById('comp-healers');
-            const dpsInput = document.getElementById('comp-dps');
-            return {
-                rosterSize: parseInt(rosterSizeInput?.value, 10) || 20,
-                tanks: parseInt(tanksInput?.value, 10) || 2,
-                healers: parseInt(healersInput?.value, 10) || 4,
-                dps: parseInt(dpsInput?.value, 10) || 14
-            };
+            const rosterSize = parseInt(document.getElementById('roster-size')?.value, 10) || 20;
+            const tanks = parseInt(document.getElementById('comp-tanks')?.value, 10) || 0;
+            const healers = parseInt(document.getElementById('comp-healers')?.value, 10) || 0;
+            const dps = parseInt(document.getElementById('comp-dps')?.value, 10) || Math.max(0, rosterSize - tanks - healers);
+            return { rosterSize, tanks, healers, dps };
         }
 
         function createEmptyCurrentRoster(raidName = DEFAULT_RAID_NAME) {
-            const config = getGeneratorConfigFromInputs();
             return {
                 version: CURRENT_ROSTER_VERSION,
-                raidName: safeTrim(raidName) || DEFAULT_RAID_NAME,
+                raidName,
                 date: getTodayDate(),
-                config,
+                config: { rosterSize: 20, tanks: 2, healers: 4, dps: 14 },
                 fixed: [],
                 substitutes: [],
                 members: [],
-                lastSavedAt: new Date().toISOString(),
-                lastArchivedSignature: null,
-                lastArchivedAt: null,
-                rosterMode: 'empty'
+                rosterMode: 'empty',
+                lastSavedAt: new Date().toISOString()
             };
         }
 
         function normalizeStoredSignup(signup) {
-            return normalizeSignup(signup || {});
+            return {
+                name: safeTrim(signup?.name),
+                class: signup?.class || '',
+                specialization: signup?.specialization || '',
+                roles: Array.isArray(signup?.roles) ? signup.roles : [],
+                notes: signup?.notes || '',
+                timestamp: signup?.timestamp || new Date().toISOString()
+            };
         }
 
         function buildRosterMember(signup, source = 'signup', existingMember = {}) {
             const normalizedSignup = normalizeStoredSignup(signup);
             return {
-                name: normalizedSignup.name,
-                class: normalizedSignup.class,
-                specialization: normalizedSignup.specialization,
-                roles: Array.isArray(normalizedSignup.roles) ? normalizedSignup.roles : [],
+                ...normalizedSignup,
                 role: existingMember.role || getMainRoleFromSpec(normalizedSignup.specialization) || 'DPS',
-                notes: normalizedSignup.notes || '',
                 source: normalizeRosterSource(source),
                 status: normalizeRosterStatus(existingMember.status)
             };
@@ -1516,84 +1574,49 @@
             );
             const seen = new Set();
             const members = [];
-
             const appendList = (players, source) => {
                 players.forEach((player) => {
                     const normalized = normalizeStoredSignup(player);
-                    if (!safeTrim(normalized.name)) return;
+                    if (!normalized.name) return;
                     const key = normalized.name.toLowerCase();
                     if (seen.has(key)) return;
                     seen.add(key);
                     members.push(buildRosterMember(normalized, source, existingByName.get(key) || {}));
                 });
             };
-
             appendList(Array.isArray(fixedList) ? fixedList : [], 'fixed');
             appendList(Array.isArray(substituteList) ? substituteList : [], 'substitute');
-
-            if (members.length === 0 && rosterSignups.length > 0) {
-                appendList(rosterSignups, 'signup');
-            }
-
+            if (members.length === 0 && rosterSignups.length > 0) appendList(rosterSignups, 'signup');
             rosterSignups.forEach((signup) => {
                 const normalized = normalizeStoredSignup(signup);
-                if (!safeTrim(normalized.name)) return;
+                if (!normalized.name) return;
                 const key = normalized.name.toLowerCase();
                 if (seen.has(key)) return;
                 seen.add(key);
                 members.push(buildRosterMember(normalized, 'signup', existingByName.get(key) || {}));
             });
-
-            (Array.isArray(existingMembers) ? existingMembers : []).forEach((member) => {
-                const name = safeTrim(member.name);
-                if (!name) return;
-                const key = name.toLowerCase();
-                if (seen.has(key)) return;
-                seen.add(key);
-                members.push({
-                    name,
-                    class: member.class || '',
-                    specialization: member.specialization || '',
-                    roles: Array.isArray(member.roles) ? member.roles : [],
-                    role: member.role || getMainRoleFromSpec(member.specialization) || 'DPS',
-                    notes: member.notes || '',
-                    source: normalizeRosterSource(member.source),
-                    status: normalizeRosterStatus(member.status)
-                });
-            });
-
             return members;
         }
 
         function normalizeRaidMember(member = {}) {
-            const name = safeTrim(member.name);
+            const normalized = normalizeStoredSignup(member);
             return {
-                name,
-                class: member.class || '',
-                specialization: member.specialization || '',
-                roles: Array.isArray(member.roles) ? member.roles : [],
-                role: member.role || getMainRoleFromSpec(member.specialization) || 'DPS',
-                notes: member.notes || '',
+                ...normalized,
+                role: member.role || getMainRoleFromSpec(normalized.specialization) || 'DPS',
                 source: normalizeRosterSource(member.source),
-                status: normalizeRosterStatus(member.status)
+                status: normalizeRosterStatus(member.status),
+                participation: ['titular', 'suplente', 'no_convocado'].includes(member.participation) ? member.participation : 'titular',
+                attendance: ['asistio', 'ausente', 'justificada', 'pendiente'].includes(member.attendance) ? member.attendance : 'pendiente'
             };
         }
 
         function normalizeCurrentRoster(roster) {
             const base = roster && typeof roster === 'object' ? roster : {};
             const config = base.config && typeof base.config === 'object' ? base.config : {};
-            const fixed = Array.isArray(base.fixed) ? base.fixed.map(normalizeStoredSignup).filter(player => safeTrim(player.name)) : [];
-            const substitutes = Array.isArray(base.substitutes) ? base.substitutes.map(normalizeStoredSignup).filter(player => safeTrim(player.name)) : [];
-            const normalizedMembers = Array.isArray(base.members)
-                ? base.members.map(normalizeRaidMember).filter(member => safeTrim(member.name))
-                : buildRosterMembersFromLists(fixed, substitutes, []);
+            const fixed = Array.isArray(base.fixed) ? base.fixed.map(normalizeStoredSignup).filter(p => p.name) : [];
+            const substitutes = Array.isArray(base.substitutes) ? base.substitutes.map(normalizeStoredSignup).filter(p => p.name) : [];
+            const normalizedMembers = Array.isArray(base.members) ? base.members.map(normalizeRaidMember).filter(m => m.name) : [];
             const hasStructuredRoster = fixed.length > 0 || substitutes.length > 0;
-            const hasExplicitMembers = Array.isArray(base.members) && normalizedMembers.length > 0;
-            const allMembersAreSignup = hasExplicitMembers && normalizedMembers.every((member) => normalizeRosterSource(member.source) === 'signup');
-            const rosterMode = hasStructuredRoster
-                ? 'generated'
-                : (base.rosterMode || (hasExplicitMembers ? (allMembersAreSignup ? 'signup_fallback' : 'restored') : 'empty'));
-
             return {
                 version: CURRENT_ROSTER_VERSION,
                 raidName: safeTrim(base.raidName) || DEFAULT_RAID_NAME,
@@ -1607,309 +1630,39 @@
                 fixed,
                 substitutes,
                 members: buildRosterMembersFromLists(fixed, substitutes, normalizedMembers),
-                lastSavedAt: base.lastSavedAt || new Date().toISOString(),
-                lastArchivedSignature: base.lastArchivedSignature || null,
-                lastArchivedAt: base.lastArchivedAt || null,
-                rosterMode
+                rosterMode: hasStructuredRoster ? 'generated' : (normalizedMembers.length ? 'signup_fallback' : 'empty'),
+                lastSavedAt: base.lastSavedAt || new Date().toISOString()
             };
-        }
-
-        function normalizeSeasonRaid(raid, seasonId, index) {
-            const normalizedMembers = Array.isArray(raid?.members)
-                ? raid.members.map(normalizeRaidMember).filter(member => safeTrim(member.name))
-                : [];
-            const date = /^\d{4}-\d{2}-\d{2}$/.test(raid?.date) ? raid.date : getTodayDate();
-            return {
-                id: safeTrim(raid?.id) || `raid_${date}_${Date.now()}_${index}_${seasonId}`,
-                date,
-                raidName: safeTrim(raid?.raidName) || DEFAULT_RAID_NAME,
-                closedAt: raid?.closedAt || new Date().toISOString(),
-                members: normalizedMembers
-            };
-        }
-
-        function normalizeSeason(season, index) {
-            const seasonId = safeTrim(season?.id) || `${slugifySeasonName(season?.name || `season_${index + 1}`)}_${index + 1}`;
-            return {
-                id: seasonId,
-                name: safeTrim(season?.name) || `Temporada ${index + 1}`,
-                startDate: /^\d{4}-\d{2}-\d{2}$/.test(season?.startDate) ? season.startDate : getTodayDate(),
-                endDate: season?.endDate || null,
-                isActive: !!season?.isActive,
-                raids: Array.isArray(season?.raids) ? season.raids.map((raid, raidIndex) => normalizeSeasonRaid(raid, seasonId, raidIndex)) : []
-            };
-        }
-
-        function normalizeSeasonsPayload(payload) {
-            const seasons = Array.isArray(payload)
-                ? payload
-                : Array.isArray(payload?.seasons)
-                    ? payload.seasons
-                    : [];
-            const normalizedSeasons = seasons.map(normalizeSeason);
-            let activeFound = false;
-            normalizedSeasons.forEach((season) => {
-                if (season.isActive && !activeFound) {
-                    activeFound = true;
-                    return;
-                }
-                season.isActive = false;
-            });
-            return { seasons: normalizedSeasons };
-        }
-
-        function isRecognizedSeasonsPayload(payload) {
-            return Array.isArray(payload) || Boolean(payload && typeof payload === 'object' && Array.isArray(payload.seasons));
-        }
-
-        function isRecognizedRosterPayload(payload) {
-            if (Array.isArray(payload)) {
-                return payload.every((entry) => entry && typeof entry === 'object' && (
-                    Object.prototype.hasOwnProperty.call(entry, 'class') ||
-                    Object.prototype.hasOwnProperty.call(entry, 'specialization') ||
-                    Object.prototype.hasOwnProperty.call(entry, 'role') ||
-                    Array.isArray(entry.roles)
-                ));
-            }
-            return Boolean(
-                payload && typeof payload === 'object' && (
-                    Array.isArray(payload.members) ||
-                    Array.isArray(payload.fixed) ||
-                    Array.isArray(payload.substitutes) ||
-                    Array.isArray(payload.generatedFixedRoster) ||
-                    Array.isArray(payload.generatedSubstitutes) ||
-                    Array.isArray(payload.signups) ||
-                    Array.isArray(payload.players) ||
-                    payload.raidName ||
-                    payload.date ||
-                    payload.config
-                )
-            );
-        }
-
-        function saveSeasonsState() {
-            return writeStorageJson(SEASONS_STORAGE_KEY, seasonsState);
-        }
-
-        function transformLegacyCurrentRoster(payload) {
-            if (Array.isArray(payload)) {
-                return normalizeCurrentRoster({ members: payload });
-            }
-
-            if (!payload || typeof payload !== 'object') {
-                return null;
-            }
-
-            if (Array.isArray(payload.members) || Array.isArray(payload.fixed) || Array.isArray(payload.substitutes)) {
-                return normalizeCurrentRoster(payload);
-            }
-
-            const fixed = payload.generatedFixedRoster || payload.fixedRoster || payload.fixed || [];
-            const substitutes = payload.generatedSubstitutes || payload.substitutes || payload.subs || [];
-            const signups = payload.rosterSignups || payload.signups || payload.players || [];
-
-            if (Array.isArray(fixed) || Array.isArray(substitutes) || Array.isArray(signups)) {
-                return normalizeCurrentRoster({
-                    raidName: payload.raidName || DEFAULT_RAID_NAME,
-                    date: payload.date || getTodayDate(),
-                    config: payload.config || {},
-                    fixed: Array.isArray(fixed) ? fixed : [],
-                    substitutes: Array.isArray(substitutes) ? substitutes : [],
-                    members: Array.isArray(signups) ? signups : []
-                });
-            }
-
-            return null;
-        }
-
-        function loadSeasonsState() {
-            const stored = readStorageJson(SEASONS_STORAGE_KEY);
-            if (stored && !isRecognizedSeasonsPayload(stored)) {
-                backupStorageValue(SEASONS_STORAGE_KEY, JSON.stringify(stored), 'invalid_seasons_shape');
-                seasonsState = { seasons: [] };
-                saveSeasonsState();
-                return seasonsState;
-            }
-            seasonsState = normalizeSeasonsPayload(stored || { seasons: [] });
-            saveSeasonsState();
-            return seasonsState;
         }
 
         function loadCurrentRoster() {
             const stored = readStorageJson(CURRENT_ROSTER_STORAGE_KEY);
             if (stored) {
-                if (!isRecognizedRosterPayload(stored)) {
-                    backupStorageValue(CURRENT_ROSTER_STORAGE_KEY, JSON.stringify(stored), 'invalid_current_roster_shape');
-                } else {
-                    currentRosterState = normalizeCurrentRoster(stored);
-                    writeStorageJson(CURRENT_ROSTER_STORAGE_KEY, currentRosterState);
-                    return currentRosterState;
-                }
+                currentRosterState = normalizeCurrentRoster(stored);
+                writeStorageJson(CURRENT_ROSTER_STORAGE_KEY, currentRosterState);
+                return currentRosterState;
             }
-
             for (const key of LEGACY_STORAGE_KEYS) {
-                let rawValue = null;
-                try {
-                    rawValue = localStorage.getItem(key);
-                } catch (error) {
-                    console.warn(`No se pudo leer ${key}:`, error);
-                    continue;
-                }
+                const rawValue = (() => { try { return localStorage.getItem(key); } catch (e) { return null; } })();
                 if (!rawValue) continue;
                 try {
                     const parsed = JSON.parse(rawValue);
-                    const migrated = transformLegacyCurrentRoster(parsed);
-                    if (migrated) {
-                        currentRosterState = migrated;
-                        writeStorageJson(CURRENT_ROSTER_STORAGE_KEY, currentRosterState);
-                        return currentRosterState;
-                    }
-                    backupStorageValue(key, rawValue, 'legacy_unrecognized');
-                } catch (error) {
-                    console.error(`Error migrando ${key}:`, error);
-                    backupStorageValue(key, rawValue, 'legacy_invalid_json');
-                }
+                    currentRosterState = normalizeCurrentRoster(parsed);
+                    writeStorageJson(CURRENT_ROSTER_STORAGE_KEY, currentRosterState);
+                    return currentRosterState;
+                } catch (error) {}
             }
-
             currentRosterState = createEmptyCurrentRoster();
             writeStorageJson(CURRENT_ROSTER_STORAGE_KEY, currentRosterState);
             return currentRosterState;
         }
 
         function saveCurrentRoster(roster, options = {}) {
-            const normalized = normalizeCurrentRoster(roster || currentRosterState || createEmptyCurrentRoster());
-            normalized.lastSavedAt = new Date().toISOString();
-            currentRosterState = normalized;
-            const saved = writeStorageJson(CURRENT_ROSTER_STORAGE_KEY, normalized);
-            if (saved && options.render !== false) {
-                renderSeasonManager();
-            }
+            currentRosterState = normalizeCurrentRoster(roster || currentRosterState || createEmptyCurrentRoster());
+            currentRosterState.lastSavedAt = new Date().toISOString();
+            const saved = writeStorageJson(CURRENT_ROSTER_STORAGE_KEY, currentRosterState);
+            if (saved && options.render !== false) renderRaidManagement();
             return saved;
-        }
-
-        function createSeason(name, startDate) {
-            const seasonName = safeTrim(name);
-            if (!seasonName || !/^\d{4}-\d{2}-\d{2}$/.test(startDate || '')) {
-                throw new Error('El nombre y la fecha de inicio de la temporada son obligatorios.');
-            }
-
-            const newSeason = normalizeSeason({
-                id: `${slugifySeasonName(seasonName)}_${Date.now()}`,
-                name: seasonName,
-                startDate,
-                endDate: null,
-                isActive: true,
-                raids: []
-            }, seasonsState.seasons.length);
-
-            seasonsState.seasons = seasonsState.seasons.map(season => ({ ...season, isActive: false }));
-            seasonsState.seasons.unshift(newSeason);
-            saveSeasonsState();
-            renderSeasonManager();
-            return newSeason;
-        }
-
-        function setActiveSeason(seasonId) {
-            let found = false;
-            seasonsState.seasons = seasonsState.seasons.map((season) => {
-                const isMatch = season.id === seasonId;
-                if (isMatch) found = true;
-                return { ...season, isActive: isMatch };
-            });
-            if (!found) {
-                throw new Error('No se encontró la temporada seleccionada.');
-            }
-            saveSeasonsState();
-            renderSeasonManager();
-            return getActiveSeason();
-        }
-
-        function getActiveSeason() {
-            return seasonsState.seasons.find(season => season.isActive) || null;
-        }
-
-        function archiveSeason(seasonId, endDate) {
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate || '')) {
-                throw new Error('Debes indicar una fecha de cierre válida para archivar la temporada.');
-            }
-
-            const targetSeason = seasonsState.seasons.find((season) => season.id === seasonId);
-            if (!targetSeason) {
-                throw new Error('No se encontró la temporada a archivar.');
-            }
-            if (endDate < targetSeason.startDate) {
-                throw new Error('La fecha de cierre no puede ser anterior al inicio de la temporada.');
-            }
-
-            const wasActive = seasonsState.seasons.some((season) => season.id === seasonId && season.isActive);
-            let archived = null;
-            const updatedSeasons = seasonsState.seasons.map((season) => {
-                if (season.id !== seasonId) return season;
-                archived = { ...season, endDate, isActive: false };
-                return archived;
-            });
-
-            if (!archived) {
-                throw new Error('No se encontró la temporada a archivar.');
-            }
-
-            seasonsState.seasons = updatedSeasons;
-            if (wasActive) {
-                const replacementSeason = seasonsState.seasons.find((season) => season.id !== seasonId && season.endDate === null);
-                if (replacementSeason) {
-                    seasonsState.seasons = seasonsState.seasons.map((season) => ({
-                        ...season,
-                        isActive: season.id === replacementSeason.id
-                    }));
-                }
-            }
-
-            saveSeasonsState();
-            renderSeasonManager();
-            return archived;
-        }
-
-        function getAttendanceBySeason(playerName, seasonId) {
-            const normalizedName = safeTrim(playerName).toLowerCase();
-            const season = seasonsState.seasons.find(item => item.id === seasonId);
-            if (!season || !normalizedName) {
-                return { attended: 0, totalRaids: season?.raids?.length || 0, percentage: 0 };
-            }
-
-            const totalRaids = season.raids.length;
-            const attended = season.raids.reduce((count, raid) => {
-                const entry = raid.members.find(member => member.name.toLowerCase() === normalizedName);
-                return count + (entry?.status === 'confirmado' ? 1 : 0);
-            }, 0);
-
-            return {
-                attended,
-                totalRaids,
-                percentage: totalRaids > 0 ? Math.round((attended / totalRaids) * 100) : 0
-            };
-        }
-
-        function getGlobalAttendance(playerName) {
-            const normalizedName = safeTrim(playerName).toLowerCase();
-            let totalRaids = 0;
-            let attended = 0;
-
-            seasonsState.seasons.forEach((season) => {
-                season.raids.forEach((raid) => {
-                    const entry = raid.members.find(member => member.name.toLowerCase() === normalizedName);
-                    if (!entry) return;
-                    totalRaids++;
-                    if (entry.status === 'confirmado') {
-                        attended++;
-                    }
-                });
-            });
-
-            return {
-                attended,
-                totalRaids,
-                percentage: totalRaids > 0 ? Math.round((attended / totalRaids) * 100) : 0
-            };
         }
 
         function syncGeneratedRosterFromCurrentState() {
@@ -1918,604 +1671,402 @@
         }
 
         function syncCurrentRosterFromGeneratedState() {
-            if (!currentRosterState) {
-                currentRosterState = createEmptyCurrentRoster();
-            }
-            currentRosterState.raidName = safeTrim(document.getElementById('current-raid-name')?.value) || currentRosterState.raidName || DEFAULT_RAID_NAME;
-            currentRosterState.date = document.getElementById('current-raid-date')?.value || currentRosterState.date || getTodayDate();
+            if (!currentRosterState) currentRosterState = createEmptyCurrentRoster();
+            currentRosterState.raidName = safeTrim(currentRosterState.raidName) || DEFAULT_RAID_NAME;
+            currentRosterState.date = currentRosterState.date || getTodayDate();
             currentRosterState.config = getGeneratorConfigFromInputs();
             currentRosterState.fixed = generatedFixedRoster.map(normalizeStoredSignup);
             currentRosterState.substitutes = generatedSubstitutes.map(normalizeStoredSignup);
             currentRosterState.members = buildRosterMembersFromLists(currentRosterState.fixed, currentRosterState.substitutes, currentRosterState.members);
             currentRosterState.rosterMode = 'generated';
             saveCurrentRoster(currentRosterState, { render: false });
-            renderSeasonManager();
         }
 
         function syncCurrentRosterWithSignups() {
-            if (!currentRosterState) {
-                currentRosterState = loadCurrentRoster();
-            }
-
+            if (!currentRosterState) currentRosterState = loadCurrentRoster();
             currentRosterState.members = buildRosterMembersFromLists(currentRosterState.fixed, currentRosterState.substitutes, currentRosterState.members);
-
             if (currentRosterState.fixed.length > 0 || currentRosterState.substitutes.length > 0) {
                 currentRosterState.rosterMode = 'generated';
                 const latestByName = new Map(rosterSignups.map(signup => [signup.name.toLowerCase(), signup]));
                 currentRosterState.fixed = currentRosterState.fixed.map(player => latestByName.get(player.name.toLowerCase()) || player);
                 currentRosterState.substitutes = currentRosterState.substitutes.map(player => latestByName.get(player.name.toLowerCase()) || player);
                 syncGeneratedRosterFromCurrentState();
-            } else if (currentRosterState.rosterMode !== 'restored') {
-                currentRosterState.rosterMode = currentRosterState.members.length > 0 ? 'signup_fallback' : 'empty';
             }
-
             saveCurrentRoster(currentRosterState, { render: false });
-            renderSeasonManager();
+            renderRaidManagement();
         }
 
-        function resetCurrentRoster(keepRaidName = true, preserveArchiveMeta = false) {
-            const previousState = currentRosterState || createEmptyCurrentRoster();
-            const raidName = keepRaidName ? safeTrim(document.getElementById('current-raid-name')?.value || previousState.raidName) : DEFAULT_RAID_NAME;
-            currentRosterState = createEmptyCurrentRoster(raidName || DEFAULT_RAID_NAME);
+        function resetCurrentRoster(keepRaidName = true) {
+            const previous = currentRosterState || createEmptyCurrentRoster();
+            const raidName = keepRaidName ? safeTrim(previous.raidName) || DEFAULT_RAID_NAME : DEFAULT_RAID_NAME;
+            currentRosterState = createEmptyCurrentRoster(raidName);
             currentRosterState.config = getGeneratorConfigFromInputs();
-            if (preserveArchiveMeta) {
-                currentRosterState.lastArchivedSignature = previousState.lastArchivedSignature || null;
-                currentRosterState.lastArchivedAt = previousState.lastArchivedAt || null;
-            }
             generatedFixedRoster = [];
             generatedSubstitutes = [];
-            const builder = document.getElementById('roster-builder');
-            const exportButton = document.getElementById('btn-export-generated-roster');
-            if (builder) builder.style.display = 'none';
-            if (exportButton) exportButton.style.display = 'none';
-            saveCurrentRoster(currentRosterState);
+            document.getElementById('roster-builder')?.style && (document.getElementById('roster-builder').style.display = 'none');
+            document.getElementById('btn-export-generated-roster')?.style && (document.getElementById('btn-export-generated-roster').style.display = 'none');
+            saveCurrentRoster(currentRosterState, { render: false });
         }
 
-        function updateSeasonStatusMessage(message, tone = 'warning') {
-            const box = document.getElementById('season-status-message');
-            if (!box) return;
-            box.className = `season-status-message ${tone}`;
-            box.textContent = message;
+        function normalizeManagementState(payload) {
+            const seasons = Array.isArray(payload?.seasons) ? payload.seasons.map((s, i) => ({
+                id: safeTrim(s.id) || `season_${Date.now()}_${i}`,
+                name: safeTrim(s.name) || `Temporada ${i + 1}`,
+                startDate: /^\d{4}-\d{2}-\d{2}$/.test(s.startDate) ? s.startDate : getTodayDate(),
+                endDate: s.endDate || null,
+                isActive: !!s.isActive
+            })) : [];
+            let activeSeen = false;
+            seasons.forEach(s => { if (s.isActive && !activeSeen) activeSeen = true; else s.isActive = false; });
+            const raids = Array.isArray(payload?.raids) ? payload.raids.map(r => ({
+                id: safeTrim(r.id) || `raid_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                seasonId: safeTrim(r.seasonId),
+                name: safeTrim(r.name) || DEFAULT_RAID_NAME,
+                date: /^\d{4}-\d{2}-\d{2}$/.test(r.date) ? r.date : getTodayDate(),
+                createdAt: r.createdAt || new Date().toISOString(),
+                members: Array.isArray(r.members) ? r.members.map(normalizeRaidMember) : []
+            })) : [];
+            return { seasons, raids };
         }
 
-        function renderSeasonHistory() {
-            const list = document.getElementById('season-history-list');
-            if (!list) return;
-            const activeSeason = getActiveSeason();
-            list.innerHTML = '';
-
-            if (!activeSeason) {
-                list.innerHTML = '<div class="season-empty-state">No hay temporada activa. Activa una temporada para ver su histórico.</div>';
-                return;
-            }
-
-            if (activeSeason.raids.length === 0) {
-                list.innerHTML = '<div class="season-empty-state">Todavía no hay rosters cerrados en esta temporada.</div>';
-                return;
-            }
-
-            activeSeason.raids
-                .slice()
-                .sort((a, b) => (b.closedAt || '').localeCompare(a.closedAt || ''))
-                .forEach((raid) => {
-                    const confirmed = raid.members.filter(member => member.status === 'confirmado').length;
-                    const item = document.createElement('div');
-                    item.className = 'season-history-item';
-                    item.innerHTML = `
-                        <strong>${escapeHtml(raid.raidName)}</strong>
-                        <div class="season-history-meta">
-                            <span>📅 ${escapeHtml(raid.date)}</span>
-                            <span>👥 ${raid.members.length} miembros</span>
-                            <span>✅ ${confirmed} confirmados</span>
-                        </div>
-                    `;
-                    list.appendChild(item);
-                });
+        function getActiveManagementSeason() {
+            return managementState.seasons.find(s => s.isActive) || null;
         }
 
-        function renderAttendanceSummary() {
-            const container = document.getElementById('attendance-summary');
-            if (!container) return;
-            const activeSeason = getActiveSeason();
-            container.innerHTML = '';
-
-            if (!activeSeason) {
-                container.innerHTML = '<div class="season-empty-state">Activa una temporada para calcular asistencia.</div>';
-                return;
-            }
-
-            const playerNames = new Map();
-            activeSeason.raids.forEach((raid) => {
-                raid.members.forEach((member) => {
-                    const displayName = safeTrim(member.name);
-                    if (!displayName) return;
-                    const normalizedKey = displayName.toLowerCase();
-                    if (!playerNames.has(normalizedKey)) {
-                        playerNames.set(normalizedKey, displayName);
-                    }
-                });
-            });
-
-            if (playerNames.size === 0) {
-                container.innerHTML = '<div class="season-empty-state">Aún no hay datos archivados para calcular asistencias.</div>';
-                return;
-            }
-
-            const rows = [...playerNames.entries()]
-                .sort((a, b) => a[1].localeCompare(b[1], 'es', { sensitivity: 'base' }))
-                .map(([, playerName]) => {
-                    const seasonStats = getAttendanceBySeason(playerName, activeSeason.id);
-                    const globalStats = getGlobalAttendance(playerName);
-                    return `
-                        <tr>
-                            <td>${escapeHtml(playerName)}</td>
-                            <td>${seasonStats.attended}/${seasonStats.totalRaids}</td>
-                            <td>${seasonStats.percentage}%</td>
-                            <td>${globalStats.attended}/${globalStats.totalRaids}</td>
-                        </tr>
-                    `;
-                })
-                .join('');
-
-            container.innerHTML = `
-                <div class="attendance-summary-card">
-                    <strong>${escapeHtml(activeSeason.name)}</strong>
-                    <table class="attendance-table">
-                        <caption class="season-muted-text">Asistencia acumulada de la temporada activa ${escapeHtml(activeSeason.name)}</caption>
-                        <thead>
-                            <tr>
-                                <th>Jugador</th>
-                                <th>Confirmado</th>
-                                <th>% temporada</th>
-                                <th>Global</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function renderCurrentRosterMembers() {
-            const container = document.getElementById('current-roster-members');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const members = Array.isArray(currentRosterState?.members) ? currentRosterState.members : [];
-            if (members.length === 0) {
-                container.innerHTML = '<div class="season-empty-state">Genera un roster o espera a que carguen los inscritos para empezar a gestionar asistencia.</div>';
-                return;
-            }
-
-            const counts = members.reduce((acc, member) => {
-                acc[member.status] = (acc[member.status] || 0) + 1;
-                return acc;
-            }, { confirmado: 0, pendiente: 0, ausente: 0 });
-
-            const rows = members.map((member) => `
-                <tr>
-                    <td>${escapeHtml(member.name)}</td>
-                    <td>${escapeHtml(member.role)}</td>
-                    <td><span class="source-badge ${normalizeRosterSource(member.source)}">${normalizeRosterSource(member.source) === 'fixed' ? 'Fijo' : normalizeRosterSource(member.source) === 'substitute' ? 'Suplente' : 'Inscrito'}</span></td>
-                    <td><span class="status-badge ${member.status}">${member.status}</span></td>
-                    <td>
-                        <select class="status-select" data-player-name="${escapeHtml(member.name)}">
-                            <option value="pendiente" ${member.status === 'pendiente' ? 'selected' : ''}>pendiente</option>
-                            <option value="confirmado" ${member.status === 'confirmado' ? 'selected' : ''}>confirmado</option>
-                            <option value="ausente" ${member.status === 'ausente' ? 'selected' : ''}>ausente</option>
-                        </select>
-                    </td>
-                </tr>
-            `).join('');
-
-            container.innerHTML = `
-                <div class="current-roster-summary">
-                    <span class="status-badge confirmado">Confirmados: ${counts.confirmado || 0}</span>
-                    <span class="status-badge pendiente">Pendientes: ${counts.pendiente || 0}</span>
-                    <span class="status-badge ausente">Ausentes: ${counts.ausente || 0}</span>
-                </div>
-                <table class="current-roster-table">
-                    <thead>
-                        <tr>
-                            <th>Jugador</th>
-                            <th>Rol</th>
-                            <th>Origen</th>
-                            <th>Estado actual</th>
-                            <th>Actualizar estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            `;
-
-            container.querySelectorAll('.status-select').forEach((select) => {
-                select.addEventListener('change', (event) => {
-                    const playerName = safeTrim(event.target.dataset.playerName);
-                    const normalizedPlayerName = playerName.toLowerCase();
-                    const memberIndex = currentRosterState.members.findIndex(member => safeTrim(member.name).toLowerCase() === normalizedPlayerName);
-                    if (memberIndex === -1) return;
-                    currentRosterState.members[memberIndex].status = normalizeRosterStatus(event.target.value);
-                    saveCurrentRoster(currentRosterState, { render: false });
-                    renderCurrentRosterMembers();
-                });
-            });
-        }
-
-        function renderSeasonManager() {
-            const activeIndicator = document.getElementById('active-season-indicator');
-            const select = document.getElementById('active-season-select');
-            const closeButton = document.getElementById('btn-close-current-roster');
-            const archiveButton = document.getElementById('btn-archive-season');
-            const activateButton = document.getElementById('btn-set-active-season');
-            const raidNameInput = document.getElementById('current-raid-name');
-            const raidDateInput = document.getElementById('current-raid-date');
-            const startDateInput = document.getElementById('season-start-date');
-            const activeSeason = getActiveSeason();
-            const selectedSeasonId = select?.value || activeSeason?.id || '';
-
-            const desiredRaidName = currentRosterState?.raidName || DEFAULT_RAID_NAME;
-            const desiredRaidDate = currentRosterState?.date || getTodayDate();
-            if (raidNameInput && document.activeElement !== raidNameInput && raidNameInput.value !== desiredRaidName) raidNameInput.value = desiredRaidName;
-            if (raidDateInput && document.activeElement !== raidDateInput && raidDateInput.value !== desiredRaidDate) raidDateInput.value = desiredRaidDate;
-            if (startDateInput && !startDateInput.value) startDateInput.value = getTodayDate();
-
-            const config = currentRosterState?.config || getGeneratorConfigFromInputs();
-            const rosterSizeInput = document.getElementById('roster-size');
-            const tanksInput = document.getElementById('comp-tanks');
-            const healersInput = document.getElementById('comp-healers');
-            const dpsInput = document.getElementById('comp-dps');
-            if (rosterSizeInput) rosterSizeInput.value = config.rosterSize || 20;
-            if (tanksInput) tanksInput.value = config.tanks || 2;
-            if (healersInput) healersInput.value = config.healers || 4;
-            if (dpsInput) dpsInput.value = config.dps || Math.max(0, (config.rosterSize || 20) - (config.tanks || 2) - (config.healers || 4));
-
-            if (select) {
-                select.innerHTML = '';
-                if (seasonsState.seasons.length === 0) {
-                    const emptyOption = document.createElement('option');
-                    emptyOption.value = '';
-                    emptyOption.textContent = 'Sin temporadas';
-                    select.appendChild(emptyOption);
-                } else {
-                    seasonsState.seasons.forEach((season) => {
-                        const option = document.createElement('option');
-                        option.value = season.id;
-                        option.selected = selectedSeasonId ? season.id === selectedSeasonId : season.isActive;
-                        option.textContent = `${season.name}${season.endDate ? ' (archivada)' : ''}`;
-                        select.appendChild(option);
+        function migrateLegacySeasonData() {
+            const legacy = readStorageJson('equinox_seasons');
+            if (!legacy || !Array.isArray(legacy.seasons)) return null;
+            const seasons = legacy.seasons.map((season, index) => ({
+                id: safeTrim(season.id) || `legacy_season_${index}_${Date.now()}`,
+                name: safeTrim(season.name) || `Temporada ${index + 1}`,
+                startDate: season.startDate || getTodayDate(),
+                endDate: season.endDate || null,
+                isActive: !!season.isActive
+            }));
+            const raids = [];
+            legacy.seasons.forEach((season, seasonIndex) => {
+                (Array.isArray(season.raids) ? season.raids : []).forEach((raid, raidIndex) => {
+                    raids.push({
+                        id: safeTrim(raid.id) || `legacy_raid_${seasonIndex}_${raidIndex}_${Date.now()}`,
+                        seasonId: safeTrim(season.id) || seasons[seasonIndex].id,
+                        name: safeTrim(raid.raidName) || DEFAULT_RAID_NAME,
+                        date: raid.date || getTodayDate(),
+                        createdAt: raid.closedAt || new Date().toISOString(),
+                        members: (Array.isArray(raid.members) ? raid.members : []).map(member => normalizeRaidMember({
+                            ...member,
+                            participation: member.source === 'substitute' ? 'suplente' : (member.source === 'fixed' ? 'titular' : 'titular'),
+                            attendance: member.status === 'confirmado' ? 'asistio' : (member.status === 'ausente' ? 'ausente' : 'pendiente')
+                        }))
                     });
+                });
+            });
+            return normalizeManagementState({ seasons, raids });
+        }
+
+        async function loadManagementState() {
+            let loaded = false;
+            if (window.firestoreDB && window.firestoreCollection && window.firestoreGetDocs) {
+                try {
+                    const [seasonSnap, raidSnap] = await Promise.all([
+                        window.firestoreGetDocs(window.firestoreCollection(window.firestoreDB, 'equinoxSeasons')),
+                        window.firestoreGetDocs(window.firestoreCollection(window.firestoreDB, 'equinoxRaids'))
+                    ]);
+                    const firestoreSeasons = seasonSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    const firestoreRaids = raidSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    managementState = normalizeManagementState({ seasons: firestoreSeasons, raids: firestoreRaids });
+                    if (firestoreSeasons.length === 0 && firestoreRaids.length === 0) {
+                        const migrated = migrateLegacySeasonData();
+                        if (migrated && (migrated.seasons.length || migrated.raids.length)) {
+                            managementState = migrated;
+                            await Promise.all([
+                                ...managementState.seasons.map(season => saveManagementDoc('equinoxSeasons', season.id, season)),
+                                ...managementState.raids.map(raid => saveManagementDoc('equinoxRaids', raid.id, raid))
+                            ]);
+                        }
+                    }
+                    writeStorageJson(MANAGEMENT_STORAGE_KEY, managementState);
+                    loaded = true;
+                } catch (error) {
+                    console.warn('No se pudieron cargar las raids desde Firebase; se usa respaldo local.', error);
                 }
             }
-
-            if (activeIndicator) {
-                activeIndicator.textContent = activeSeason
-                    ? `Temporada activa: ${activeSeason.name}`
-                    : 'Sin temporada activa';
-            }
-
-            const selectedSeason = seasonsState.seasons.find((season) => season.id === select?.value) || null;
-            const canArchiveCurrentRoster = Boolean((currentRosterState?.members?.length || 0) > 0 && !['empty', 'signup_fallback'].includes(currentRosterState?.rosterMode));
-            if (closeButton) {
-                closeButton.disabled = !activeSeason || isClosingCurrentRoster || !canArchiveCurrentRoster;
-            }
-            if (archiveButton) archiveButton.disabled = !select?.value || selectedSeason?.endDate !== null;
-            if (activateButton) activateButton.disabled = !select?.value || seasonsState.seasons.length === 0 || selectedSeason?.endDate !== null;
-
-            if (!activeSeason) {
-                updateSeasonStatusMessage('Debes crear o activar una temporada antes de cerrar y guardar un roster.', 'warning');
-            } else {
-                updateSeasonStatusMessage(`Los cierres de roster se archivarán en ${activeSeason.name}.`, 'success');
-            }
-
-            renderSeasonHistory();
-            renderAttendanceSummary();
-            renderCurrentRosterMembers();
+            if (!loaded) managementState = normalizeManagementState(readStorageJson(MANAGEMENT_STORAGE_KEY) || { seasons: [], raids: [] });
+            renderRaidManagement();
         }
 
-        function buildArchiveSignature(seasonId, roster) {
-            const membersSignature = roster.members
-                .map(member => `${safeTrim(member.name).toLowerCase()}:${normalizeRosterStatus(member.status)}`)
-                .sort()
-                .join('|');
-            const normalizedRaidName = safeTrim(roster.raidName).replace(/\s+/g, ' ').toLowerCase();
-            return [seasonId, roster.date, normalizedRaidName, roster.members.length, membersSignature].join('::');
+        async function saveManagementDoc(collectionName, id, data) {
+            if (window.firestoreDB && window.firestoreDoc && window.firestoreSetDoc) {
+                const ref = window.firestoreDoc(window.firestoreDB, collectionName, id);
+                await window.firestoreSetDoc(ref, data);
+            }
+            writeStorageJson(MANAGEMENT_STORAGE_KEY, managementState);
         }
 
-        function archiveCurrentRosterToSeason() {
-            if (isClosingCurrentRoster) return;
-            const activeSeason = getActiveSeason();
-            if (!activeSeason) {
-                updateSeasonStatusMessage('No hay temporada activa. Activa una antes de cerrar el roster.', 'warning');
-                alert('No hay temporada activa.');
-                return;
+        async function deleteManagementDoc(collectionName, id) {
+            if (window.firestoreDB && window.firestoreDoc && window.firestoreDeleteDoc) {
+                await window.firestoreDeleteDoc(window.firestoreDoc(window.firestoreDB, collectionName, id));
             }
-
-            const rosterToArchive = normalizeCurrentRoster({
-                ...currentRosterState,
-                raidName: safeTrim(document.getElementById('current-raid-name')?.value) || DEFAULT_RAID_NAME,
-                date: document.getElementById('current-raid-date')?.value || getTodayDate()
-            });
-
-            if (!safeTrim(rosterToArchive.raidName) || !/^\d{4}-\d{2}-\d{2}$/.test(rosterToArchive.date)) {
-                alert('Debes indicar nombre y fecha válidos para cerrar el roster.');
-                return;
-            }
-
-            const canArchiveCurrentRoster = Boolean((rosterToArchive.members?.length || 0) > 0 && !['empty', 'signup_fallback'].includes(rosterToArchive.rosterMode));
-            if (!canArchiveCurrentRoster) {
-                alert('Debes generar o cargar un roster actual antes de archivarlo.');
-                return;
-            }
-
-            if (!Array.isArray(rosterToArchive.members) || rosterToArchive.members.length === 0) {
-                alert('No hay miembros en el roster actual para archivar.');
-                return;
-            }
-
-            const now = Date.now();
-            const signature = buildArchiveSignature(activeSeason.id, rosterToArchive);
-            const lastClosedRaid = activeSeason.raids[0];
-            const isRecentDuplicate = Boolean(
-                currentRosterState?.lastArchivedSignature === signature &&
-                currentRosterState?.lastArchivedAt &&
-                now - new Date(currentRosterState.lastArchivedAt).getTime() < ARCHIVE_DUPLICATE_WINDOW_MS
-            );
-            const isSeasonDuplicate = Boolean(
-                lastClosedRaid &&
-                buildArchiveSignature(activeSeason.id, {
-                    raidName: lastClosedRaid.raidName,
-                    date: lastClosedRaid.date,
-                    members: lastClosedRaid.members
-                }) === signature &&
-                lastClosedRaid.closedAt &&
-                now - new Date(lastClosedRaid.closedAt).getTime() < ARCHIVE_DUPLICATE_WINDOW_MS
-            );
-
-            if (isRecentDuplicate || isSeasonDuplicate) {
-                alert('Se bloqueó un cierre duplicado del roster. Espera unos segundos antes de intentarlo de nuevo.');
-                return;
-            }
-
-            isClosingCurrentRoster = true;
-            renderSeasonManager();
-
-            try {
-                const raidRecord = {
-                    id: `raid_${rosterToArchive.date}_${Date.now()}`,
-                    date: rosterToArchive.date,
-                    raidName: rosterToArchive.raidName,
-                    closedAt: new Date().toISOString(),
-                    members: rosterToArchive.members.map((member) => ({
-                        name: member.name,
-                        class: member.class,
-                        specialization: member.specialization,
-                        roles: member.roles,
-                        role: member.role,
-                        notes: member.notes,
-                        source: member.source,
-                        status: normalizeRosterStatus(member.status)
-                    }))
-                };
-
-                seasonsState.seasons = seasonsState.seasons.map((season) => {
-                    if (season.id !== activeSeason.id) return season;
-                    return {
-                        ...season,
-                        raids: [raidRecord, ...season.raids]
-                    };
-                });
-                saveSeasonsState();
-
-                currentRosterState.lastArchivedSignature = signature;
-                currentRosterState.lastArchivedAt = raidRecord.closedAt;
-                saveCurrentRoster(currentRosterState, { render: false });
-                resetCurrentRoster(true, true);
-                updateSeasonStatusMessage(`Roster archivado correctamente en ${activeSeason.name}.`, 'success');
-            } finally {
-                isClosingCurrentRoster = false;
-                renderSeasonManager();
-            }
+            writeStorageJson(MANAGEMENT_STORAGE_KEY, managementState);
         }
 
-        function exportRosterData() {
-            const payload = {
-                exportedAt: new Date().toISOString(),
-                version: CURRENT_ROSTER_VERSION,
-                equinox_seasons: seasonsState,
-                equinox_current_roster: currentRosterState
-            };
-            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const anchor = document.createElement('a');
-            try {
-                anchor.href = url;
-                anchor.download = `equinox-roster-backup-${getTodayDate()}.json`;
-                document.body.appendChild(anchor);
-                anchor.click();
-            } finally {
-                anchor.remove();
-                URL.revokeObjectURL(url);
-            }
+        async function createManagementSeason() {
+            if (!isAdmin) return alert('Esta función es exclusiva del administrador.');
+            const name = safeTrim(document.getElementById('management-season-name')?.value);
+            const startDate = document.getElementById('management-season-start')?.value;
+            if (!name || !/^\d{4}-\d{2}-\d{2}$/.test(startDate || '')) return alert('Indica un nombre y una fecha de inicio válidos.');
+            const id = `${slugifySeasonName(name)}_${Date.now()}`;
+            const season = { id, name, startDate, endDate: null, isActive: true };
+            managementState.seasons = managementState.seasons.map(s => ({ ...s, isActive: false }));
+            managementState.seasons.unshift(season);
+            await Promise.all(managementState.seasons.map(s => saveManagementDoc('equinoxSeasons', s.id, s)));
+            document.getElementById('management-season-name').value = '';
+            renderRaidManagement();
         }
 
-        function importRosterData(rawText) {
-            let parsed;
-            try {
-                parsed = JSON.parse(rawText);
-            } catch (error) {
-                alert('El archivo JSON no es válido.');
-                return false;
-            }
-
-            if (!confirm('Importar datos reemplazará la información local actual de este navegador. ¿Deseas continuar?')) {
-                return false;
-            }
-
-            let seasonsPayload = null;
-            if (isRecognizedSeasonsPayload(parsed?.equinox_seasons)) {
-                seasonsPayload = parsed.equinox_seasons;
-            } else if (Array.isArray(parsed?.seasons)) {
-                seasonsPayload = { seasons: parsed.seasons };
-            } else if (isRecognizedSeasonsPayload(parsed?.seasons)) {
-                seasonsPayload = parsed.seasons;
-            } else if (isRecognizedSeasonsPayload(parsed)) {
-                seasonsPayload = parsed;
-            }
-
-            let currentRosterPayload = null;
-            if (isRecognizedRosterPayload(parsed?.equinox_current_roster)) {
-                currentRosterPayload = parsed.equinox_current_roster;
-            } else if (isRecognizedRosterPayload(parsed?.currentRoster)) {
-                currentRosterPayload = parsed.currentRoster;
-            } else if (isRecognizedRosterPayload(parsed?.current_roster)) {
-                currentRosterPayload = parsed.current_roster;
-            } else if (!isRecognizedSeasonsPayload(parsed) && isRecognizedRosterPayload(parsed)) {
-                currentRosterPayload = parsed;
-            }
-
-            const hasValidSeasons = Boolean(seasonsPayload);
-            const hasValidRoster = Boolean(currentRosterPayload);
-
-            if (!hasValidSeasons && !hasValidRoster) {
-                alert('El archivo no contiene un respaldo válido del roster.');
-                return false;
-            }
-
-            if (currentRosterState) {
-                backupStorageValue(CURRENT_ROSTER_STORAGE_KEY, JSON.stringify(currentRosterState), 'pre_import_backup');
-            }
-            if (seasonsState) {
-                backupStorageValue(SEASONS_STORAGE_KEY, JSON.stringify(seasonsState), 'pre_import_backup');
-            }
-
-            const normalizedSeasons = hasValidSeasons
-                ? normalizeSeasonsPayload(seasonsPayload)
-                : normalizeSeasonsPayload(seasonsState || loadSeasonsState() || { seasons: [] });
-            const normalizedRoster = hasValidRoster
-                ? (transformLegacyCurrentRoster(currentRosterPayload) || normalizeCurrentRoster(currentRosterPayload))
-                : normalizeCurrentRoster(currentRosterState || loadCurrentRoster() || createEmptyCurrentRoster());
-
-            if (!Array.isArray(normalizedSeasons.seasons)) {
-                alert('El archivo no contiene una estructura de temporadas válida.');
-                return false;
-            }
-
-            seasonsState = normalizedSeasons;
-            currentRosterState = normalizedRoster;
-            saveSeasonsState();
-            saveCurrentRoster(currentRosterState, { render: false });
-            syncGeneratedRosterFromCurrentState();
-            syncRosterSignupsFromCurrentRosterState();
-            renderSeasonManager();
-            if (isAdmin && (generatedFixedRoster.length > 0 || generatedSubstitutes.length > 0)) {
-                const builder = document.getElementById('roster-builder');
-                const exportButton = document.getElementById('btn-export-generated-roster');
-                if (builder) builder.style.display = '';
-                if (exportButton) exportButton.style.display = '';
-                renderRosterBuilder();
-            }
-            return true;
+        async function activateManagementSeason() {
+            if (!isAdmin) return alert('Esta función es exclusiva del administrador.');
+            const id = document.getElementById('management-season-select')?.value;
+            const target = managementState.seasons.find(s => s.id === id);
+            if (!target) return alert('Selecciona una temporada.');
+            if (target.endDate) return alert('No puedes activar una temporada archivada.');
+            managementState.seasons = managementState.seasons.map(s => ({ ...s, isActive: s.id === id }));
+            await Promise.all(managementState.seasons.map(s => saveManagementDoc('equinoxSeasons', s.id, s)));
+            renderRaidManagement();
         }
 
+        async function archiveManagementSeason() {
+            if (!isAdmin) return alert('Esta función es exclusiva del administrador.');
+            const id = document.getElementById('management-season-select')?.value;
+            const season = managementState.seasons.find(s => s.id === id);
+            if (!season) return alert('Selecciona una temporada.');
+            if (season.endDate) return alert('La temporada ya está archivada.');
+            const endDate = getTodayDate();
+            season.endDate = endDate;
+            season.isActive = false;
+            await saveManagementDoc('equinoxSeasons', season.id, season);
+            renderRaidManagement();
+        }
 
-        function syncRosterSignupsFromCurrentRosterState() {
-            const sourcePlayers = currentRosterState?.fixed?.length || currentRosterState?.substitutes?.length
-                ? [...(currentRosterState.fixed || []), ...(currentRosterState.substitutes || [])]
-                : (currentRosterState?.members || []);
-            if (!Array.isArray(sourcePlayers) || sourcePlayers.length === 0) {
-                rosterSignups = [];
-                renderRoster();
-                updateStatistics();
-                return;
-            }
-            rosterSignups = sourcePlayers
-                .map((player) => normalizeSignup({
-                    name: player.name,
-                    class: player.class,
-                    specialization: player.specialization,
-                    roles: Array.isArray(player.roles) ? player.roles : (player.role ? [player.role] : []),
-                    notes: player.notes || '',
-                    timestamp: player.timestamp || new Date().toISOString()
+        async function createManagementRaid() {
+            if (!isAdmin) return alert('Esta función es exclusiva del administrador.');
+            const season = getActiveManagementSeason();
+            if (!season) return alert('Crea o activa una temporada antes de crear una raid.');
+            const name = safeTrim(document.getElementById('management-raid-name')?.value) || DEFAULT_RAID_NAME;
+            const date = document.getElementById('management-raid-date')?.value || getTodayDate();
+            const activePlayers = rosterSignups.filter(p => (p.rosterStatus || 'activo') !== 'inactivo');
+            if (!activePlayers.length) return alert('No hay jugadores activos en el roster permanente.');
+            const id = `raid_${date}_${Date.now()}`;
+            const raid = {
+                id, seasonId: season.id, name, date, createdAt: new Date().toISOString(),
+                members: activePlayers.map(player => normalizeRaidMember({
+                    ...player, source: 'signup', participation: 'titular', attendance: 'pendiente'
                 }))
-                .filter((player) => safeTrim(player.name))
-                .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
-            renderRoster();
-            updateStatistics();
+            };
+            managementState.raids.unshift(raid);
+            await saveManagementDoc('equinoxRaids', id, raid);
+            selectedManagementRaidId = id;
+            document.getElementById('management-raid-name').value = '';
+            document.getElementById('management-raid-date').value = getTodayDate();
+            renderRaidManagement();
         }
 
-        function initializeSeasonPersistence() {
-            loadSeasonsState();
+        async function updateManagementRaidMember(field, value, playerName) {
+            if (!isAdmin) return;
+            const raid = managementState.raids.find(r => r.id === selectedManagementRaidId);
+            if (!raid) return;
+            const member = raid.members.find(m => safeTrim(m.name).toLowerCase() === safeTrim(playerName).toLowerCase());
+            if (!member) return;
+            member[field] = value;
+            await saveManagementDoc('equinoxRaids', raid.id, raid);
+            renderRaidAttendance();
+            renderAttendanceStats();
+        }
+
+        async function updatePermanentRosterStatus(playerName, status) {
+            if (!isAdmin) return;
+            const player = rosterSignups.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+            if (!player) return;
+            player.rosterStatus = ['activo', 'condicionado', 'inactivo'].includes(status) ? status : 'activo';
+            try {
+                await saveRosterSignupToFirebase(player);
+                renderPermanentRosterManagement();
+            } catch (error) {
+                alert('No se pudo actualizar el estado del jugador.');
+            }
+        }
+
+        function renderPermanentRosterManagement() {
+            const container = document.getElementById('permanent-roster-members');
+            if (!container) return;
+            const players = [...rosterSignups].sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+            if (!players.length) { container.innerHTML = '<div class="management-empty">No hay jugadores registrados.</div>'; return; }
+            const rows = players.map(player => {
+                const status = player.rosterStatus || 'activo';
+                const rowClass = status === 'inactivo' ? 'management-player-inactive' : '';
+                return `<tr class="${rowClass}">
+                    <td>${escapeHtml(player.name)}</td>
+                    <td>${escapeHtml(player.class)}</td>
+                    <td>${escapeHtml(player.specialization)}</td>
+                    <td>${escapeHtml(getMainRoleFromSpec(player.specialization) || '-')}</td>
+                    <td><select class="management-roster-status" data-player-name="${escapeHtml(player.name)}">
+                        <option value="activo" ${status === 'activo' ? 'selected' : ''}>Activo</option>
+                        <option value="condicionado" ${status === 'condicionado' ? 'selected' : ''}>Condicionado</option>
+                        <option value="inactivo" ${status === 'inactivo' ? 'selected' : ''}>Inactivo</option>
+                    </select></td>
+                </tr>`;
+            }).join('');
+            container.innerHTML = `<table class="admin-roster-table"><thead><tr><th>Jugador</th><th>Clase</th><th>Spec</th><th>Rol</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table>`;
+            container.querySelectorAll('.management-roster-status').forEach(select => select.addEventListener('change', e => updatePermanentRosterStatus(e.target.dataset.playerName, e.target.value)));
+        }
+
+        function renderManagementSeasonControls() {
+            const seasonSelect = document.getElementById('management-season-select');
+            const statsSelect = document.getElementById('management-stats-season');
+            const raidSelect = document.getElementById('management-raid-select');
+            const seasons = managementState.seasons;
+            const active = getActiveManagementSeason();
+            if (seasonSelect) {
+                seasonSelect.innerHTML = seasons.length ? seasons.map(s => `<option value="${escapeHtml(s.id)}" ${s.isActive ? 'selected' : ''}>${escapeHtml(s.name)}${s.endDate ? ' (archivada)' : ''}</option>`).join('') : '<option value="">Sin temporadas</option>';
+            }
+            if (statsSelect) statsSelect.innerHTML = '<option value="all">Todas las temporadas</option>' + seasons.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('');
+            const raids = [...managementState.raids].sort((a,b) => b.date.localeCompare(a.date));
+            if (raidSelect) {
+                if (!raids.length) raidSelect.innerHTML = '<option value="">Sin raids</option>';
+                else {
+                    const selected = selectedManagementRaidId || raids[0].id;
+                    selectedManagementRaidId = raids.some(r => r.id === selected) ? selected : raids[0].id;
+                    raidSelect.innerHTML = raids.map(r => `<option value="${escapeHtml(r.id)}" ${r.id === selectedManagementRaidId ? 'selected' : ''}>${escapeHtml(r.date)} · ${escapeHtml(r.name)}</option>`).join('');
+                }
+            }
+            const list = document.getElementById('management-season-list');
+            if (list) list.innerHTML = seasons.length ? seasons.map(s => `<div class="season-history-item"><strong>${escapeHtml(s.name)}</strong><span>${escapeHtml(s.startDate)}${s.endDate ? ` → ${escapeHtml(s.endDate)}` : ' · Activa'}</span></div>`).join('') : '<div class="management-empty">No hay temporadas creadas.</div>';
+            const raidStatus = document.getElementById('management-raid-status');
+            if (raidStatus) {
+                raidStatus.className = `season-status-message ${active ? 'success' : 'warning'}`;
+                raidStatus.textContent = active ? `Las nuevas raids se crearán en ${active.name}.` : 'Selecciona una temporada activa para crear una raid.';
+            }
+        }
+
+        function renderRaidAttendance() {
+            const container = document.getElementById('management-raid-attendance');
+            const summary = document.getElementById('management-raid-summary');
+            if (!container) return;
+            const raid = managementState.raids.find(r => r.id === selectedManagementRaidId);
+            if (!raid) {
+                if (summary) summary.textContent = 'Sin raid seleccionada';
+                container.innerHTML = '<div class="management-empty">Crea una raid para empezar a registrar asistencia.</div>';
+                return;
+            }
+            const counts = raid.members.reduce((acc,m) => { acc[m.attendance] = (acc[m.attendance] || 0) + 1; return acc; }, {});
+            if (summary) summary.textContent = `${raid.name} · ${raid.date}`;
+            const rows = raid.members.map(member => `<tr>
+                <td>${escapeHtml(member.name)}</td><td>${escapeHtml(member.role)}</td>
+                <td><select class="raid-participation" data-player-name="${escapeHtml(member.name)}">
+                    <option value="titular" ${member.participation === 'titular' ? 'selected' : ''}>Titular</option>
+                    <option value="suplente" ${member.participation === 'suplente' ? 'selected' : ''}>Suplente</option>
+                    <option value="no_convocado" ${member.participation === 'no_convocado' ? 'selected' : ''}>No convocado</option>
+                </select></td>
+                <td><select class="raid-attendance" data-player-name="${escapeHtml(member.name)}">
+                    <option value="pendiente" ${member.attendance === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="asistio" ${member.attendance === 'asistio' ? 'selected' : ''}>Asistió</option>
+                    <option value="ausente" ${member.attendance === 'ausente' ? 'selected' : ''}>Ausente</option>
+                    <option value="justificada" ${member.attendance === 'justificada' ? 'selected' : ''}>Justificada</option>
+                </select></td></tr>`).join('');
+            container.innerHTML = `<div class="current-roster-summary"><span class="status-badge confirmado">Asistieron: ${counts.asistio || 0}</span><span class="status-badge pendiente">Pendientes: ${counts.pendiente || 0}</span><span class="status-badge ausente">Ausentes: ${counts.ausente || 0}</span></div><table class="admin-raid-table"><thead><tr><th>Jugador</th><th>Rol</th><th>Convocatoria</th><th>Asistencia</th></tr></thead><tbody>${rows}</tbody></table>`;
+            container.querySelectorAll('.raid-participation').forEach(select => select.addEventListener('change', e => updateManagementRaidMember('participation', e.target.value, e.target.dataset.playerName)));
+            container.querySelectorAll('.raid-attendance').forEach(select => select.addEventListener('change', e => updateManagementRaidMember('attendance', e.target.value, e.target.dataset.playerName)));
+        }
+
+        function renderAttendanceStats() {
+            const container = document.getElementById('management-attendance-summary');
+            if (!container) return;
+            const seasonFilter = document.getElementById('management-stats-season')?.value || 'all';
+            const raids = managementState.raids.filter(r => seasonFilter === 'all' || r.seasonId === seasonFilter);
+            const byPlayer = new Map();
+            raids.forEach(raid => raid.members.forEach(member => {
+                if (member.participation === 'no_convocado') return;
+                if (!byPlayer.has(member.name)) byPlayer.set(member.name, { total: 0, attended: 0, absent: 0, justified: 0, pending: 0 });
+                const stats = byPlayer.get(member.name);
+                if (member.attendance === 'pendiente') { stats.pending++; return; }
+                stats.total++;
+                if (member.attendance === 'asistio') stats.attended++;
+                if (member.attendance === 'ausente') stats.absent++;
+                if (member.attendance === 'justificada') stats.justified++;
+            }));
+            const rows = [...byPlayer.entries()].sort((a,b) => b[1].total - a[1].total || a[0].localeCompare(b[0], 'es')).map(([name, st]) => {
+                const pct = st.total ? Math.round(st.attended / st.total * 100) : 0;
+                return `<tr><td>${escapeHtml(name)}</td><td>${st.total}</td><td>${st.attended}</td><td>${st.absent}</td><td>${st.justified}</td><td>${st.pending}</td><td><strong>${pct}%</strong></td></tr>`;
+            }).join('');
+            const totalRaids = raids.length;
+            const totalAttendance = [...byPlayer.values()].reduce((n,s) => n + s.attended, 0);
+            const totalAbsences = [...byPlayer.values()].reduce((n,s) => n + s.absent, 0);
+            container.innerHTML = `<div class="management-stat-grid"><div class="management-stat"><strong>${totalRaids}</strong>Raids</div><div class="management-stat"><strong>${totalAttendance}</strong>Asistencias</div><div class="management-stat"><strong>${totalAbsences}</strong>Ausencias</div></div>${rows ? `<table class="admin-raid-table"><thead><tr><th>Jugador</th><th>Convocado</th><th>Asistió</th><th>Ausente</th><th>Justificada</th><th>Pendiente</th><th>%</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="management-empty">Todavía no hay datos de asistencia.</div>'}`;
+        }
+
+        function renderRaidManagement() {
+            const panel = document.getElementById('admin-roster-management');
+            if (panel) panel.style.display = isAdmin ? '' : 'none';
+            if (!isAdmin) return;
+            renderPermanentRosterManagement();
+            renderManagementSeasonControls();
+            renderRaidAttendance();
+            renderAttendanceStats();
+            const today = getTodayDate();
+            const start = document.getElementById('management-season-start');
+            const raidDate = document.getElementById('management-raid-date');
+            if (start && !start.value) start.value = today;
+            if (raidDate && !raidDate.value) raidDate.value = today;
+        }
+
+        async function initializeRaidManagement() {
             loadCurrentRoster();
             syncGeneratedRosterFromCurrentState();
-            renderSeasonManager();
-            updateAdminUI();
+            await loadManagementState();
+            renderRaidManagement();
         }
-
 
         function updateAdminUI() {
             const status = document.getElementById('admin-status');
             const button = document.getElementById('btn-admin-auth');
             const actionsHeader = document.getElementById('actions-header');
             const rosterGenerator = document.getElementById('roster-generator-section');
-
-            status.textContent = isAdmin ? 'Modo administrador activo' : 'Modo usuario';
-            status.style.color = isAdmin ? '#10b981' : '#fbbf24';
-            button.textContent = isAdmin ? '🚪 Cerrar Sesión Admin' : '🔐 Acceso Administrador';
-            actionsHeader.style.display = isAdmin ? '' : 'none';
-
-            // El Generador de Roster Fijo es exclusivo de administradores.
-            // Se oculta completamente para usuarios normales.
-            if (rosterGenerator) {
-                rosterGenerator.style.display = isAdmin ? '' : 'none';
+            if (status) {
+                status.textContent = isAdmin ? 'Modo administrador activo' : 'Modo usuario';
+                status.style.color = isAdmin ? '#10b981' : '#fbbf24';
             }
-
-            // Al cerrar sesión, ocultamos el builder, pero conservamos el roster local.
+            if (button) button.textContent = isAdmin ? '🚪 Cerrar Sesión Admin' : '🔐 Acceso Administrador';
+            if (actionsHeader) actionsHeader.style.display = isAdmin ? '' : 'none';
+            if (rosterGenerator) rosterGenerator.style.display = isAdmin ? '' : 'none';
             if (!isAdmin) {
-                const builder = document.getElementById('roster-builder');
-                const exportButton = document.getElementById('btn-export-generated-roster');
-                if (builder) builder.style.display = 'none';
-                if (exportButton) exportButton.style.display = 'none';
-            } else if ((generatedFixedRoster.length > 0 || generatedSubstitutes.length > 0)) {
+                document.getElementById('roster-builder')?.style && (document.getElementById('roster-builder').style.display = 'none');
+                document.getElementById('btn-export-generated-roster')?.style && (document.getElementById('btn-export-generated-roster').style.display = 'none');
+            } else if (generatedFixedRoster.length > 0 || generatedSubstitutes.length > 0) {
                 const builder = document.getElementById('roster-builder');
                 const exportButton = document.getElementById('btn-export-generated-roster');
                 if (builder) builder.style.display = '';
                 if (exportButton) exportButton.style.display = '';
                 renderRosterBuilder();
             }
+            renderRaidManagement();
         }
 
         function requestAdminPassword() {
             return new Promise((resolve, reject) => {
                 const modal = document.createElement('div');
                 modal.className = 'admin-auth-modal';
-                modal.innerHTML = `
-                    <div class="admin-auth-modal-content">
-                        <h3 style="margin-top:0;">🔐 Acceso Administrador</h3>
-                        <p>Introduce la contraseña del administrador:</p>
-                        <label for="admin-password-input" style="display:block; margin-bottom:6px; color: var(--dorado);">Contraseña</label>
-                        <input id="admin-password-input" type="password" placeholder="Contraseña" autocomplete="new-password">
-                        <div class="admin-auth-modal-buttons">
-                            <button id="admin-auth-cancel">Cancelar</button>
-                            <button id="admin-auth-submit">Entrar</button>
-                        </div>
-                    </div>
-                `;
-
+                modal.innerHTML = `<div class="admin-auth-modal-content">
+                    <h3 style="margin-top:0;">🔐 Acceso Administrador</h3>
+                    <p>Introduce la contraseña del administrador:</p>
+                    <label for="admin-password-input" style="display:block; margin-bottom:6px; color: var(--dorado);">Contraseña</label>
+                    <input id="admin-password-input" type="password" placeholder="Contraseña" autocomplete="new-password">
+                    <div class="admin-auth-modal-buttons"><button id="admin-auth-cancel">Cancelar</button><button id="admin-auth-submit">Entrar</button></div>
+                </div>`;
                 const cleanup = () => modal.remove();
                 document.body.appendChild(modal);
                 const input = modal.querySelector('#admin-password-input');
                 input.focus();
-
-                modal.querySelector('#admin-auth-cancel').addEventListener('click', () => {
-                    cleanup();
-                    reject(new Error('cancelled'));
-                });
-
-                modal.querySelector('#admin-auth-submit').addEventListener('click', () => {
-                    const password = input.value.trim();
-                    cleanup();
-                    resolve(password);
-                });
+                modal.querySelector('#admin-auth-cancel').addEventListener('click', () => { cleanup(); reject(new Error('cancelled')); });
+                modal.querySelector('#admin-auth-submit').addEventListener('click', () => { const password = input.value.trim(); cleanup(); resolve(password); });
             });
         }
 
@@ -3962,89 +3513,32 @@
         }
 
 
-        document.getElementById('btn-create-season').addEventListener('click', function() {
-            try {
-                const season = createSeason(
-                    document.getElementById('season-name').value,
-                    document.getElementById('season-start-date').value
-                );
-                document.getElementById('season-name').value = '';
-                document.getElementById('archive-season-end-date').value = '';
-                updateSeasonStatusMessage(`Temporada ${season.name} creada y activada.`, 'success');
-            } catch (error) {
-                alert(error.message);
-            }
+        document.getElementById('btn-management-create-season')?.addEventListener('click', async function() {
+            try { await createManagementSeason(); }
+            catch (error) { console.error(error); alert(error.message || 'No se pudo crear la temporada.'); }
         });
 
-        document.getElementById('btn-set-active-season').addEventListener('click', function() {
-            const seasonId = document.getElementById('active-season-select').value;
-            if (!seasonId) {
-                alert('Selecciona una temporada.');
-                return;
-            }
-            const selectedSeason = seasonsState.seasons.find((season) => season.id === seasonId);
-            if (selectedSeason?.endDate !== null) {
-                alert('No puedes reactivar una temporada archivada.');
-                return;
-            }
-            try {
-                const season = setActiveSeason(seasonId);
-                updateSeasonStatusMessage(`Temporada activa actualizada a ${season.name}.`, 'success');
-            } catch (error) {
-                alert(error.message);
-            }
+        document.getElementById('btn-management-activate-season')?.addEventListener('click', async function() {
+            try { await activateManagementSeason(); }
+            catch (error) { console.error(error); alert(error.message || 'No se pudo activar la temporada.'); }
         });
 
-        document.getElementById('btn-archive-season').addEventListener('click', function() {
-            const seasonId = document.getElementById('active-season-select').value;
-            const endDate = document.getElementById('archive-season-end-date').value;
-            if (!seasonId) {
-                alert('Selecciona una temporada para archivar.');
-                return;
-            }
-            const selectedSeason = seasonsState.seasons.find((season) => season.id === seasonId);
-            if (selectedSeason?.endDate !== null) {
-                alert('La temporada seleccionada ya está archivada.');
-                return;
-            }
-            try {
-                const season = archiveSeason(seasonId, endDate);
-                updateSeasonStatusMessage(`Temporada ${season.name} archivada.`, 'success');
-            } catch (error) {
-                alert(error.message);
-            }
+        document.getElementById('btn-management-archive-season')?.addEventListener('click', async function() {
+            try { await archiveManagementSeason(); }
+            catch (error) { console.error(error); alert(error.message || 'No se pudo archivar la temporada.'); }
         });
 
-        document.getElementById('active-season-select').addEventListener('change', renderSeasonManager);
-        document.getElementById('btn-close-current-roster').addEventListener('click', archiveCurrentRosterToSeason);
-        document.getElementById('btn-reset-current-roster').addEventListener('click', function() {
-            resetCurrentRoster(true);
-            updateSeasonStatusMessage('Roster actual reiniciado para la siguiente raid.', 'success');
+        document.getElementById('btn-management-create-raid')?.addEventListener('click', async function() {
+            try { await createManagementRaid(); }
+            catch (error) { console.error(error); alert(error.message || 'No se pudo crear la raid.'); }
         });
 
-        document.getElementById('current-raid-name').addEventListener('change', function() {
-            saveCurrentRoster({ ...(currentRosterState || createEmptyCurrentRoster()), raidName: this.value }, { render: false });
-        });
-        document.getElementById('current-raid-date').addEventListener('change', function() {
-            saveCurrentRoster({ ...(currentRosterState || createEmptyCurrentRoster()), date: this.value }, { render: false });
+        document.getElementById('management-raid-select')?.addEventListener('change', function() {
+            selectedManagementRaidId = this.value;
+            renderRaidAttendance();
         });
 
-        document.getElementById('btn-export-roster-data').addEventListener('click', exportRosterData);
-        document.getElementById('btn-import-roster-data').addEventListener('click', function() {
-            document.getElementById('import-roster-data-input').click();
-        });
-        document.getElementById('import-roster-data-input').addEventListener('change', function(event) {
-            const [file] = event.target.files || [];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (importRosterData(String(reader.result || ''))) {
-                    updateSeasonStatusMessage('Datos importados correctamente.', 'success');
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        });
+        document.getElementById('management-stats-season')?.addEventListener('change', renderAttendanceStats);
 
         document.getElementById('btn-generate-roster').addEventListener('click', function() {
             if (!isAdmin) {
@@ -4090,7 +3584,7 @@
         // Initialize when DOM is ready
         window.addEventListener('load', function() {
             updateAdminUI();
-            initializeSeasonPersistence();
+            initializeRaidManagement();
 
             // Setup instructions constant
             const FIREBASE_SETUP_INSTRUCTIONS = '\n\nPara configurar Firebase:\n\n' +
