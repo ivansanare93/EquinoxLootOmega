@@ -11,12 +11,14 @@ Repositorio para la aplicación que organiza Loot de la RAID de Equinox
 - **Excel Export**: Export assignment data to Excel spreadsheets
 - **Blizzard API Integration**: Direct integration with WoW Retail Game Data API for live raid and loot data
 
-### Roster Signup Tool (NEW!)
-- **Class & Role Registration**: Guild members can sign up their class, specialization, and preferred roles for the next expansion
+### Roster Signup Tool
+- **Class & Role Registration**: Guild members can sign up their class, specialization, and preferred roles
 - **Multi-Role Support**: Players can indicate if they can Tank, Heal, or DPS
-- **Live Statistics**: Officers can see real-time counts of Tanks, Healers, and DPS signups
-- **Filtering & Export**: Filter by class or role, and export roster data to Excel for planning
-- **Real-time Sync**: All signups are synchronized in real-time via Firebase Firestore
+- **Persistent Current Roster**: The current roster, raid metadata, and attendance states are saved automatically in `localStorage`
+- **Season Management**: Officers can create seasons, activate one season at a time, and archive old seasons without losing history
+- **Raid History & Attendance**: Closing a roster stores a seasonal snapshot and updates per-player attendance stats
+- **Filtering & Export**: Filter by class or role, export the generated roster to Excel, and export/import seasonal backups in JSON
+- **Real-time Sync + Local Safety Net**: Signups still sync through Firebase, while seasonal tracking remains local to the browser
 
 ## Firebase Integration
 
@@ -74,7 +76,17 @@ For detailed deployment instructions, see [docs/GITHUB_PAGES_DEPLOYMENT.md](docs
 1. Fill out the registration form with character name, class, and specialization
 2. Select which roles you can play (Tank, Healer, DPS)
 3. Add any additional notes (optional)
-4. Officers can view all signups, filter by class/role, and export to Excel
+4. Create a season from the **Temporadas y Asistencia** panel and leave only one active at a time
+5. Generate or review the current roster, adjust each member status (`confirmado`, `pendiente`, `ausente`), and set raid name/date
+6. Use **Cerrar y guardar roster** to archive the raid inside the active season and start a clean roster for the next run
+7. Review the active season history and attendance summary, or export/import a JSON backup when needed
+
+#### Roster seasons and browser storage
+- Seasonal data is stored in `localStorage` under the keys `equinox_seasons` and `equinox_current_roster`.
+- The page restores the current roster automatically on reload, browser restart, or when revisiting the page on the same device/browser.
+- If an old local format or corrupt JSON is detected, the app attempts a migration and keeps a backup copy in a `equinox_backup_*` key before resetting.
+- `localStorage` is limited to the current browser profile/device. It is not shared automatically between browsers, devices, or users.
+- Use the built-in **Exportar datos** button to save a full JSON backup and **Importar datos** to restore it with basic schema validation.
 
 ## Blizzard API Integration
 
