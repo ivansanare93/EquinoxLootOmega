@@ -1589,9 +1589,10 @@
                 : buildRosterMembersFromLists(fixed, substitutes, []);
             const hasStructuredRoster = fixed.length > 0 || substitutes.length > 0;
             const hasExplicitMembers = Array.isArray(base.members) && normalizedMembers.length > 0;
+            const allMembersAreSignup = hasExplicitMembers && normalizedMembers.every((member) => normalizeRosterSource(member.source) === 'signup');
             const rosterMode = hasStructuredRoster
                 ? 'generated'
-                : (base.rosterMode || (hasExplicitMembers ? 'restored' : 'empty'));
+                : (base.rosterMode || (hasExplicitMembers ? (allMembersAreSignup ? 'signup_fallback' : 'restored') : 'empty'));
 
             return {
                 version: CURRENT_ROSTER_VERSION,
@@ -1830,6 +1831,14 @@
         function archiveSeason(seasonId, endDate) {
             if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate || '')) {
                 throw new Error('Debes indicar una fecha de cierre válida para archivar la temporada.');
+            }
+
+            const targetSeason = seasonsState.seasons.find((season) => season.id === seasonId);
+            if (!targetSeason) {
+                throw new Error('No se encontró la temporada a archivar.');
+            }
+            if (endDate < targetSeason.startDate) {
+                throw new Error('La fecha de cierre no puede ser anterior al inicio de la temporada.');
             }
 
             const wasActive = seasonsState.seasons.some((season) => season.id === seasonId && season.isActive);
@@ -2374,7 +2383,9 @@
                 backupStorageValue(SEASONS_STORAGE_KEY, JSON.stringify(seasonsState), 'pre_import_backup');
             }
 
-            const normalizedSeasons = normalizeSeasonsPayload(hasValidSeasons ? seasonsPayload : { seasons: [] });
+            const normalizedSeasons = hasValidSeasons
+                ? normalizeSeasonsPayload(seasonsPayload)
+                : normalizeSeasonsPayload(seasonsState || loadSeasonsState() || { seasons: [] });
             const normalizedRoster = hasValidRoster
                 ? (transformLegacyCurrentRoster(currentRosterPayload) || normalizeCurrentRoster(currentRosterPayload))
                 : normalizeCurrentRoster(currentRosterState || loadCurrentRoster() || createEmptyCurrentRoster());
