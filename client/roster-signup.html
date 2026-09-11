@@ -1825,7 +1825,7 @@
             }
 
             if (!seasonsState.seasons.some(season => season.isActive)) {
-                const replacementSeason = seasonsState.seasons.find(season => season.id !== seasonId && !season.endDate);
+                const replacementSeason = seasonsState.seasons.find(season => season.id !== seasonId && season.endDate === null);
                 if (replacementSeason) {
                     seasonsState.seasons = seasonsState.seasons.map((season) => ({
                         ...season,
@@ -1983,10 +1983,15 @@
                 return;
             }
 
-            const playerNames = new Set();
+            const playerNames = new Map();
             activeSeason.raids.forEach((raid) => {
                 raid.members.forEach((member) => {
-                    if (safeTrim(member.name)) playerNames.add(member.name);
+                    const displayName = safeTrim(member.name);
+                    if (!displayName) return;
+                    const normalizedKey = displayName.toLowerCase();
+                    if (!playerNames.has(normalizedKey)) {
+                        playerNames.set(normalizedKey, displayName);
+                    }
                 });
             });
 
@@ -1995,9 +2000,9 @@
                 return;
             }
 
-            const rows = [...playerNames]
-                .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
-                .map((playerName) => {
+            const rows = [...playerNames.entries()]
+                .sort((a, b) => a[1].localeCompare(b[1], 'es', { sensitivity: 'base' }))
+                .map(([, playerName]) => {
                     const seasonStats = getAttendanceBySeason(playerName, activeSeason.id);
                     const globalStats = getGlobalAttendance(playerName);
                     return `
@@ -2083,8 +2088,9 @@
 
             container.querySelectorAll('.status-select').forEach((select) => {
                 select.addEventListener('change', (event) => {
-                    const playerName = event.target.dataset.playerName;
-                    const memberIndex = currentRosterState.members.findIndex(member => member.name === playerName);
+                    const playerName = safeTrim(event.target.dataset.playerName);
+                    const normalizedPlayerName = playerName.toLowerCase();
+                    const memberIndex = currentRosterState.members.findIndex(member => safeTrim(member.name).toLowerCase() === normalizedPlayerName);
                     if (memberIndex === -1) return;
                     currentRosterState.members[memberIndex].status = normalizeRosterStatus(event.target.value);
                     saveCurrentRoster(currentRosterState, { render: false });
@@ -2294,7 +2300,7 @@
                 currentRosterPayload = parsed.currentRoster;
             } else if (isRecognizedRosterPayload(parsed?.current_roster)) {
                 currentRosterPayload = parsed.current_roster;
-            } else if (isRecognizedRosterPayload(parsed)) {
+            } else if (!isRecognizedSeasonsPayload(parsed) && isRecognizedRosterPayload(parsed)) {
                 currentRosterPayload = parsed;
             }
 
