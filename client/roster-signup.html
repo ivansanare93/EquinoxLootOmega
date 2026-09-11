@@ -2685,7 +2685,7 @@
             document.getElementById('player-notes').value = signup.notes || '';
 
             // Scroll to form
-            document.getElementById('signup-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('signup-form')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
         }
 
         // Update statistics
@@ -3930,7 +3930,7 @@
             renderRosterBuilder();
             const exportButton = document.getElementById('btn-export-generated-roster');
             if (exportButton) exportButton.style.display = '';
-            builder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            builder?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
         });
 
         document.getElementById('btn-export-generated-roster').addEventListener('click', exportGeneratedRoster);
