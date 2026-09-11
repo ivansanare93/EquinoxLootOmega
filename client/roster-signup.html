@@ -2123,6 +2123,8 @@
             const raidNameInput = document.getElementById('current-raid-name');
             const raidDateInput = document.getElementById('current-raid-date');
             const startDateInput = document.getElementById('season-start-date');
+            const activeSeason = getActiveSeason();
+            const selectedSeasonId = select?.value || activeSeason?.id || '';
 
             if (raidNameInput) raidNameInput.value = currentRosterState?.raidName || DEFAULT_RAID_NAME;
             if (raidDateInput) raidDateInput.value = currentRosterState?.date || getTodayDate();
@@ -2142,24 +2144,25 @@
                 select.innerHTML = seasonsState.seasons.length === 0
                     ? '<option value="">Sin temporadas</option>'
                     : seasonsState.seasons.map((season) => `
-                        <option value="${season.id}" ${season.isActive ? 'selected' : ''}>
+                        <option value="${season.id}" ${(selectedSeasonId ? season.id === selectedSeasonId : season.isActive) ? 'selected' : ''}>
                             ${escapeHtml(season.name)}${season.endDate ? ' (archivada)' : ''}
                         </option>
                     `).join('');
             }
 
-            const activeSeason = getActiveSeason();
             if (activeIndicator) {
                 activeIndicator.textContent = activeSeason
                     ? `Temporada activa: ${activeSeason.name}`
                     : 'Sin temporada activa';
             }
 
+            const selectedSeason = seasonsState.seasons.find((season) => season.id === select?.value) || null;
+            const hasGeneratedRoster = Boolean((currentRosterState?.fixed?.length || 0) > 0 || (currentRosterState?.substitutes?.length || 0) > 0);
             if (closeButton) {
-                closeButton.disabled = !activeSeason || isClosingCurrentRoster || (currentRosterState?.members?.length || 0) === 0;
+                closeButton.disabled = !activeSeason || isClosingCurrentRoster || !hasGeneratedRoster;
             }
-            if (archiveButton) archiveButton.disabled = !select?.value;
-            if (activateButton) activateButton.disabled = !select?.value || seasonsState.seasons.length === 0;
+            if (archiveButton) archiveButton.disabled = !select?.value || selectedSeason?.endDate !== null;
+            if (activateButton) activateButton.disabled = !select?.value || seasonsState.seasons.length === 0 || selectedSeason?.endDate !== null;
 
             if (!activeSeason) {
                 updateSeasonStatusMessage('Debes crear o activar una temporada antes de cerrar y guardar un roster.', 'warning');
@@ -2197,6 +2200,12 @@
 
             if (!safeTrim(rosterToArchive.raidName) || !/^\d{4}-\d{2}-\d{2}$/.test(rosterToArchive.date)) {
                 alert('Debes indicar nombre y fecha válidos para cerrar el roster.');
+                return;
+            }
+
+            const hasGeneratedRoster = Boolean((rosterToArchive.fixed?.length || 0) > 0 || (rosterToArchive.substitutes?.length || 0) > 0);
+            if (!hasGeneratedRoster) {
+                alert('Debes generar o cargar un roster actual antes de archivarlo.');
                 return;
             }
 
@@ -2295,6 +2304,17 @@
             } catch (error) {
                 alert('El archivo JSON no es válido.');
                 return false;
+            }
+
+            if (!confirm('Importar datos reemplazará la información local actual de este navegador. ¿Deseas continuar?')) {
+                return false;
+            }
+
+            if (currentRosterState) {
+                backupStorageValue(CURRENT_ROSTER_STORAGE_KEY, JSON.stringify(currentRosterState), 'pre_import_backup');
+            }
+            if (seasonsState) {
+                backupStorageValue(SEASONS_STORAGE_KEY, JSON.stringify(seasonsState), 'pre_import_backup');
             }
 
             let seasonsPayload = null;
@@ -3892,6 +3912,11 @@
                 alert('Selecciona una temporada.');
                 return;
             }
+            const selectedSeason = seasonsState.seasons.find((season) => season.id === seasonId);
+            if (selectedSeason?.endDate !== null) {
+                alert('No puedes reactivar una temporada archivada.');
+                return;
+            }
             try {
                 const season = setActiveSeason(seasonId);
                 updateSeasonStatusMessage(`Temporada activa actualizada a ${season.name}.`, 'success');
@@ -3907,6 +3932,11 @@
                 alert('Selecciona una temporada para archivar.');
                 return;
             }
+            const selectedSeason = seasonsState.seasons.find((season) => season.id === seasonId);
+            if (selectedSeason?.endDate !== null) {
+                alert('La temporada seleccionada ya está archivada.');
+                return;
+            }
             try {
                 const season = archiveSeason(seasonId, endDate);
                 updateSeasonStatusMessage(`Temporada ${season.name} archivada.`, 'success');
@@ -3915,6 +3945,7 @@
             }
         });
 
+        document.getElementById('active-season-select').addEventListener('change', renderSeasonManager);
         document.getElementById('btn-close-current-roster').addEventListener('click', archiveCurrentRosterToSeason);
         document.getElementById('btn-reset-current-roster').addEventListener('click', function() {
             resetCurrentRoster(true);
