@@ -2300,12 +2300,15 @@
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const anchor = document.createElement('a');
-            anchor.href = url;
-            anchor.download = `equinox-roster-backup-${getTodayDate()}.json`;
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-            URL.revokeObjectURL(url);
+            try {
+                anchor.href = url;
+                anchor.download = `equinox-roster-backup-${getTodayDate()}.json`;
+                document.body.appendChild(anchor);
+                anchor.click();
+            } finally {
+                anchor.remove();
+                URL.revokeObjectURL(url);
+            }
         }
 
         function importRosterData(rawText) {
@@ -2319,13 +2322,6 @@
 
             if (!confirm('Importar datos reemplazará la información local actual de este navegador. ¿Deseas continuar?')) {
                 return false;
-            }
-
-            if (currentRosterState) {
-                backupStorageValue(CURRENT_ROSTER_STORAGE_KEY, JSON.stringify(currentRosterState), 'pre_import_backup');
-            }
-            if (seasonsState) {
-                backupStorageValue(SEASONS_STORAGE_KEY, JSON.stringify(seasonsState), 'pre_import_backup');
             }
 
             let seasonsPayload = null;
@@ -2356,6 +2352,13 @@
             if (!hasValidSeasons && !hasValidRoster) {
                 alert('El archivo no contiene un respaldo válido del roster.');
                 return false;
+            }
+
+            if (currentRosterState) {
+                backupStorageValue(CURRENT_ROSTER_STORAGE_KEY, JSON.stringify(currentRosterState), 'pre_import_backup');
+            }
+            if (seasonsState) {
+                backupStorageValue(SEASONS_STORAGE_KEY, JSON.stringify(seasonsState), 'pre_import_backup');
             }
 
             const normalizedSeasons = normalizeSeasonsPayload(hasValidSeasons ? seasonsPayload : { seasons: [] });
