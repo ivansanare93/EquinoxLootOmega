@@ -1824,6 +1824,17 @@
                 throw new Error('No se encontró la temporada a archivar.');
             }
 
+            if (!seasonsState.seasons.some(season => season.isActive)) {
+                const replacementSeason = seasonsState.seasons.find(season => season.id !== seasonId && !season.endDate)
+                    || seasonsState.seasons.find(season => season.id !== seasonId);
+                if (replacementSeason) {
+                    seasonsState.seasons = seasonsState.seasons.map((season) => ({
+                        ...season,
+                        isActive: season.id === replacementSeason.id
+                    }));
+                }
+            }
+
             saveSeasonsState();
             renderSeasonManager();
             return archived;
@@ -2120,7 +2131,7 @@
             const activeSeason = getActiveSeason();
             if (activeIndicator) {
                 activeIndicator.textContent = activeSeason
-                    ? `Temporada activa: ${escapeHtml(activeSeason.name)}`
+                    ? `Temporada activa: ${activeSeason.name}`
                     : 'Sin temporada activa';
             }
 
@@ -2133,7 +2144,7 @@
             if (!activeSeason) {
                 updateSeasonStatusMessage('Debes crear o activar una temporada antes de cerrar y guardar un roster.', 'warning');
             } else {
-                updateSeasonStatusMessage(`Los cierres de roster se archivarán en ${escapeHtml(activeSeason.name)}.`, 'success');
+                updateSeasonStatusMessage(`Los cierres de roster se archivarán en ${activeSeason.name}.`, 'success');
             }
 
             renderSeasonHistory();
@@ -2232,7 +2243,7 @@
                 currentRosterState.lastArchivedAt = raidRecord.closedAt;
                 saveCurrentRoster(currentRosterState, { render: false });
                 resetCurrentRoster(true);
-                updateSeasonStatusMessage(`Roster archivado correctamente en ${escapeHtml(activeSeason.name)}.`, 'success');
+                updateSeasonStatusMessage(`Roster archivado correctamente en ${activeSeason.name}.`, 'success');
             } finally {
                 isClosingCurrentRoster = false;
                 renderSeasonManager();
