@@ -1,0 +1,245 @@
+/* ============================================================
+   themes.css — Sistema de temas para Destino de Azeroth
+   Cambiar tema: body.theme-wow | body.theme-slime | body.theme-dark | body.theme-classic
+   ============================================================ */
+
+/* ── Tema WoW Fantasy (default) ── */
+body.theme-wow {
+  --color-bg:           #0f172a;
+  --color-bg2:          #1e293b;
+  --color-surface:      rgba(30, 41, 59, 0.95);
+  --color-border:       rgba(245, 158, 11, 0.25);
+  --color-primary:      #f59e0b;
+  --color-primary-dim:  rgba(245, 158, 11, 0.1);
+  --color-secondary:    #8b5cf6;
+  --color-glow:         rgba(245, 158, 11, 0.5);
+  --color-text:         #f1f5f9;
+  --color-text-muted:   #94a3b8;
+  --color-success:      #10b981;
+  --color-danger:       #ef4444;
+  --color-overlay-bg:   rgba(0, 0, 0, 0.85);
+
+  background: linear-gradient(135deg, #0f172a 0%, #1a0f2e 50%, #0f172a 100%);
+}
+
+body.theme-wow #app-header {
+  background: linear-gradient(90deg, rgba(15,23,42,0.98), rgba(26,15,46,0.98));
+}
+
+body.theme-wow #wheel-canvas {
+  box-shadow: 0 0 40px rgba(245,158,11,0.4), 0 0 80px rgba(139,92,246,0.2), 0 20px 60px rgba(0,0,0,0.6);
+}
+
+/* Runas decorativas WoW */
+body.theme-wow::before {
+  content: '᛫';
+  position: fixed;
+  top: 10%;
+  left: 3%;
+  font-size: 3rem;
+  color: rgba(245,158,11,0.05);
+  pointer-events: none;
+  animation: runeFloat 8s ease-in-out infinite;
+}
+
+body.theme-wow::after {
+  content: '᚛';
+  position: fixed;
+  bottom: 15%;
+  right: 3%;
+  font-size: 3rem;
+  color: rgba(139,92,246,0.05);
+  pointer-events: none;
+  animation: runeFloat 10s ease-in-out infinite reverse;
+}
+
+@keyframes runeFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.05; }
+  50% { transform: translateY(-20px) rotate(10deg); opacity: 0.1; }
+}
+
+/* ── Tema Slime (canal personal) ── */
+body.theme-slime {
+  --color-bg:           #0a0f0a;
+  --color-bg2:          #0f1f0f;
+  --color-surface:      rgba(15, 30, 15, 0.97);
+  --color-border:       rgba(34, 197, 94, 0.25);
+  --color-primary:      #22c55e;
+  --color-primary-dim:  rgba(34, 197, 94, 0.1);
+  --color-secondary:    #16a34a;
+  --color-glow:         rgba(34, 197, 94, 0.45);
+  --color-text:         #ecfdf5;
+  --color-text-muted:   #6ee7a0;
+  --color-success:      #4ade80;
+  --color-danger:       #f87171;
+  --color-overlay-bg:   rgba(0, 10, 0, 0.9);
+
+  background: radial-gradient(ellipse at center, #0a1a0a 0%, #040804 100%);
+}
+
+body.theme-slime #app-header {
+  background: linear-gradient(90deg, rgba(10,15,10,0.98), rgba(15,30,15,0.98));
+  box-shadow: 0 2px 20px rgba(34,197,94,0.2);
+}
+
+body.theme-slime #wheel-canvas {
+  box-shadow: 0 0 40px rgba(34,197,94,0.4), 0 0 80px rgba(22,163,74,0.15), 0 20px 60px rgba(0,0,0,0.7);
+}
+
+body.theme-slime #btn-spin {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+/* Efecto slime drip */
+body.theme-slime .header-title::after {
+  content: '🟢';
+  margin-left: 8px;
+  font-size: 0.8em;
+  animation: slimeDrip 3s ease-in-out infinite;
+}
+
+@keyframes slimeDrip {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* Partículas slime */
+body.theme-slime .result-overlay-bg {
+  background: radial-gradient(ellipse, rgba(34,197,94,0.1) 0%, rgba(0,10,0,0.9) 70%);
+}
+
+/* ── Tema Dark ── */
+body.theme-dark {
+  --color-bg:           #080808;
+  --color-bg2:          #111111;
+  --color-surface:      rgba(17, 17, 17, 0.98);
+  --color-border:       rgba(220, 38, 38, 0.25);
+  --color-primary:      #dc2626;
+  --color-primary-dim:  rgba(220, 38, 38, 0.1);
+  --color-secondary:    #991b1b;
+  --color-glow:         rgba(220, 38, 38, 0.4);
+  --color-text:         #f5f5f5;
+  --color-text-muted:   #737373;
+  --color-success:      #22c55e;
+  --color-danger:       #dc2626;
+  --color-overlay-bg:   rgba(0, 0, 0, 0.92);
+
+  background: #080808;
+}
+
+body.theme-dark #app-header {
+  background: #0d0d0d;
+  border-bottom-color: rgba(220,38,38,0.3);
+}
+
+body.theme-dark #wheel-canvas {
+  box-shadow: 0 0 40px rgba(220,38,38,0.3), 0 20px 60px rgba(0,0,0,0.9);
+}
+
+body.theme-dark .mode-btn.active {
+  background: #dc2626;
+}
+
+/* ── Tema Classic ── */
+body.theme-classic {
+  --color-bg:           #2c1810;
+  --color-bg2:          #3d2415;
+  --color-surface:      rgba(58, 38, 22, 0.97);
+  --color-border:       rgba(201, 162, 100, 0.4);
+  --color-primary:      #c9a264;
+  --color-primary-dim:  rgba(201, 162, 100, 0.15);
+  --color-secondary:    #a07840;
+  --color-glow:         rgba(201, 162, 100, 0.35);
+  --color-text:         #f5e6d3;
+  --color-text-muted:   #a89880;
+  --color-success:      #7daa62;
+  --color-danger:       #cc4444;
+  --color-overlay-bg:   rgba(20, 10, 5, 0.9);
+
+  background: linear-gradient(135deg, #2c1810 0%, #1a0f08 100%);
+}
+
+body.theme-classic #app-header {
+  background: linear-gradient(90deg, rgba(30,15,8,0.98), rgba(44,24,16,0.98));
+  border-bottom-color: rgba(201,162,100,0.5);
+}
+
+body.theme-classic #wheel-canvas {
+  box-shadow: 0 0 30px rgba(201,162,100,0.3), 0 0 60px rgba(100,60,20,0.2), 0 20px 60px rgba(0,0,0,0.7);
+}
+
+body.theme-classic .panel-section-title {
+  font-family: 'Georgia', serif;
+}
+
+body.theme-classic .header-title {
+  font-family: 'Georgia', serif;
+}
+
+/* ── Selector de temas ── */
+.theme-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.theme-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-dot:hover {
+  transform: scale(1.15);
+  border-color: white;
+}
+
+.theme-dot.active {
+  border-color: white;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.theme-dot[data-theme="wow"] {
+  background: linear-gradient(135deg, #f59e0b, #8b5cf6);
+}
+
+.theme-dot[data-theme="slime"] {
+  background: linear-gradient(135deg, #22c55e, #0a1a0a);
+}
+
+.theme-dot[data-theme="dark"] {
+  background: linear-gradient(135deg, #dc2626, #080808);
+}
+
+.theme-dot[data-theme="classic"] {
+  background: linear-gradient(135deg, #c9a264, #2c1810);
+}
+
+.theme-dot .theme-label {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.theme-dot:hover .theme-label { opacity: 1; }
+
+/* ── Colores de roles ── */
+.role-tank    { color: #4db8ff; }
+.role-healer  { color: #00ff7f; }
+.role-dps     { color: #ff6060; }
+
+.badge-tank    { background: rgba(77,184,255,0.15); border-color: #4db8ff; color: #4db8ff; }
+.badge-healer  { background: rgba(0,255,127,0.15);  border-color: #00ff7f; color: #00ff7f; }
+.badge-dps     { background: rgba(255,96,96,0.15);  border-color: #ff6060; color: #ff6060; }
