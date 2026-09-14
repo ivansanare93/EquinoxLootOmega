@@ -687,6 +687,47 @@
             margin-bottom: 30px;
         }
 
+        .admin-roster-management-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 16px 20px;
+        }
+
+        .admin-roster-management-title {
+            min-width: 0;
+        }
+
+        .admin-roster-management-title h2 {
+            margin: 0 0 4px;
+        }
+
+        .admin-roster-collapse-btn {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .admin-roster-management-content {
+            display: grid;
+            gap: 20px;
+        }
+
+        .admin-roster-management-content.is-collapsed {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .admin-roster-management-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .admin-roster-collapse-btn {
+                width: 100%;
+            }
+        }
+
         .season-card {
             background: rgba(15, 23, 42, 0.88);
             border: 1px solid rgba(251, 191, 36, 0.35);
@@ -1040,6 +1081,17 @@
              ROSTER / RAID MANAGEMENT (ADMIN ONLY)
              ============================================= -->
         <div class="season-management-panel" id="admin-roster-management" style="display:none;">
+            <div class="admin-roster-management-header season-card">
+                <div class="admin-roster-management-title">
+                    <h2>👥 Gestión del Roster</h2>
+                    <span class="season-muted-text">Gestión del roster, raids, asistencia e historial</span>
+                </div>
+                <button id="btn-toggle-admin-roster-management" class="season-secondary-btn admin-roster-collapse-btn" type="button" aria-expanded="true" aria-controls="admin-roster-management-content">
+                    🔽 Minimizar
+                </button>
+            </div>
+
+            <div id="admin-roster-management-content" class="admin-roster-management-content">
             <div class="season-card">
                 <h2>👥 Gestión del Roster</h2>
                 <div id="admin-roster-status-message" class="season-status-message success">
@@ -1112,6 +1164,7 @@
                     </div>
                 </div>
                 <div id="management-attendance-summary" class="attendance-list"></div>
+            </div>
             </div>
         </div>
 
@@ -2003,9 +2056,43 @@
             container.innerHTML = `<div class="management-stat-grid"><div class="management-stat"><strong>${totalRaids}</strong>Raids</div><div class="management-stat"><strong>${totalAttendance}</strong>Asistencias</div><div class="management-stat"><strong>${totalAbsences}</strong>Ausencias</div></div>${rows ? `<table class="admin-raid-table"><thead><tr><th>Jugador</th><th>Convocado</th><th>Asistió</th><th>Ausente</th><th>Justificada</th><th>Pendiente</th><th>%</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="management-empty">Todavía no hay datos de asistencia.</div>'}`;
         }
 
+        function initializeAdminRosterCollapse() {
+            const panel = document.getElementById('admin-roster-management');
+            const content = document.getElementById('admin-roster-management-content');
+            const button = document.getElementById('btn-toggle-admin-roster-management');
+            if (!panel || !content || !button || button.dataset.initialized === 'true') return;
+
+            button.dataset.initialized = 'true';
+            let collapsed = false;
+            try {
+                collapsed = localStorage.getItem('equinox_admin_roster_management_collapsed') === 'true';
+            } catch (error) {
+                console.warn('No se pudo recuperar el estado de la sección de administración:', error);
+            }
+
+            const applyState = (isCollapsed) => {
+                content.classList.toggle('is-collapsed', isCollapsed);
+                button.setAttribute('aria-expanded', String(!isCollapsed));
+                button.textContent = isCollapsed ? '▶️ Expandir' : '🔽 Minimizar';
+            };
+
+            applyState(collapsed);
+
+            button.addEventListener('click', () => {
+                collapsed = !content.classList.contains('is-collapsed');
+                applyState(collapsed);
+                try {
+                    localStorage.setItem('equinox_admin_roster_management_collapsed', String(collapsed));
+                } catch (error) {
+                    console.warn('No se pudo guardar el estado de la sección de administración:', error);
+                }
+            });
+        }
+
         function renderRaidManagement() {
             const panel = document.getElementById('admin-roster-management');
             if (panel) panel.style.display = isAdmin ? '' : 'none';
+            initializeAdminRosterCollapse();
             if (!isAdmin) return;
             renderPermanentRosterManagement();
             renderManagementSeasonControls();
