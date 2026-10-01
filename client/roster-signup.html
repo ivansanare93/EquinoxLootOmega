@@ -10,7 +10,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs, writeBatch, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs, writeBatch, deleteDoc, runTransaction } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
         
         try {
@@ -33,6 +33,7 @@
             window.firestoreGetDocs = getDocs;
             window.firestoreWriteBatch = writeBatch;
             window.firestoreDeleteDoc = deleteDoc;
+            window.firestoreRunTransaction = runTransaction;
             window.firebaseAuth = auth;
             window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
             window.firebaseSignOut = signOut;
@@ -1469,6 +1470,7 @@
         // Global roster data
         let rosterSignups = [];
         let isAdmin = false;
+        let editingRosterSignupId = null;
         const ADMIN_EMAIL = window.ROSTER_ADMIN_EMAIL || 'ofi@equinox.com';
         const ROSTER_COLLECTION = 'rosterSignupsEntries';
 
@@ -2254,6 +2256,7 @@
                 if (isAdmin) {
                     loadAdminFirestoreData();
                 } else if (wasAdmin) {
+                    editingRosterSignupId = null;
                     resetManagementStateForPublic();
                 }
             });
@@ -2261,7 +2264,10 @@
             const rosterCollectionRef = window.firestoreCollection(window.firestoreDB, ROSTER_COLLECTION);
             window.firestoreOnSnapshot(rosterCollectionRef, (snapshot) => {
                 rosterSignups = snapshot.docs
-                    .map((docSnap) => normalizeSignup({ id: docSnap.id, ...docSnap.data() }))
+                    .map((docSnap) => ({
+                        ...normalizeSignup(docSnap.data()),
+                        documentId: docSnap.id
+                    }))
                     .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
                 renderRoster();
                 updateStatistics();
@@ -2276,6 +2282,35 @@
             const signupId = getSignupDocId(signup.name);
             const signupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, signupId);
             await window.firestoreSetDoc(signupRef, normalizeSignup(signup));
+        }
+
+        async function saveEditedRosterSignupToFirebase(signup, originalSignupId) {
+            const updatedSignup = normalizeSignup(signup);
+            const newSignupId = getSignupDocId(updatedSignup.name);
+            const originalSignupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, originalSignupId);
+
+            if (newSignupId === originalSignupId) {
+                await window.firestoreSetDoc(originalSignupRef, updatedSignup);
+                return;
+            }
+
+            const newSignupRef = window.firestoreDoc(window.firestoreDB, ROSTER_COLLECTION, newSignupId);
+            await window.firestoreRunTransaction(window.firestoreDB, async (transaction) => {
+                const originalSignupSnap = await transaction.get(originalSignupRef);
+                const newSignupSnap = await transaction.get(newSignupRef);
+
+                if (!originalSignupSnap.exists()) {
+                    throw new Error('La inscripción original ya no existe. Recarga el roster antes de editarla.');
+                }
+
+                if (newSignupSnap.exists()) {
+                    throw new Error('Ya existe una inscripción con ese nombre.');
+                }
+
+                // The transaction commits both operations together, preventing duplicates on rename.
+                transaction.set(newSignupRef, updatedSignup);
+                transaction.delete(originalSignupRef);
+            });
         }
 
         async function deleteRosterSignupFromFirebase(playerName) {
@@ -2340,7 +2375,8 @@
                 timestamp: new Date().toISOString()
             };
 
-            if (existingIndex >= 0) {
+            const originalSignupId = isAdmin ? editingRosterSignupId : null;
+            if (existingIndex >= 0 && !originalSignupId) {
                 if (!isAdmin) {
                     alert(`${playerName} ya está registrado. Solo un administrador puede editar registros existentes.`);
                     return;
@@ -2352,15 +2388,20 @@
             }
 
             try {
-                await saveRosterSignupToFirebase(newSignup);
+                if (originalSignupId) {
+                    await saveEditedRosterSignupToFirebase(newSignup, originalSignupId);
+                } else {
+                    await saveRosterSignupToFirebase(newSignup);
+                }
             } catch (error) {
                 console.error('Error saving roster:', error);
-                alert('Error al guardar. Por favor, intenta de nuevo.');
+                alert(error.message || 'Error al guardar. Por favor, intenta de nuevo.');
                 return;
             }
 
             // Reset form
             this.reset();
+            editingRosterSignupId = null;
             alert('¡Registro completado con éxito!');
         });
 
@@ -2448,6 +2489,7 @@
 
             try {
                 await deleteRosterSignupFromFirebase(playerName);
+                editingRosterSignupId = null;
             } catch (error) {
                 console.error('Error deleting roster entry:', error);
                 alert('Error al borrar. Por favor, intenta de nuevo.');
@@ -2466,6 +2508,8 @@
                 alert('No se encontró el registro.');
                 return;
             }
+
+            editingRosterSignupId = signup.documentId || getSignupDocId(signup.name);
 
             // Populate form with existing data
             document.getElementById('player-name').value = signup.name;
