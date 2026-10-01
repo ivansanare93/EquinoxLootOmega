@@ -1,0 +1,100 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == 'be0rjT0v6dPllWpjKNPcgqsxfTS2';
+    }
+
+    function validRoles(roles) {
+      return roles is list
+        && roles.size() >= 1
+        && roles.size() <= 4
+        && roles.toSet().hasOnly(['Tank', 'Offtank', 'Healer', 'DPS'])
+        && roles.toSet().size() == roles.size();
+    }
+
+    function validClassAndSpecialization(className, specialization) {
+      return (className == 'Guerrero' && specialization in ['Armas', 'Furia', 'Protección'])
+        || (className == 'Mago' && specialization in ['Arcano', 'Fuego', 'Escarcha'])
+        || (className == 'Sacerdote' && specialization in ['Disciplina', 'Sagrado', 'Sombra'])
+        || (className == 'Paladín' && specialization in ['Sagrado', 'Protección', 'Represión'])
+        || (className == 'Cazador' && specialization in ['Bestias', 'Puntería', 'Supervivencia'])
+        || (className == 'Brujo' && specialization in ['Aflicción', 'Demonología', 'Destrucción'])
+        || (className == 'Chamán' && specialization in ['Elemental', 'Mejora', 'Restauración'])
+        || (className == 'Druida' && specialization in ['Equilibrio', 'Feral', 'Guardián', 'Restauración'])
+        || (className == 'Pícaro' && specialization in ['Asesinato', 'Forajido', 'Sutileza'])
+        || (className == 'Caballero de la Muerte' && specialization in ['Sangre', 'Escarcha', 'Profano'])
+        || (className == 'Monje' && specialization in ['Maestro Cervecero', 'Tejedor de Niebla', 'Viajero del Viento'])
+        || (className == 'Cazador de Demonios' && specialization in ['Devastación', 'Venganza', 'Devorador'])
+        || (className == 'Evocador' && specialization in ['Devastación', 'Preservación', 'Aumento']);
+    }
+
+    function validPublicRosterSignup(data) {
+      return data.keys().hasAll([
+          'name', 'class', 'specialization', 'roles', 'notes', 'rosterStatus', 'timestamp'
+        ])
+        && data.keys().hasOnly([
+          'name', 'class', 'specialization', 'roles', 'notes', 'rosterStatus', 'timestamp'
+        ])
+        && data.name is string
+        && data.name.size() >= 1
+        && data.name.size() <= 24
+        && data['class'] is string
+        && data.specialization is string
+        && data.specialization.size() >= 1
+        && data.specialization.size() <= 32
+        && validClassAndSpecialization(data['class'], data.specialization)
+        && validRoles(data.roles)
+        && data.notes is string
+        && data.notes.size() <= 500
+        && data.rosterStatus == 'activo'
+        && data.timestamp is string
+        && data.timestamp.matches('^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$');
+    }
+
+    match /appData/characters {
+      allow read, write: if isAdmin();
+    }
+
+    match /appData/assignments {
+      allow read, write: if isAdmin();
+    }
+
+    match /rosterSignupsEntries/{signupId} {
+      allow read: if true;
+      allow create: if validPublicRosterSignup(request.resource.data);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /rosterSignups/expansion {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /rosterSignupsMeta/migration {
+      allow read, write: if isAdmin();
+    }
+
+    match /equinoxSeasons/{seasonId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /equinoxRaids/{raidId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /mythicPlusGroups/current {
+      allow read: if true;
+      // Temporary exception: this shared document is publicly writable because
+      // ownerId is currently a localStorage value, not a Firebase Auth UID.
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -14,6 +14,7 @@
     "test": "echo \"No tests yet\" && exit 0",
     "test:api": "node scripts/test-api.js",
     "test:filtered-loot": "node scripts/test-filtered-loot.js",
+    "test:firestore-rules": "firebase emulators:exec --only firestore --project equinox-firestore-rules-test \"node --test tests/firestore-rules.test.js\"",
     "build:ruleta": "copyfiles -u 1 \"client/ruleta/**/*\" public"
   },
   "keywords": [
@@ -33,7 +34,10 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "copyfiles": "^2.4.1",
+    "firebase": "^12.19.0",
+    "firebase-tools": "^15.32.1",
     "mkdirp": "^3.0.1",
     "nodemon": "^3.0.1",
     "rimraf": "^6.1.2"
