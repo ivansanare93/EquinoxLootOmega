@@ -2108,8 +2108,28 @@
         async function initializeRaidManagement() {
             loadCurrentRoster();
             syncGeneratedRosterFromCurrentState();
-            await loadManagementState();
             renderRaidManagement();
+        }
+
+        function resetManagementStateForPublic() {
+            managementState = { seasons: [], raids: [] };
+            selectedManagementRaidId = '';
+            renderRaidManagement();
+        }
+
+        async function loadAdminFirestoreData() {
+            if (!isAdmin) return;
+
+            // This historical migration is intentionally limited to administrator sessions.
+            try {
+                await migrateLegacyRosterData();
+            } catch (error) {
+                console.error('No se pudo ejecutar la migración histórica del roster.', error);
+            }
+
+            if (isAdmin) {
+                await loadManagementState();
+            }
         }
 
         function updateAdminUI() {
@@ -2226,12 +2246,17 @@
             }
 
             window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                const wasAdmin = isAdmin;
                 isAdmin = !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL);
                 updateAdminUI();
                 renderRoster();
-            });
 
-            await migrateLegacyRosterData();
+                if (isAdmin) {
+                    loadAdminFirestoreData();
+                } else if (wasAdmin) {
+                    resetManagementStateForPublic();
+                }
+            });
 
             const rosterCollectionRef = window.firestoreCollection(window.firestoreDB, ROSTER_COLLECTION);
             window.firestoreOnSnapshot(rosterCollectionRef, (snapshot) => {
