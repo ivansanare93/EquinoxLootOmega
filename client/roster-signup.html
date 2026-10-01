@@ -2372,8 +2372,11 @@
                 
                 // Roles badges
                 const rolesBadges = signup.roles.map(role => {
-                    const roleClass = role.toLowerCase();
-                    return `<span class="role-badge role-${roleClass}">${role}</span>`;
+                    const normalizedRole = String(role).toLowerCase();
+                    const roleClass = ['tank', 'offtank', 'healer', 'dps'].includes(normalizedRole)
+                        ? normalizedRole
+                        : 'dps';
+                    return `<span class="role-badge role-${roleClass}">${escapeHtml(role)}</span>`;
                 }).join('');
 
                 // Class color styling
@@ -2383,15 +2386,15 @@
                     : '';
 
                 row.innerHTML = `
-                    <td>${signup.name}</td>
-                    <td style="${classCellStyle}">${signup.class}</td>
-                    <td>${signup.specialization}</td>
+                    <td>${escapeHtml(signup.name)}</td>
+                    <td style="${classCellStyle}">${escapeHtml(signup.class)}</td>
+                    <td>${escapeHtml(signup.specialization)}</td>
                     <td>${rolesBadges}</td>
-                    <td>${signup.notes || '-'}</td>
+                    <td>${escapeHtml(signup.notes) || '-'}</td>
                     ${isAdmin ? `
                         <td>
-                            <button class="edit-btn" data-player-name="${signup.name}">✏️ Editar</button>
-                            <button class="delete-btn" data-player-name="${signup.name}">🗑️ Borrar</button>
+                            <button class="edit-btn" data-player-name="${escapeHtml(signup.name)}">✏️ Editar</button>
+                            <button class="delete-btn" data-player-name="${escapeHtml(signup.name)}">🗑️ Borrar</button>
                         </td>
                     ` : ''}
                 `;
