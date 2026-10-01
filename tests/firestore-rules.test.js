@@ -14,6 +14,7 @@ const {
   getDoc,
   collection,
   setDoc,
+  serverTimestamp,
   Timestamp,
   updateDoc
 } = require('firebase/firestore');
@@ -65,6 +66,14 @@ function validForeverMember(overrides = {}) {
     alts: [],
     ...overrides
   };
+}
+
+function validPublicForeverMember(overrides = {}) {
+  return validForeverMember({
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    ...overrides
+  });
 }
 
 function validForeverAlter(id = 'alter-one') {
@@ -171,13 +180,17 @@ test('only the configured UID is administrative', async () => {
   assert.notEqual(ADMIN_UID, 'different-user');
 });
 
-test('public can read Forever members but cannot modify them', async () => {
+test('public can read and create a valid Naciente Forever member but cannot modify it', async () => {
   await seed(['gameVersions', 'forever', 'members', 'member-one'], validForeverMember());
   const memberRef = doc(publicDb(), 'gameVersions', 'forever', 'members', 'member-one');
+  const publicMemberRef = doc(publicDb(), 'gameVersions', 'forever', 'members', 'generated-id-123');
 
   await assertSucceeds(getDoc(memberRef));
   await assertSucceeds(getDocs(collection(publicDb(), 'gameVersions', 'forever', 'members')));
-  await assertFails(setDoc(doc(publicDb(), 'gameVersions', 'forever', 'members', 'member-two'), validForeverMember()));
+  await assertSucceeds(setDoc(publicMemberRef, validPublicForeverMember()));
+  await assertFails(setDoc(publicMemberRef, validPublicForeverMember()));
+  await assertFails(updateDoc(publicMemberRef, { rank: 'alba' }));
+  await assertFails(deleteDoc(publicMemberRef));
   await assertFails(updateDoc(memberRef, { rank: 'alba' }));
   await assertFails(deleteDoc(memberRef));
 });
@@ -196,8 +209,12 @@ test('an authenticated non-admin cannot manage Forever members', async () => {
 
 test('admin can manage valid Forever members', async () => {
   const memberRef = doc(adminDb(), 'gameVersions', 'forever', 'members', 'member-one');
-  await assertSucceeds(setDoc(memberRef, validForeverMember()));
+  await assertSucceeds(setDoc(memberRef, validForeverMember({ rank: 'eclipse' })));
   await assertSucceeds(updateDoc(memberRef, { rank: 'centinela' }));
+  await assertSucceeds(updateDoc(memberRef, {
+    main: { ...validForeverMember().main, primaryProfessions: ['alchemy'] },
+    alts: [validForeverAlter('admin-alter')]
+  }));
   await assertSucceeds(deleteDoc(memberRef));
 });
 
@@ -229,6 +246,73 @@ test('Forever member validation checks every embedded alter', async () => {
   await assertFails(setDoc(
     doc(db, 'gameVersions', 'forever', 'members', 'invalid-alter'),
     validForeverMember({ alts })
+  ));
+});
+
+test('public Forever creation rejects administrative ranks and ownerUid', async () => {
+  const db = publicDb();
+
+  for (const rank of ['eclipse', 'alba', 'centinela', 'nova']) {
+    await assertFails(setDoc(
+      doc(db, 'gameVersions', 'forever', 'members', `public-${rank}`),
+      validPublicForeverMember({ rank })
+    ));
+  }
+
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-owner'),
+    validPublicForeverMember({ ownerUid: 'future-owner' })
+  ));
+});
+
+test('public Forever creation rejects malformed data and manipulated timestamps', async () => {
+  const db = publicDb();
+  const mainWithoutProfessions = { ...validForeverMember().main };
+  delete mainWithoutProfessions.primaryProfessions;
+
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-extra-field'),
+    validPublicForeverMember({ unexpected: true })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-missing-field'),
+    validPublicForeverMember({ main: mainWithoutProfessions })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-invalid-class'),
+    validPublicForeverMember({ main: { ...validForeverMember().main, classId: 'monk' } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-invalid-spec'),
+    validPublicForeverMember({ main: { ...validForeverMember().main, primarySpecId: 'feral' } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-invalid-role'),
+    validPublicForeverMember({ main: { ...validForeverMember().main, primaryRole: 'tank' } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-invalid-profession'),
+    validPublicForeverMember({ main: { ...validForeverMember().main, primaryProfessions: ['cooking'] } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-too-many-professions'),
+    validPublicForeverMember({ main: { ...validForeverMember().main, primaryProfessions: ['alchemy', 'mining', 'tailoring'] } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-duplicate-professions'),
+    validPublicForeverMember({ main: { ...validForeverMember().main, primaryProfessions: ['mining', 'mining'] } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-too-many-alters'),
+    validPublicForeverMember({ alts: Array.from({ length: 11 }, (_, index) => validForeverAlter(`alter-${index}`)) })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-invalid-alter'),
+    validPublicForeverMember({ alts: [{ id: 'bad-alter', characterName: 'Broken' }] })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'public-manipulated-timestamps'),
+    validForeverMember()
   ));
 });
 

@@ -164,6 +164,13 @@ service cloud.firestore {
         && validForeverAlters(member.alts);
     }
 
+    function validPublicForeverMember(member) {
+      return validForeverMember(member)
+        && member.rank == 'naciente'
+        && member.createdAt == request.time
+        && member.updatedAt == request.time;
+    }
+
     match /appData/characters {
       allow read, write: if isAdmin();
     }
@@ -205,7 +212,10 @@ service cloud.firestore {
 
     match /gameVersions/forever/members/{memberId} {
       allow read: if true;
-      allow create, update: if isAdmin() && validForeverMember(request.resource.data);
+      // Unauthenticated registrations cannot be rate-limited by Firestore Rules alone.
+      allow create: if validPublicForeverMember(request.resource.data)
+        || (isAdmin() && validForeverMember(request.resource.data));
+      allow update: if isAdmin() && validForeverMember(request.resource.data);
       allow delete: if isAdmin();
     }
 
