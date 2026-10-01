@@ -1,47 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equinox - Retail</title>
-    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../shared/game-hub.css">
     <script src="../shared/game-version.js" defer></script>
-  </head>
-  <body class="hub-page">
-    <main class="hub-shell">
-      <nav class="hub-navigation" aria-label="Navegaci&oacute;n de versi&oacute;n">
-        <span>Equinox <span aria-hidden="true">/</span> Retail</span>
-        <a href="../">Cambiar versi&oacute;n</a>
-      </nav>
+</head>
+<body>
+    <div class="tools-container">
+        <div class="back-to-home-wrapper">
+            <a href="../" class="back-to-home">&#8592; Cambiar versi&oacute;n</a>
+        </div>
+        <div class="header-section">
+            <h1>&#9876;&#65039; Equinox - Herramientas Retail &#9876;&#65039;</h1>
+            <p>Gestiona las herramientas de World of Warcraft Retail</p>
+        </div>
 
-      <header class="hub-hero hub-hero--compact">
-        <p class="hub-eyebrow">World of Warcraft Retail</p>
-        <h1>Herramientas Retail</h1>
-        <p>Gestiona el bot&iacute;n, el roster y las actividades actuales de la hermandad.</p>
-      </header>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="icon">&#128230;</div>
+                <h2>Loot Manager</h2>
+                <p>Sistema de gesti&oacute;n de bot&iacute;n para raids actuales</p>
+                <ul class="features">
+                    <li>Asignaci&oacute;n de objetos por jefe</li>
+                    <li>Gesti&oacute;n de personajes de raid</li>
+                    <li>Filtrado por clase y dificultad</li>
+                    <li>Exportaci&oacute;n a Excel</li>
+                    <li>Sincronizaci&oacute;n en tiempo real</li>
+                </ul>
+                <a href="../LarancioOrtegaLoot.html">Abrir Loot Manager &rarr;</a>
+            </div>
 
-      <div class="tool-grid" aria-label="Herramientas de Retail">
-        <a class="tool-card" href="../LarancioOrtegaLoot.html">
-          <h2>Loot Manager</h2>
-          <p>Asignaci&oacute;n de objetos, personajes de raid y sincronizaci&oacute;n en tiempo real.</p>
-          <span>Abrir Loot Manager &rarr;</span>
-        </a>
-        <a class="tool-card" href="../roster-signup.html">
-          <h2>Registro de Roster</h2>
-          <p>Inscripciones, composici&oacute;n, temporadas, raids y asistencia.</p>
-          <span>Abrir Registro de Roster &rarr;</span>
-        </a>
-        <a class="tool-card" href="../mythic-plus-groups.html">
-          <h2>Organizador de M&iacute;ticas+</h2>
-          <p>Organiza jugadores y grupos de cinco para las M&iacute;ticas+.</p>
-          <span>Abrir Organizador &rarr;</span>
-        </a>
-        <a class="tool-card" href="../ruleta/index.html">
-          <h2>Destino de Azeroth</h2>
-          <p>Ruleta de clases, especializaciones, filtros y modos de selecci&oacute;n.</p>
-          <span>Abrir Ruleta &rarr;</span>
-        </a>
-      </div>
-    </main>
-  </body>
+            <div class="tool-card">
+                <div class="icon">&#128737;&#65039;</div>
+                <h2>Registro de Roster</h2>
+                <p>Herramienta de planificaci&oacute;n para el pr&oacute;ximo parche 12.1</p>
+                <ul class="features">
+                    <li>Registro de clase y especializaci&oacute;n</li>
+                    <li>Selecci&oacute;n de roles disponibles</li>
+                    <li>Estad&iacute;sticas de composici&oacute;n</li>
+                    <li>Filtrado por clase y rol</li>
+                    <li>Exportaci&oacute;n para oficiales</li>
+                </ul>
+                <a href="../roster-signup.html">Abrir Registro de Roster &rarr;</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="icon">&#9876;&#65039;</div>
+                <h2>Organizador M&iacute;ticas+</h2>
+                <p>Organiza grupos de 5 jugadores para hacer M&iacute;ticas+</p>
+                <ul class="features">
+                    <li>A&ntilde;ade jugadores con su clase y rol</li>
+                    <li>Grupos de 1 Tanque, 1 Healer y 3 DPS</li>
+                    <li>Tablero con m&uacute;ltiples grupos</li>
+                    <li>Asignaci&oacute;n manual o autom&aacute;tica</li>
+                    <li>Indicador de grupo completo</li>
+                </ul>
+                <a href="../mythic-plus-groups.html">Abrir Organizador &rarr;</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="icon">&#127922;</div>
+                <h2>Destino de Azeroth</h2>
+                <p>&iquest;Qu&eacute; personaje juegas hoy? La ruleta m&aacute;gica decide tu destino en World of Warcraft.</p>
+                <ul class="features">
+                    <li>Ruleta visual de clases y especializaciones</li>
+                    <li>9 modos: Clase, Spec, Caos, Destino Absoluto...</li>
+                    <li>Filtros por rol, tipo DPS y clase</li>
+                    <li>Compatible con OBS Browser Source</li>
+                    <li>4 temas: WoW Fantasy, Slime, Dark, Classic</li>
+                </ul>
+                <a href="../ruleta/index.html">&#127922; Abrir Ruleta &rarr;</a>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
