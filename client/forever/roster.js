@@ -492,26 +492,79 @@ function requestDelete(member) {
     deleteConfirmButton.focus();
 }
 
+function addClassAccent(card, classId) {
+    if (classFor(classId)) {
+        card.classList.add(`forever-roster__member--${classId}`);
+    }
+}
+
+function createMemberText(className, text) {
+    const element = document.createElement('p');
+    element.className = className;
+    element.textContent = text;
+    return element;
+}
+
 function renderMembers() {
     membersList.replaceChildren();
+    const rankOrder = new Map(FOREVER_CATALOG.ranks.map((rank, index) => [rank.id, index]));
     rosterMembers
         .slice()
-        .sort((a, b) => (a.main?.characterName || '').localeCompare(b.main?.characterName || '', 'es'))
+        .sort((a, b) => {
+            const rankDifference = (rankOrder.get(a.rank) ?? rankOrder.size) - (rankOrder.get(b.rank) ?? rankOrder.size);
+            return rankDifference || (a.main?.characterName || '').localeCompare(b.main?.characterName || '', 'es');
+        })
         .forEach((member) => {
             const item = document.createElement('li');
             item.className = 'forever-roster__member';
+            addClassAccent(item, member.main?.classId);
+
+            const header = document.createElement('div');
+            header.className = 'forever-roster__member-header';
             const name = document.createElement('div');
             name.className = 'forever-roster__member-name';
             name.textContent = member.main?.characterName || 'Personaje sin nombre';
-            const meta = document.createElement('div');
-            meta.className = 'forever-roster__member-meta';
-            meta.textContent = [
-                labelFor(FOREVER_CATALOG.ranks, member.rank || ''),
-                labelFor(FOREVER_CATALOG.classes, member.main?.classId || ''),
-                labelFor(classFor(member.main?.classId)?.specializations || [], member.main?.primarySpecId || ''),
-                labelFor(FOREVER_CATALOG.roles, member.main?.primaryRole || '')
-            ].filter(Boolean).join(' - ');
-            item.append(name, meta);
+            const rank = document.createElement('span');
+            rank.className = 'forever-roster__member-rank';
+            rank.textContent = labelFor(FOREVER_CATALOG.ranks, member.rank || '');
+            header.append(name, rank);
+
+            const classLabel = labelFor(FOREVER_CATALOG.classes, member.main?.classId || '');
+            const specializationLabel = labelFor(classFor(member.main?.classId)?.specializations || [], member.main?.primarySpecId || '');
+            const classSpec = createMemberText('forever-roster__member-class-spec', [classLabel, specializationLabel].filter(Boolean).join(' - '));
+            const role = document.createElement('span');
+            role.className = 'forever-roster__member-role';
+            role.dataset.role = member.main?.primaryRole || '';
+            role.textContent = `Rol: ${labelFor(FOREVER_CATALOG.roles, member.main?.primaryRole || '')}`;
+
+            const details = document.createElement('div');
+            details.className = 'forever-roster__member-details';
+            const professions = member.main?.primaryProfessions || [];
+            if (professions.length) {
+                const professionBlock = document.createElement('div');
+                professionBlock.className = 'forever-roster__member-professions';
+                const professionTitle = createMemberText('forever-roster__member-detail-title', 'Profesiones');
+                const professionLabels = professions.map((profession) => labelFor(FOREVER_CATALOG.primaryProfessions, profession));
+                const professionValues = createMemberText('forever-roster__member-detail-values', professionLabels.join(' - '));
+                professionBlock.append(professionTitle, professionValues);
+                details.append(professionBlock);
+            }
+
+            const footer = document.createElement('div');
+            footer.className = 'forever-roster__member-footer';
+            const alterCount = Array.isArray(member.alts) ? member.alts.length : 0;
+            const alters = document.createElement('span');
+            alters.className = 'forever-roster__member-alters';
+            alters.textContent = alterCount === 0 ? 'Sin alters' : `${alterCount} ${alterCount === 1 ? 'alter' : 'alters'}`;
+            const profileButton = document.createElement('button');
+            profileButton.className = 'forever-roster__profile-button';
+            profileButton.type = 'button';
+            profileButton.disabled = true;
+            profileButton.textContent = 'Ver perfil - Proximamente';
+            profileButton.title = 'Proximamente';
+            footer.append(alters, profileButton);
+
+            item.append(header, classSpec, role, details, footer);
             if (isAdmin) {
                 const actions = document.createElement('div');
                 actions.className = 'forever-roster__member-actions';

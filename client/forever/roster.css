@@ -327,27 +327,131 @@
 
 .forever-roster__members {
     display: grid;
-    gap: 12px;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
 .forever-roster__member {
-    border: 1px solid rgba(212, 175, 55, 0.55);
+    --member-class-color: var(--dorado);
+
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(212, 175, 55, 0.48);
+    border-left: 4px solid var(--member-class-color);
     border-radius: 6px;
-    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 18px;
+}
+
+.forever-roster__member--druid { --member-class-color: #ff7c0a; }
+.forever-roster__member--hunter { --member-class-color: #aad372; }
+.forever-roster__member--mage { --member-class-color: #3fc7eb; }
+.forever-roster__member--paladin { --member-class-color: #f48cba; }
+.forever-roster__member--priest { --member-class-color: #f0ebe0; }
+.forever-roster__member--rogue { --member-class-color: #fff468; }
+.forever-roster__member--shaman { --member-class-color: #0070dd; }
+.forever-roster__member--warlock { --member-class-color: #8788ee; }
+.forever-roster__member--warrior { --member-class-color: #c69b6d; }
+
+.forever-roster__member-header,
+.forever-roster__member-footer {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
 }
 
 .forever-roster__member-name {
-    color: var(--dorado);
-    font-size: 1.15em;
+    color: #f8fafc;
+    font-size: 1.2em;
     font-weight: bold;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
-.forever-roster__member-meta {
-    color: #e5e7eb;
-    margin-top: 6px;
+.forever-roster__member-rank,
+.forever-roster__member-role {
+    border: 1px solid rgba(212, 175, 55, 0.55);
+    border-radius: 999px;
+    color: #f8fafc;
+    display: inline-flex;
+    font-size: 0.84em;
+    font-weight: bold;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+.forever-roster__member-rank {
+    background: rgba(212, 175, 55, 0.13);
+    color: var(--dorado);
+}
+
+.forever-roster__member-class-spec {
+    color: var(--member-class-color);
+    font-weight: bold;
+    margin: 6px 0 0;
+}
+
+.forever-roster__member-role {
+    align-self: flex-start;
+    margin-top: 12px;
+}
+
+.forever-roster__member-role[data-role="tank"] { border-color: #60a5fa; }
+.forever-roster__member-role[data-role="healer"] { border-color: #86efac; }
+.forever-roster__member-role[data-role="dps"] { border-color: #fca5a5; }
+
+.forever-roster__member-details {
+    flex: 1;
+    margin-top: 18px;
+}
+
+.forever-roster__member-professions {
+    border-top: 1px solid rgba(212, 175, 55, 0.24);
+    padding-top: 12px;
+}
+
+.forever-roster__member-detail-title,
+.forever-roster__member-detail-values {
+    margin: 0;
+}
+
+.forever-roster__member-detail-title {
+    color: #cbd5e1;
+    font-size: 0.82em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.forever-roster__member-detail-values {
+    color: #f8fafc;
+    margin-top: 4px;
+}
+
+.forever-roster__member-footer {
+    border-top: 1px solid rgba(212, 175, 55, 0.24);
+    margin-top: 18px;
+    padding-top: 14px;
+}
+
+.forever-roster__member-alters {
+    color: #cbd5e1;
+    font-size: 0.92em;
+}
+
+.forever-roster__profile-button {
+    background: transparent;
+    border: 0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    font: inherit;
+    font-size: 0.9em;
+    padding: 0;
+    text-align: right;
 }
 
 .forever-roster__member-actions {
@@ -391,5 +495,9 @@
 
     .forever-signup-form__actions .forever-roster__button {
         flex: 1 1 130px;
+    }
+
+    .forever-roster__members {
+        grid-template-columns: 1fr;
     }
 }
