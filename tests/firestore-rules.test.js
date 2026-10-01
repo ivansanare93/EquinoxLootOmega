@@ -60,10 +60,7 @@ function validForeverMember(overrides = {}) {
       primarySpecId: 'arcane',
       primaryRole: 'dps',
       secondary: null,
-      professions: {
-        primary: null,
-        secondary: null
-      }
+      primaryProfessions: []
     },
     alts: [],
     ...overrides
@@ -77,10 +74,7 @@ function validForeverAlter(id = 'alter-one') {
     classId: 'priest',
     specId: 'holy',
     role: 'healer',
-    professions: {
-      primary: 'tailoring',
-      secondary: null
-    }
+    primaryProfessions: ['tailoring']
   };
 }
 
@@ -235,5 +229,67 @@ test('Forever member validation checks every embedded alter', async () => {
   await assertFails(setDoc(
     doc(db, 'gameVersions', 'forever', 'members', 'invalid-alter'),
     validForeverMember({ alts })
+  ));
+});
+
+test('Forever accepts zero, one, and two primary professions and multirole specs', async () => {
+  const db = adminDb();
+  const zeroProfessions = validForeverMember();
+  const oneProfession = validForeverMember({
+    main: { ...validForeverMember().main, primaryProfessions: ['mining'] }
+  });
+  const twoProfessions = validForeverMember({
+    main: { ...validForeverMember().main, primaryProfessions: ['blacksmithing', 'mining'] }
+  });
+  const feralTank = validForeverMember({
+    main: {
+      ...validForeverMember().main,
+      classId: 'druid',
+      primarySpecId: 'feral',
+      primaryRole: 'tank'
+    }
+  });
+  const enhancementTank = validForeverMember({
+    main: {
+      ...validForeverMember().main,
+      classId: 'shaman',
+      primarySpecId: 'enhancement',
+      primaryRole: 'tank'
+    }
+  });
+
+  await assertSucceeds(setDoc(doc(db, 'gameVersions', 'forever', 'members', 'zero-professions'), zeroProfessions));
+  await assertSucceeds(setDoc(doc(db, 'gameVersions', 'forever', 'members', 'one-profession'), oneProfession));
+  await assertSucceeds(setDoc(doc(db, 'gameVersions', 'forever', 'members', 'two-professions'), twoProfessions));
+  await assertSucceeds(setDoc(doc(db, 'gameVersions', 'forever', 'members', 'feral-tank'), feralTank));
+  await assertSucceeds(setDoc(doc(db, 'gameVersions', 'forever', 'members', 'enhancement-tank'), enhancementTank));
+});
+
+test('Forever rejects invalid professions and class, spec, and role combinations', async () => {
+  const db = adminDb();
+
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'three-professions'),
+    validForeverMember({ main: { ...validForeverMember().main, primaryProfessions: ['alchemy', 'mining', 'tailoring'] } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'duplicate-professions'),
+    validForeverMember({ main: { ...validForeverMember().main, primaryProfessions: ['mining', 'mining'] } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'unknown-profession'),
+    validForeverMember({ main: { ...validForeverMember().main, primaryProfessions: ['cooking'] } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'unknown-class'),
+    validForeverMember({ main: { ...validForeverMember().main, classId: 'monk' } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'wrong-spec'),
+    validForeverMember({ main: { ...validForeverMember().main, classId: 'mage', primarySpecId: 'feral' } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'wrong-role'),
+    validForeverMember({ main: { ...validForeverMember().main, primaryRole: 'tank' } })
   ));
 });

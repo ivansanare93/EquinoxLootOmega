@@ -61,65 +61,76 @@ service cloud.firestore {
         && value.matches('^[a-z0-9][a-z0-9-]*$');
     }
 
-    function validForeverRole(role) {
-      return role in ['tank', 'healer', 'dps'];
+    function validForeverPrimaryProfession(profession) {
+      return profession in [
+        'alchemy', 'blacksmithing', 'enchanting', 'engineering', 'herbalism',
+        'leatherworking', 'mining', 'skinning', 'tailoring'
+      ];
     }
 
-    function validForeverProfession(value) {
-      return value == null || validForeverIdentifier(value, 40);
+    function validForeverPrimaryProfessions(professions) {
+      return professions is list
+        && professions.size() <= 2
+        && (professions.size() < 1 || validForeverPrimaryProfession(professions[0]))
+        && (professions.size() < 2 || validForeverPrimaryProfession(professions[1]))
+        && (professions.size() < 2 || professions[0] != professions[1]);
     }
 
-    function validForeverProfessions(professions) {
-      return professions is map
-        && professions.keys().hasAll(['primary', 'secondary'])
-        && professions.keys().hasOnly(['primary', 'secondary'])
-        && validForeverProfession(professions.primary)
-        && validForeverProfession(professions.secondary)
-        && (professions.primary == null
-          || professions.secondary == null
-          || professions.primary != professions.secondary);
+    function validForeverClassSpecAndRole(classId, specId, role) {
+      return (classId == 'druid' && specId == 'balance' && role == 'dps')
+        || (classId == 'druid' && specId == 'feral' && role in ['dps', 'tank'])
+        || (classId == 'druid' && specId == 'restoration' && role == 'healer')
+        || (classId == 'hunter' && specId in ['beast-mastery', 'marksmanship', 'survival'] && role == 'dps')
+        || (classId == 'mage' && specId in ['arcane', 'fire', 'frost'] && role == 'dps')
+        || (classId == 'paladin' && specId == 'holy' && role == 'healer')
+        || (classId == 'paladin' && specId == 'protection' && role == 'tank')
+        || (classId == 'paladin' && specId == 'retribution' && role == 'dps')
+        || (classId == 'priest' && specId in ['discipline', 'holy'] && role == 'healer')
+        || (classId == 'priest' && specId == 'shadow' && role == 'dps')
+        || (classId == 'rogue' && specId in ['assassination', 'combat', 'subtlety'] && role == 'dps')
+        || (classId == 'shaman' && specId == 'elemental' && role == 'dps')
+        || (classId == 'shaman' && specId == 'enhancement' && role in ['dps', 'tank'])
+        || (classId == 'shaman' && specId == 'restoration' && role == 'healer')
+        || (classId == 'warlock' && specId in ['affliction', 'demonology', 'destruction'] && role == 'dps')
+        || (classId == 'warrior' && specId in ['arms', 'fury'] && role == 'dps')
+        || (classId == 'warrior' && specId == 'protection' && role == 'tank');
     }
 
-    function validForeverSecondary(secondary) {
+    function validForeverSecondary(classId, secondary) {
       return secondary == null || (
         secondary is map
         && secondary.keys().hasAll(['specId', 'role'])
         && secondary.keys().hasOnly(['specId', 'role'])
-        && validForeverIdentifier(secondary.specId, 40)
-        && validForeverRole(secondary.role)
+        && validForeverClassSpecAndRole(classId, secondary.specId, secondary.role)
       );
     }
 
     function validForeverMain(main) {
       return main is map
         && main.keys().hasAll([
-          'characterName', 'classId', 'primarySpecId', 'primaryRole', 'secondary', 'professions'
+          'characterName', 'classId', 'primarySpecId', 'primaryRole', 'secondary', 'primaryProfessions'
         ])
         && main.keys().hasOnly([
-          'characterName', 'classId', 'primarySpecId', 'primaryRole', 'secondary', 'professions'
+          'characterName', 'classId', 'primarySpecId', 'primaryRole', 'secondary', 'primaryProfessions'
         ])
         && main.characterName is string
         && main.characterName.size() >= 1
         && main.characterName.size() <= 24
-        && validForeverIdentifier(main.classId, 40)
-        && validForeverIdentifier(main.primarySpecId, 40)
-        && validForeverRole(main.primaryRole)
-        && validForeverSecondary(main.secondary)
-        && validForeverProfessions(main.professions);
+        && validForeverClassSpecAndRole(main.classId, main.primarySpecId, main.primaryRole)
+        && validForeverSecondary(main.classId, main.secondary)
+        && validForeverPrimaryProfessions(main.primaryProfessions);
     }
 
     function validForeverAlter(alter) {
       return alter is map
-        && alter.keys().hasAll(['id', 'characterName', 'classId', 'specId', 'role', 'professions'])
-        && alter.keys().hasOnly(['id', 'characterName', 'classId', 'specId', 'role', 'professions'])
+        && alter.keys().hasAll(['id', 'characterName', 'classId', 'specId', 'role', 'primaryProfessions'])
+        && alter.keys().hasOnly(['id', 'characterName', 'classId', 'specId', 'role', 'primaryProfessions'])
         && validForeverIdentifier(alter.id, 64)
         && alter.characterName is string
         && alter.characterName.size() >= 1
         && alter.characterName.size() <= 24
-        && validForeverIdentifier(alter.classId, 40)
-        && validForeverIdentifier(alter.specId, 40)
-        && validForeverRole(alter.role)
-        && validForeverProfessions(alter.professions);
+        && validForeverClassSpecAndRole(alter.classId, alter.specId, alter.role)
+        && validForeverPrimaryProfessions(alter.primaryProfessions);
     }
 
     function validForeverAlters(alters) {
