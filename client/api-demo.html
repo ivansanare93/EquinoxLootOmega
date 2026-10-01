@@ -160,11 +160,26 @@
 
     <script src="api-config.js"></script>
     <script>
-        const API_BASE = window.EQUINOX_CONFIG.apiBaseUrl.replace(/\/+$/, '');
-        document.getElementById('serverUrl').textContent = API_BASE;
+        const apiConfig = window.EQUINOX_CONFIG || {};
+            const API_BASE = apiConfig.apiConfigured !== false && typeof apiConfig.apiBaseUrl === 'string'
+                ? apiConfig.apiBaseUrl.replace(/\/+$/, '')
+                : '';
+        const API_UNAVAILABLE_MESSAGE = 'La API de Blizzard no está configurada porque el backend no está desplegado.';
+
+        document.getElementById('serverUrl').textContent = API_BASE || 'Backend no configurado';
+
+        function requireApi(output) {
+            if (API_BASE) return true;
+
+            output.className = 'error';
+            output.textContent = API_UNAVAILABLE_MESSAGE;
+            return false;
+        }
         
         async function checkHealth() {
             const output = document.getElementById('serverStatus');
+            if (!requireApi(output)) return;
+
             try {
                 const response = await fetch(`${API_BASE}/health`);
                 const data = await response.json();
@@ -178,6 +193,8 @@
 
         async function loadJournalInstances() {
             const output = document.getElementById('journalInstancesOutput');
+            if (!requireApi(output)) return;
+
             output.innerHTML = '<span class="loading">Cargando journal instances...</span>';
             
             try {
@@ -203,6 +220,8 @@
 
         async function loadRaids() {
             const output = document.getElementById('raidsOutput');
+            if (!requireApi(output)) return;
+
             output.innerHTML = '<span class="loading">Cargando raids...</span>';
             
             try {
@@ -226,10 +245,12 @@
         }
 
         async function loadRaidDetails() {
+            const output = document.getElementById('raidDetailsOutput');
+            if (!requireApi(output)) return;
+
             const raidId = document.getElementById('raidId').value;
             if (!raidId) return alert('Por favor ingresa un Raid ID');
             
-            const output = document.getElementById('raidDetailsOutput');
             output.innerHTML = '<span class="loading">Cargando detalles...</span>';
             
             try {
@@ -256,10 +277,12 @@
         }
 
         async function loadEncounterLoot() {
+            const output = document.getElementById('encounterLootOutput');
+            if (!requireApi(output)) return;
+
             const encounterId = document.getElementById('encounterId').value;
             if (!encounterId) return alert('Por favor ingresa un Encounter ID');
             
-            const output = document.getElementById('encounterLootOutput');
             output.innerHTML = '<span class="loading">Cargando loot...</span>';
             
             try {
@@ -285,6 +308,9 @@
         }
 
         async function loadFilteredLoot() {
+            const output = document.getElementById('filteredLootOutput');
+            if (!requireApi(output)) return;
+
             const encounterId = document.getElementById('filteredEncounterId').value;
             const playerClass = document.getElementById('playerClass').value;
             const specialization = document.getElementById('specialization').value;
@@ -292,7 +318,6 @@
             if (!encounterId) return alert('Por favor ingresa un Encounter ID');
             if (!playerClass) return alert('Por favor selecciona una clase');
             
-            const output = document.getElementById('filteredLootOutput');
             output.innerHTML = '<span class="loading">Cargando loot filtrado...</span>';
             
             try {
@@ -338,10 +363,12 @@
         }
 
         async function loadItemDetails() {
+            const output = document.getElementById('itemDetailsOutput');
+            if (!requireApi(output)) return;
+
             const itemId = document.getElementById('itemId').value;
             if (!itemId) return alert('Por favor ingresa un Item ID');
             
-            const output = document.getElementById('itemDetailsOutput');
             output.innerHTML = '<span class="loading">Cargando item...</span>';
             
             try {
@@ -376,6 +403,8 @@
 
         async function getCacheStats() {
             const output = document.getElementById('cacheOutput');
+            if (!requireApi(output)) return;
+
             output.innerHTML = '<span class="loading">Obteniendo estadísticas...</span>';
             
             try {
@@ -389,6 +418,8 @@
 
         async function clearCache() {
             const output = document.getElementById('cacheOutput');
+            if (!requireApi(output)) return;
+
             output.innerHTML = '<span class="loading">Limpiando caché...</span>';
             
             try {
