@@ -138,12 +138,18 @@ function renderProfile(member) {
         createText(
             'p',
             'forever-member__class-spec',
-            `${labelFor(FOREVER_CATALOG.classes, main.classId, 'Clase desconocida')} - ${specLabel(main.classId, main.primarySpecId)} - ${labelFor(FOREVER_CATALOG.roles, main.primaryRole, 'Rol desconocido')}`
+            `${labelFor(FOREVER_CATALOG.classes, main.classId, 'Clase desconocida')} - ${specLabel(main.classId, main.primarySpecId)}`
         )
+    );
+    const badges = document.createElement('div');
+    badges.className = 'forever-member__badges';
+    badges.append(
+        createText('span', 'forever-member__rank', labelFor(FOREVER_CATALOG.ranks, member.rank, 'Rango desconocido')),
+        createText('span', 'forever-member__role', `Rol: ${labelFor(FOREVER_CATALOG.roles, main.primaryRole, 'Rol desconocido')}`)
     );
     header.append(
         heading,
-        createText('span', 'forever-member__rank', labelFor(FOREVER_CATALOG.ranks, member.rank, 'Rango desconocido'))
+        badges
     );
 
     memberProfile.replaceChildren(header, renderMain(main), renderProfessions(main.primaryProfessions), renderAlters(member.alts));

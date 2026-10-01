@@ -463,13 +463,26 @@
 
 .forever-roster__profile-button {
     background: transparent;
-    border: 0;
-    color: #94a3b8;
-    cursor: not-allowed;
+    border-bottom: 1px solid transparent;
+    color: var(--dorado);
+    cursor: pointer;
     font: inherit;
     font-size: 0.9em;
     padding: 0;
     text-align: right;
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.forever-roster__profile-button:hover,
+.forever-roster__profile-button:focus-visible {
+    border-bottom-color: currentColor;
+    color: #f4d77c;
+}
+
+.forever-roster__profile-button:focus-visible {
+    outline: 2px solid #f4d77c;
+    outline-offset: 3px;
 }
 
 .forever-roster__member-actions {
