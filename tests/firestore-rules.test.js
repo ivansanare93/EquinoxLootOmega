@@ -14,6 +14,7 @@ const {
   getDoc,
   collection,
   setDoc,
+  Timestamp,
   updateDoc
 } = require('firebase/firestore');
 
@@ -41,6 +42,45 @@ function validSignup(overrides = {}) {
     rosterStatus: 'activo',
     timestamp: '2026-10-01T12:00:00.000Z',
     ...overrides
+  };
+}
+
+function validForeverMember(overrides = {}) {
+  const now = Timestamp.fromDate(new Date('2026-10-01T12:00:00.000Z'));
+
+  return {
+    schemaVersion: 1,
+    rank: 'naciente',
+    createdAt: now,
+    updatedAt: now,
+    ownerUid: null,
+    main: {
+      characterName: 'Aeloria',
+      classId: 'mage',
+      primarySpecId: 'arcane',
+      primaryRole: 'dps',
+      secondary: null,
+      professions: {
+        primary: null,
+        secondary: null
+      }
+    },
+    alts: [],
+    ...overrides
+  };
+}
+
+function validForeverAlter(id = 'alter-one') {
+  return {
+    id,
+    characterName: 'Veloria',
+    classId: 'priest',
+    specId: 'holy',
+    role: 'healer',
+    professions: {
+      primary: 'tailoring',
+      secondary: null
+    }
   };
 }
 
@@ -135,4 +175,65 @@ test('only the configured UID is administrative', async () => {
   await assertFails(getDoc(doc(otherUserDb, 'appData', 'characters')));
   await assertFails(setDoc(doc(otherUserDb, 'equinoxSeasons', 'season'), { name: 'S1' }));
   assert.notEqual(ADMIN_UID, 'different-user');
+});
+
+test('public can read Forever members but cannot modify them', async () => {
+  await seed(['gameVersions', 'forever', 'members', 'member-one'], validForeverMember());
+  const memberRef = doc(publicDb(), 'gameVersions', 'forever', 'members', 'member-one');
+
+  await assertSucceeds(getDoc(memberRef));
+  await assertSucceeds(getDocs(collection(publicDb(), 'gameVersions', 'forever', 'members')));
+  await assertFails(setDoc(doc(publicDb(), 'gameVersions', 'forever', 'members', 'member-two'), validForeverMember()));
+  await assertFails(updateDoc(memberRef, { rank: 'alba' }));
+  await assertFails(deleteDoc(memberRef));
+});
+
+test('an authenticated non-admin cannot manage Forever members', async () => {
+  const memberRef = doc(
+    testEnv.authenticatedContext('regular-member').firestore(),
+    'gameVersions', 'forever', 'members', 'member-one'
+  );
+
+  await assertFails(setDoc(memberRef, validForeverMember()));
+  await seed(['gameVersions', 'forever', 'members', 'member-one'], validForeverMember());
+  await assertFails(updateDoc(memberRef, { rank: 'centinela' }));
+  await assertFails(deleteDoc(memberRef));
+});
+
+test('admin can manage valid Forever members', async () => {
+  const memberRef = doc(adminDb(), 'gameVersions', 'forever', 'members', 'member-one');
+  await assertSucceeds(setDoc(memberRef, validForeverMember()));
+  await assertSucceeds(updateDoc(memberRef, { rank: 'centinela' }));
+  await assertSucceeds(deleteDoc(memberRef));
+});
+
+test('Forever member validation rejects invalid rank, role, alters, and ownerUid', async () => {
+  const db = adminDb();
+
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'invalid-rank'),
+    validForeverMember({ rank: 'celeste' })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'invalid-role'),
+    validForeverMember({ main: { ...validForeverMember().main, primaryRole: 'support' } })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'too-many-alters'),
+    validForeverMember({ alts: Array.from({ length: 11 }, (_, index) => validForeverAlter(`alter-${index}`)) })
+  ));
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'owned-member'),
+    validForeverMember({ ownerUid: 'future-owner' })
+  ));
+});
+
+test('Forever member validation checks every embedded alter', async () => {
+  const db = adminDb();
+  const alts = [validForeverAlter('alter-one'), { id: 'alter-two', characterName: 'Broken' }];
+
+  await assertFails(setDoc(
+    doc(db, 'gameVersions', 'forever', 'members', 'invalid-alter'),
+    validForeverMember({ alts })
+  ));
 });

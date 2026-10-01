@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equinox Forever - Roster</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../shared/game-hub.css">
+    <link rel="stylesheet" href="roster.css">
+    <script src="../shared/game-version.js" defer></script>
+    <script type="module" src="roster.js"></script>
+</head>
+<body>
+    <main class="forever-roster">
+        <div class="back-to-home-wrapper">
+            <a href="./" class="back-to-home">&larr; Volver a Forever</a>
+        </div>
+        <header class="forever-roster__header">
+            <h1>Roster Forever</h1>
+            <p>Personajes y configuraciones de Equinox Forever.</p>
+        </header>
+
+        <section class="forever-roster__panel" aria-live="polite">
+            <p id="forever-roster-loading" class="forever-roster__status">Cargando roster...</p>
+            <p id="forever-roster-empty" class="forever-roster__status" hidden>No hay miembros registrados todav&iacute;a.</p>
+            <p id="forever-roster-error" class="forever-roster__status forever-roster__status--error" hidden>No se ha podido cargar el roster. Int&eacute;ntalo de nuevo m&aacute;s tarde.</p>
+            <ul id="forever-roster-members" class="forever-roster__members" hidden></ul>
+        </section>
+    </main>
+</body>
+</html>

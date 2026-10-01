@@ -54,6 +54,105 @@ service cloud.firestore {
         && data.timestamp.matches('^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$');
     }
 
+    function validForeverIdentifier(value, maxLength) {
+      return value is string
+        && value.size() >= 1
+        && value.size() <= maxLength
+        && value.matches('^[a-z0-9][a-z0-9-]*$');
+    }
+
+    function validForeverRole(role) {
+      return role in ['tank', 'healer', 'dps'];
+    }
+
+    function validForeverProfession(value) {
+      return value == null || validForeverIdentifier(value, 40);
+    }
+
+    function validForeverProfessions(professions) {
+      return professions is map
+        && professions.keys().hasAll(['primary', 'secondary'])
+        && professions.keys().hasOnly(['primary', 'secondary'])
+        && validForeverProfession(professions.primary)
+        && validForeverProfession(professions.secondary)
+        && (professions.primary == null
+          || professions.secondary == null
+          || professions.primary != professions.secondary);
+    }
+
+    function validForeverSecondary(secondary) {
+      return secondary == null || (
+        secondary is map
+        && secondary.keys().hasAll(['specId', 'role'])
+        && secondary.keys().hasOnly(['specId', 'role'])
+        && validForeverIdentifier(secondary.specId, 40)
+        && validForeverRole(secondary.role)
+      );
+    }
+
+    function validForeverMain(main) {
+      return main is map
+        && main.keys().hasAll([
+          'characterName', 'classId', 'primarySpecId', 'primaryRole', 'secondary', 'professions'
+        ])
+        && main.keys().hasOnly([
+          'characterName', 'classId', 'primarySpecId', 'primaryRole', 'secondary', 'professions'
+        ])
+        && main.characterName is string
+        && main.characterName.size() >= 1
+        && main.characterName.size() <= 24
+        && validForeverIdentifier(main.classId, 40)
+        && validForeverIdentifier(main.primarySpecId, 40)
+        && validForeverRole(main.primaryRole)
+        && validForeverSecondary(main.secondary)
+        && validForeverProfessions(main.professions);
+    }
+
+    function validForeverAlter(alter) {
+      return alter is map
+        && alter.keys().hasAll(['id', 'characterName', 'classId', 'specId', 'role', 'professions'])
+        && alter.keys().hasOnly(['id', 'characterName', 'classId', 'specId', 'role', 'professions'])
+        && validForeverIdentifier(alter.id, 64)
+        && alter.characterName is string
+        && alter.characterName.size() >= 1
+        && alter.characterName.size() <= 24
+        && validForeverIdentifier(alter.classId, 40)
+        && validForeverIdentifier(alter.specId, 40)
+        && validForeverRole(alter.role)
+        && validForeverProfessions(alter.professions);
+    }
+
+    function validForeverAlters(alters) {
+      return alters is list
+        && alters.size() <= 10
+        && (alters.size() < 1 || validForeverAlter(alters[0]))
+        && (alters.size() < 2 || validForeverAlter(alters[1]))
+        && (alters.size() < 3 || validForeverAlter(alters[2]))
+        && (alters.size() < 4 || validForeverAlter(alters[3]))
+        && (alters.size() < 5 || validForeverAlter(alters[4]))
+        && (alters.size() < 6 || validForeverAlter(alters[5]))
+        && (alters.size() < 7 || validForeverAlter(alters[6]))
+        && (alters.size() < 8 || validForeverAlter(alters[7]))
+        && (alters.size() < 9 || validForeverAlter(alters[8]))
+        && (alters.size() < 10 || validForeverAlter(alters[9]));
+    }
+
+    function validForeverMember(member) {
+      return member.keys().hasAll([
+          'schemaVersion', 'rank', 'createdAt', 'updatedAt', 'ownerUid', 'main', 'alts'
+        ])
+        && member.keys().hasOnly([
+          'schemaVersion', 'rank', 'createdAt', 'updatedAt', 'ownerUid', 'main', 'alts'
+        ])
+        && member.schemaVersion == 1
+        && member.rank in ['eclipse', 'alba', 'centinela', 'nova', 'naciente']
+        && member.createdAt is timestamp
+        && member.updatedAt is timestamp
+        && member.ownerUid == null
+        && validForeverMain(member.main)
+        && validForeverAlters(member.alts);
+    }
+
     match /appData/characters {
       allow read, write: if isAdmin();
     }
@@ -90,6 +189,12 @@ service cloud.firestore {
       // Temporary exception: this shared document is publicly writable because
       // ownerId is currently a localStorage value, not a Firebase Auth UID.
       allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /gameVersions/forever/members/{memberId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && validForeverMember(request.resource.data);
       allow delete: if isAdmin();
     }
 
