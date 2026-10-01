@@ -50,9 +50,11 @@ For detailed Firebase setup information, see [docs/FIREBASE_SETUP.md](docs/FIREB
 This application can be deployed to GitHub Pages with automatic builds via GitHub Actions. The deployment process securely injects Firebase credentials from GitHub Secrets during the build, ensuring credentials are never committed to the repository.
 
 **Quick Setup:**
-1. Configure Firebase credentials as GitHub Secrets (7 required secrets)
+1. Configure the six Firebase values as GitHub Secrets: `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, and `FIREBASE_APP_ID`
 2. Enable GitHub Pages with "GitHub Actions" as the source
 3. Push to `main` branch or manually trigger deployment
+
+`API_BASE_URL` is optional. If it is not configured as the GitHub Actions variable `vars.API_BASE_URL`, GitHub Pages still deploys and the API Demo remains disabled. Set it to the absolute URL of an independently deployed Express backend to enable the demo.
 
 For detailed deployment instructions, see [docs/GITHUB_PAGES_DEPLOYMENT.md](docs/GITHUB_PAGES_DEPLOYMENT.md).
 

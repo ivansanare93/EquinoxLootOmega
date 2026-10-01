@@ -17,6 +17,8 @@ The application requires Firebase credentials to function. After the security fi
 - Firebase credentials stored as GitHub Secrets
 - GitHub Actions workflow builds the application
 - Build process generates `firebase-config.js` from environment variables
+- `API_BASE_URL` is optional; without it, the API Demo is deployed disabled
+- When configured, `API_BASE_URL` points to an independently deployed Express backend
 - Generated file is included in the deployment to GitHub Pages
 - `.nojekyll` file disables Jekyll processing to ensure proper ES module support
 
@@ -64,7 +66,8 @@ The workflow will:
 2. Install Node.js dependencies
 3. Build static files
 4. Generate `firebase-config.js` from GitHub Secrets
-5. Deploy to GitHub Pages
+5. Generate `api-config.js`; if `API_BASE_URL` is absent, mark the API Demo as disabled
+6. Deploy to GitHub Pages
 
 ### Step 4: Access Your Site
 
@@ -93,8 +96,9 @@ npm run build
 
 - `build:static` - Copies HTML, CSS, and JS files to `public/` directory
 - `build:firebase-config` - Generates `firebase-config.js` from environment variables
+- `build:api-config` - Generates `api-config.js` from the optional `API_BASE_URL`; without it, the API Demo is disabled
 - `build:local` - Copies local `firebase-config.js` to `public/` for local development
-- `build` - Full deployment build (static + firebase-config from env vars)
+- `build` - Full deployment build (static + Firebase configuration from env vars + API configuration)
 
 ### Manual Build (for testing)
 
@@ -108,6 +112,8 @@ To test the build process locally:
    export FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
    export FIREBASE_MESSAGING_SENDER_ID="1234567890"
    export FIREBASE_APP_ID="1:1234567890:web:abc123..."
+   # Optional: enable the API Demo against a deployed Express backend
+   export API_BASE_URL="https://api.example.com"
    ```
 
 2. Run the build:
@@ -116,6 +122,8 @@ To test the build process locally:
    ```
 
 3. Check the `public/` directory for generated files
+
+`API_BASE_URL` may be omitted. In that case, `npm run build` still succeeds and `public/api-config.js` marks the API Demo as disabled. Local development uses the versioned `client/api-config.js` with `http://localhost:3000`.
 
 ## Security Considerations
 

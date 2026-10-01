@@ -97,10 +97,10 @@ GitHub Pages serves only the contents of `public/`; it cannot run Express. The E
 
 `npm run build` creates production configuration files in `public/`:
 
-- `firebase-config.js` from `FIREBASE_*` environment variables.
-- `api-config.js` from the required `API_BASE_URL` environment variable.
+- `firebase-config.js` from these six required environment variables: `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, and `FIREBASE_APP_ID`.
+- `api-config.js` from the optional `API_BASE_URL` environment variable.
 
-The GitHub Pages workflow provides `API_BASE_URL` through the GitHub Actions variable `vars.API_BASE_URL`. Set it to the public URL of the independently deployed Express backend, for example `https://api.example.com`.
+The GitHub Pages workflow provides `API_BASE_URL` through the optional GitHub Actions variable `vars.API_BASE_URL`. If it is omitted, the build still succeeds and the API demo is explicitly disabled. If it is set, use the absolute public URL of the independently deployed Express backend, for example `https://api.example.com`.
 
 `client/api-demo.html` loads `api-config.js` and uses `window.EQUINOX_CONFIG.apiBaseUrl`. Do not hardcode a production API URL or `localhost` in that page.
 
@@ -130,7 +130,7 @@ The GitHub Pages workflow provides `API_BASE_URL` through the GitHub Actions var
 | `npm run dev` | Run Express through nodemon; build `public/` first if required. |
 | `npm run build:static` | Recreate `public/` from static frontend sources. |
 | `npm run build:local` | Build static files and copy local Firebase and API configuration. |
-| `npm run build` | Production static build; requires all `FIREBASE_*` values and `API_BASE_URL`. |
+| `npm run build` | Production static build; requires the six `FIREBASE_*` values. `API_BASE_URL` is optional. |
 | `npm run build:firebase-config` | Generate `public/firebase-config.js` for production. |
 | `npm run build:api-config` | Generate `public/api-config.js` for production. |
 | `npm run test:api` | Run manual API integration checks against a running local server. |
@@ -147,6 +147,6 @@ git diff --check
 npm run build:local
 ```
 
-For changes affecting GitHub Pages production output, also run `npm run build` with safe test values for `FIREBASE_*` and an absolute test `API_BASE_URL`, then inspect the generated configuration. For backend route or Blizzard service changes, run the applicable integration script only when a configured local server is available.
+For changes affecting GitHub Pages production output, run `npm run build` with safe test values for the six `FIREBASE_*` variables both without `API_BASE_URL` and with an absolute test URL, then inspect the generated configurations. For backend route or Blizzard service changes, run the applicable integration script only when a configured local server is available.
 
 Before handing work over, inspect `git status --short`. Preserve any existing user changes. Do not create commits, amend commits, stage unrelated files, or run destructive Git commands unless explicitly requested.

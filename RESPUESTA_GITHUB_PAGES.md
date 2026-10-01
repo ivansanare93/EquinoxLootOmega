@@ -30,8 +30,8 @@ He implementado un sistema de despliegue automático que **resuelve este problem
 
 #### 3. **Scripts de Build Separados**
 ```json
-"build": "npm run build:static && npm run build:firebase-config",  // Para GitHub Pages
-"build:local": "npm run build:static && copyfiles -f client/firebase-config.js public",  // Para desarrollo local
+"build": "npm run build:static && npm run build:firebase-config && npm run build:api-config",  // Para GitHub Pages
+"build:local": "npm run build:static && copyfiles -f client/firebase-config.js client/api-config.js public",  // Para desarrollo local
 ```
 
 ### Cómo Funciona
@@ -54,6 +54,8 @@ npm start
      - FIREBASE_STORAGE_BUCKET
      - FIREBASE_MESSAGING_SENDER_ID
      - FIREBASE_APP_ID
+
+   `API_BASE_URL` no es obligatoria. Si existe un backend Express público, se puede configurar como variable de repositorio `vars.API_BASE_URL` con su URL absoluta. Si se omite, GitHub Pages se despliega igualmente y la API Demo queda deshabilitada.
 
 2. **Habilitar GitHub Pages**:
    - Ve a Settings → Pages
