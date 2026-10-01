@@ -178,7 +178,7 @@
         if (!window.firebaseAuth) {
           console.error("❌ Firebase Auth failed to initialize");
           alert("Error de configuración. Por favor, contacta al administrador.");
-          window.location.href = "index.html";
+          window.location.href = "retail/";
           return;
         }
 
@@ -214,14 +214,14 @@
               } else {
                 console.log("❌ Max attempts reached, redirecting");
                 alert("❌ Demasiados intentos fallidos. Serás redirigido al inicio.");
-                window.location.href = "index.html";
+                window.location.href = "retail/";
                 return;
               }
             }
           } catch (error) {
             console.log("❌ User cancelled authentication");
             alert("❌ Acceso cancelado. Serás redirigido al inicio.");
-            window.location.href = "index.html";
+            window.location.href = "retail/";
             return;
           }
         }
@@ -231,8 +231,9 @@
   <body>
     <div class="app-container" id="appContainer" style="display: none">
       <div class="main-content">
-        <div class="back-to-home-wrapper">
-          <a href="index.html" class="back-to-home">← Volver al Inicio</a>
+        <div class="version-navigation">
+          <a href="retail/" class="back-to-home">← Volver a Retail</a>
+          <a href="index.html" class="version-switch-link">Cambiar versi&oacute;n</a>
         </div>
         <h1>Equinox's Loot Manager - Forja de Mana Omega</h1>
 

@@ -7,7 +7,7 @@
     "start": "npm run build:local && node src/server.js",
     "dev": "nodemon src/server.js",
     "build": "npm run build:static && npm run build:firebase-config && npm run build:api-config",
-    "build:static": "rimraf public && mkdirp public && copyfiles -f client/index.html client/LarancioOrtegaLoot.html client/roster-signup.html client/mythic-plus-groups.html client/style.css client/api-demo.html client/app.js client/data.js client/.nojekyll public && copyfiles -u 1 \"client/ruleta/**/*\" public",
+    "build:static": "rimraf public && mkdirp public && copyfiles -f client/index.html client/LarancioOrtegaLoot.html client/roster-signup.html client/mythic-plus-groups.html client/style.css client/api-demo.html client/app.js client/data.js client/.nojekyll public && copyfiles -u 1 \"client/ruleta/**/*\" \"client/retail/**/*\" \"client/forever/**/*\" \"client/shared/**/*\" public",
     "build:firebase-config": "node scripts/generate-firebase-config.js",
     "build:api-config": "node scripts/generate-api-config.js",
     "build:local": "npm run build:static && copyfiles -f client/firebase-config.js client/api-config.js public",
