@@ -83,7 +83,7 @@
     
     <div class="container">
         <h2>Configuración del Servidor</h2>
-        <p>URL del servidor: <strong id="serverUrl">http://localhost:3000</strong></p>
+        <p>URL del servidor: <strong id="serverUrl"></strong></p>
         <p>Estado: <span id="serverStatus" class="loading">Verificando...</span></p>
         <button onclick="checkHealth()">Verificar Estado</button>
     </div>
@@ -158,8 +158,10 @@
         <div id="cacheOutput" class="output"></div>
     </div>
 
+    <script src="api-config.js"></script>
     <script>
-        const API_BASE = 'http://localhost:3000';
+        const API_BASE = window.EQUINOX_CONFIG.apiBaseUrl.replace(/\/+$/, '');
+        document.getElementById('serverUrl').textContent = API_BASE;
         
         async function checkHealth() {
             const output = document.getElementById('serverStatus');
