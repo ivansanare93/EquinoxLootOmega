@@ -20,6 +20,90 @@
             <p>Personajes y configuraciones de Equinox Forever.</p>
         </header>
 
+        <section class="forever-roster__signup" aria-labelledby="forever-signup-title">
+            <div class="forever-roster__signup-heading">
+                <div>
+                    <h2 id="forever-signup-title">Forma parte de Equinox Forever</h2>
+                    <p>Registra tu personaje para unirte al roster.</p>
+                </div>
+                <button id="forever-signup-open" class="forever-roster__button" type="button">+ Unirme al roster</button>
+            </div>
+            <p id="forever-signup-result" class="forever-signup-form__message forever-signup-form__message--success" aria-live="polite" hidden></p>
+
+            <form id="forever-signup-form" class="forever-signup-form" hidden novalidate>
+                <p id="forever-signup-progress" class="forever-signup-form__progress" aria-live="polite">Paso 1 de 4: Personaje principal</p>
+                <p id="forever-signup-message" class="forever-signup-form__message" aria-live="polite" hidden></p>
+
+                <fieldset class="forever-signup-form__step" data-step="1">
+                    <legend>Personaje principal</legend>
+                    <div class="forever-signup-form__grid">
+                        <div class="forever-signup-form__field">
+                            <label for="forever-main-name">Nombre del personaje</label>
+                            <input id="forever-main-name" name="mainName" type="text" maxlength="24" required autocomplete="off">
+                        </div>
+                        <div class="forever-signup-form__field">
+                            <label for="forever-main-class">Clase</label>
+                            <select id="forever-main-class" name="mainClass" required></select>
+                        </div>
+                        <div class="forever-signup-form__field">
+                            <label for="forever-main-spec">Especializaci&oacute;n principal</label>
+                            <select id="forever-main-spec" name="mainSpec" required disabled></select>
+                        </div>
+                        <div class="forever-signup-form__field">
+                            <label for="forever-main-role">Rol principal</label>
+                            <select id="forever-main-role" name="mainRole" required disabled></select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="forever-signup-form__step" data-step="2" hidden>
+                    <legend>Configuraci&oacute;n opcional</legend>
+                    <div class="forever-signup-form__field">
+                        <span class="forever-signup-form__label">Profesiones primarias</span>
+                        <p class="forever-signup-form__hint">Opcionales. Puedes seleccionar hasta dos.</p>
+                        <div id="forever-main-professions" class="forever-signup-form__checkboxes"></div>
+                    </div>
+                    <div class="forever-signup-form__secondary">
+                        <label class="forever-signup-form__toggle" for="forever-secondary-enabled">
+                            <input id="forever-secondary-enabled" type="checkbox">
+                            A&ntilde;adir especializaci&oacute;n secundaria
+                        </label>
+                        <div id="forever-secondary-fields" class="forever-signup-form__grid" hidden>
+                            <div class="forever-signup-form__field">
+                                <label for="forever-secondary-spec">Especializaci&oacute;n secundaria</label>
+                                <select id="forever-secondary-spec" name="secondarySpec"></select>
+                            </div>
+                            <div class="forever-signup-form__field">
+                                <label for="forever-secondary-role">Rol secundario</label>
+                                <select id="forever-secondary-role" name="secondaryRole" disabled></select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="forever-signup-form__step" data-step="3" hidden>
+                    <legend>Alters</legend>
+                    <p class="forever-signup-form__hint">Opcional. Puedes a&ntilde;adir hasta diez alters.</p>
+                    <div id="forever-alters" class="forever-signup-form__alters"></div>
+                    <button id="forever-add-alter" class="forever-roster__button forever-roster__button--secondary" type="button">+ A&ntilde;adir alter</button>
+                </fieldset>
+
+                <fieldset class="forever-signup-form__step" data-step="4" hidden>
+                    <legend>Revisar</legend>
+                    <div id="forever-signup-summary" class="forever-signup-form__summary"></div>
+                    <p class="forever-signup-form__rank">Naciente</p>
+                    <p class="forever-signup-form__hint">Tu ficha se registrar&aacute; inicialmente como Naciente. Los administradores de Equinox podr&aacute;n actualizar posteriormente tu rango y tus datos.</p>
+                </fieldset>
+
+                <div class="forever-signup-form__actions">
+                    <button id="forever-signup-cancel" class="forever-roster__button forever-roster__button--secondary" type="button">Cancelar</button>
+                    <button id="forever-signup-previous" class="forever-roster__button forever-roster__button--secondary" type="button" hidden>Anterior</button>
+                    <button id="forever-signup-next" class="forever-roster__button" type="button">Siguiente</button>
+                    <button id="forever-signup-submit" class="forever-roster__button" type="submit" hidden>Confirmar inscripci&oacute;n</button>
+                </div>
+            </form>
+        </section>
+
         <section class="forever-roster__panel" aria-live="polite">
             <p id="forever-roster-loading" class="forever-roster__status">Cargando roster...</p>
             <p id="forever-roster-empty" class="forever-roster__status" hidden>No hay miembros registrados todav&iacute;a.</p>
