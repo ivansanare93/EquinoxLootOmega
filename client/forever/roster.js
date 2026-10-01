@@ -556,13 +556,13 @@ function renderMembers() {
             const alters = document.createElement('span');
             alters.className = 'forever-roster__member-alters';
             alters.textContent = alterCount === 0 ? 'Sin alters' : `${alterCount} ${alterCount === 1 ? 'alter' : 'alters'}`;
-            const profileButton = document.createElement('button');
-            profileButton.className = 'forever-roster__profile-button';
-            profileButton.type = 'button';
-            profileButton.disabled = true;
-            profileButton.textContent = 'Ver perfil - Proximamente';
-            profileButton.title = 'Proximamente';
-            footer.append(alters, profileButton);
+            const profileLink = document.createElement('a');
+            const profileUrl = new URL('member.html', window.location.href);
+            profileUrl.searchParams.set('id', member.id);
+            profileLink.className = 'forever-roster__profile-button';
+            profileLink.href = profileUrl.href;
+            profileLink.textContent = 'Ver perfil \u2192';
+            footer.append(alters, profileLink);
 
             item.append(header, classSpec, role, details, footer);
             if (isAdmin) {
