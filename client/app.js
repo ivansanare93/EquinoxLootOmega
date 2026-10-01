@@ -52,6 +52,20 @@ function isFirebaseReady() {
 // ===== UTILIDADES Y HELPERS =====
 
 /**
+ * Escape a value before interpolating it into an HTML template.
+ * @param {unknown} value - Value to escape
+ * @returns {string} HTML-safe text
+ */
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
  * Helper: Crear opción DOM
  * @param {string|number} value - Valor de la opción
  * @param {string} text - Texto visible
@@ -201,7 +215,7 @@ function updateCharacterList() {
 
     characters.forEach((char, index) => {
         const li = document.createElement('li');
-        li.innerHTML = `${char.name} - ${char.class} (${char.specialization}) 
+        li.innerHTML = `${escapeHtml(char.name)} - ${escapeHtml(char.class)} (${escapeHtml(char.specialization)})
             <button class="btn-edit-char" data-index="${index}">Editar</button>
             <button class="btn-delete-char" data-index="${index}">Eliminar</button>`;
         lista.appendChild(li);
@@ -618,7 +632,7 @@ function generateCharacterRow(char, assigned) {
 
         return `
             <span class="tooltip">
-                ${a.item} (${a.dificultad}, ilvl ${a.ilvl})
+                ${escapeHtml(a.item)} (${escapeHtml(a.dificultad)}, ilvl ${escapeHtml(a.ilvl)})
                 <span class="tooltiptext">${description}</span>
             </span> (de ${bossName})
             <button class="btn-delete-assign" data-index="${globalIndex}">Eliminar</button><br>
@@ -642,14 +656,14 @@ function generateCharacterRow(char, assigned) {
                     <option value="Necesidad" ${a.tipo === 'Necesidad' ? 'selected' : ''}>Necesidad</option>
                     <option value="Codicia" ${a.tipo === 'Codicia' ? 'selected' : ''}>Codicia</option>
                 </select>
-                <input type="text" class="note-input" value="${a.note || ''}" placeholder="Nota adicional" data-index="${globalIndex}" maxlength="50" style="padding: 4px;">
+                <input type="text" class="note-input" value="${escapeHtml(a.note || '')}" placeholder="Nota adicional" data-index="${globalIndex}" maxlength="50" style="padding: 4px;">
             </div>
         `;
     }).join('');
 
     row.innerHTML = `
-        <td>${char.name}</td>
-        <td>${char.class} (${char.specialization})</td>
+        <td>${escapeHtml(char.name)}</td>
+        <td>${escapeHtml(char.class)} (${escapeHtml(char.specialization)})</td>
         <td>${assignedHtml || 'Ninguno'}</td>
         <td>${assigned.length > 0 ? 'Varios' : ''}</td>
         <td>${notesHtml || ''}</td>
