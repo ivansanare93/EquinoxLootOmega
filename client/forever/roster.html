@@ -18,7 +18,27 @@
         <header class="forever-roster__header">
             <h1>Roster Forever</h1>
             <p>Personajes y configuraciones de Equinox Forever.</p>
+            <div class="forever-roster__admin-access">
+                <button id="forever-admin-access" class="forever-roster__button forever-roster__button--secondary" type="button">Administraci&oacute;n</button>
+                <span id="forever-admin-status" class="forever-roster__admin-status" aria-live="polite">Modo visitante</span>
+                <button id="forever-admin-logout" class="forever-roster__button forever-roster__button--secondary" type="button" hidden>Cerrar sesi&oacute;n</button>
+            </div>
         </header>
+
+        <section id="forever-admin-login" class="forever-roster__admin-login" aria-labelledby="forever-admin-login-title" hidden>
+            <h2 id="forever-admin-login-title">Acceso administrativo</h2>
+            <form id="forever-admin-login-form" class="forever-admin-login__form">
+                <label for="forever-admin-email">Correo electr&oacute;nico</label>
+                <input id="forever-admin-email" type="email" autocomplete="username" required>
+                <label for="forever-admin-password">Contrase&ntilde;a</label>
+                <input id="forever-admin-password" type="password" autocomplete="current-password" required>
+                <p id="forever-admin-login-message" class="forever-signup-form__message" aria-live="polite" hidden></p>
+                <div class="forever-signup-form__actions">
+                    <button id="forever-admin-login-cancel" class="forever-roster__button forever-roster__button--secondary" type="button">Cancelar</button>
+                    <button id="forever-admin-login-submit" class="forever-roster__button" type="submit">Entrar</button>
+                </div>
+            </form>
+        </section>
 
         <section class="forever-roster__signup" aria-labelledby="forever-signup-title">
             <div class="forever-roster__signup-heading">
@@ -26,7 +46,10 @@
                     <h2 id="forever-signup-title">Forma parte de Equinox Forever</h2>
                     <p>Registra tu personaje para unirte al roster.</p>
                 </div>
-                <button id="forever-signup-open" class="forever-roster__button" type="button">+ Unirme al roster</button>
+                <div class="forever-roster__signup-controls">
+                    <button id="forever-admin-add" class="forever-roster__button" type="button" hidden>+ A&ntilde;adir miembro</button>
+                    <button id="forever-signup-open" class="forever-roster__button" type="button">+ Unirme al roster</button>
+                </div>
             </div>
             <p id="forever-signup-result" class="forever-signup-form__message forever-signup-form__message--success" aria-live="polite" hidden></p>
 
@@ -36,6 +59,10 @@
 
                 <fieldset class="forever-signup-form__step" data-step="1">
                     <legend>Personaje principal</legend>
+                    <div id="forever-admin-rank-field" class="forever-signup-form__field" hidden>
+                        <label for="forever-member-rank">Rango</label>
+                        <select id="forever-member-rank" name="memberRank"></select>
+                    </div>
                     <div class="forever-signup-form__grid">
                         <div class="forever-signup-form__field">
                             <label for="forever-main-name">Nombre del personaje</label>
@@ -109,6 +136,16 @@
             <p id="forever-roster-empty" class="forever-roster__status" hidden>No hay miembros registrados todav&iacute;a.</p>
             <p id="forever-roster-error" class="forever-roster__status forever-roster__status--error" hidden>No se ha podido cargar el roster. Int&eacute;ntalo de nuevo m&aacute;s tarde.</p>
             <ul id="forever-roster-members" class="forever-roster__members" hidden></ul>
+        </section>
+
+        <section id="forever-delete-confirmation" class="forever-roster__delete-confirmation" role="dialog" aria-modal="true" aria-labelledby="forever-delete-title" hidden>
+            <h2 id="forever-delete-title">Eliminar miembro</h2>
+            <p>&iquest;Seguro que quieres eliminar a <strong id="forever-delete-member-name"></strong> del roster?</p>
+            <p id="forever-delete-message" class="forever-signup-form__message" aria-live="polite" hidden></p>
+            <div class="forever-signup-form__actions">
+                <button id="forever-delete-cancel" class="forever-roster__button forever-roster__button--secondary" type="button">Cancelar</button>
+                <button id="forever-delete-confirm" class="forever-roster__button forever-roster__button--danger" type="button">Confirmar eliminaci&oacute;n</button>
+            </div>
         </section>
     </main>
 </body>

@@ -21,6 +21,70 @@
     line-height: 1.6;
 }
 
+.forever-roster__admin-access,
+.forever-roster__signup-controls {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.forever-roster__admin-status {
+    color: #cbd5e1;
+    font-size: 0.9em;
+}
+
+.forever-roster__admin-status--active {
+    color: #86efac;
+    font-weight: bold;
+}
+
+.forever-roster__admin-login,
+.forever-roster__delete-confirmation {
+    background-color: rgba(30, 41, 59, 0.96);
+    border: 2px solid var(--dorado);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    margin: 0 auto 24px;
+    max-width: 480px;
+    padding: 24px;
+}
+
+.forever-roster__admin-login h2,
+.forever-roster__delete-confirmation h2 {
+    color: var(--dorado);
+    font-size: 1.3em;
+    margin: 0 0 18px;
+}
+
+.forever-roster__delete-confirmation p {
+    color: #e5e7eb;
+    line-height: 1.5;
+}
+
+.forever-admin-login__form {
+    display: grid;
+    gap: 8px;
+}
+
+.forever-admin-login__form label {
+    color: #f8fafc;
+    font-weight: bold;
+    margin-top: 6px;
+}
+
+.forever-admin-login__form input {
+    background: #0f172a;
+    border: 1px solid rgba(212, 175, 55, 0.65);
+    border-radius: 4px;
+    color: #f8fafc;
+    font: inherit;
+    min-height: 40px;
+    padding: 8px 10px;
+}
+
 .forever-roster__panel {
     background-color: rgba(30, 41, 59, 0.8);
     border: 2px solid var(--dorado);
@@ -85,6 +149,17 @@
     color: #f8fafc;
 }
 
+.forever-roster__button--danger {
+    background: #b91c1c;
+    border-color: #fca5a5;
+    color: #fff;
+}
+
+.forever-roster__button--danger:hover:not(:disabled),
+.forever-roster__button--danger:focus-visible:not(:disabled) {
+    background: #dc2626;
+}
+
 .forever-signup-form {
     border-top: 1px solid rgba(212, 175, 55, 0.4);
     margin-top: 20px;
@@ -133,6 +208,10 @@
 .forever-signup-form__field {
     display: grid;
     gap: 7px;
+}
+
+.forever-signup-form__step > .forever-signup-form__field {
+    margin-bottom: 16px;
 }
 
 .forever-signup-form__field label,
@@ -271,6 +350,13 @@
     margin-top: 6px;
 }
 
+.forever-roster__member-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
 @media (max-width: 768px) {
     .forever-roster {
         padding: 28px 16px;
@@ -289,6 +375,14 @@
 
     .forever-roster__signup-heading {
         display: flex;
+    }
+
+    .forever-roster__signup-controls {
+        justify-content: stretch;
+    }
+
+    .forever-roster__signup-controls .forever-roster__button {
+        flex: 1 1 150px;
     }
 
     .forever-signup-form__actions {
