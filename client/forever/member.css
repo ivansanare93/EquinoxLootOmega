@@ -82,8 +82,23 @@
 }
 
 .forever-member__section {
+    background: transparent;
+    border: 0;
     border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+    margin: 0;
+    max-width: none;
     padding: 24px 28px;
+    transform: none;
+    transition: none;
+    width: 100%;
+}
+
+.forever-member__section:hover {
+    box-shadow: none;
+    transform: none;
 }
 
 .forever-member__section:last-child {
