@@ -1,0 +1,534 @@
+.forever-roster {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.forever-roster__header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.forever-roster__header h1 {
+    margin: 0 0 12px;
+    color: var(--dorado);
+    font-size: 2.3em;
+}
+
+.forever-roster__header p {
+    margin: 0;
+    color: #e9d5ff;
+    line-height: 1.6;
+}
+
+.forever-roster__admin-access,
+.forever-roster__signup-controls {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.forever-roster__admin-status {
+    color: #cbd5e1;
+    font-size: 0.9em;
+}
+
+.forever-roster__admin-status--active {
+    color: #86efac;
+    font-weight: bold;
+}
+
+.forever-roster__admin-login,
+.forever-roster__delete-confirmation {
+    background-color: rgba(30, 41, 59, 0.96);
+    border: 2px solid var(--dorado);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    margin: 0 auto 24px;
+    max-width: 480px;
+    padding: 24px;
+}
+
+.forever-roster__admin-login h2,
+.forever-roster__delete-confirmation h2 {
+    color: var(--dorado);
+    font-size: 1.3em;
+    margin: 0 0 18px;
+}
+
+.forever-roster__delete-confirmation p {
+    color: #e5e7eb;
+    line-height: 1.5;
+}
+
+.forever-admin-login__form {
+    display: grid;
+    gap: 8px;
+}
+
+.forever-admin-login__form label {
+    color: #f8fafc;
+    font-weight: bold;
+    margin-top: 6px;
+}
+
+.forever-admin-login__form input {
+    background: #0f172a;
+    border: 1px solid rgba(212, 175, 55, 0.65);
+    border-radius: 4px;
+    color: #f8fafc;
+    font: inherit;
+    min-height: 40px;
+    padding: 8px 10px;
+}
+
+.forever-roster__panel {
+    background-color: rgba(30, 41, 59, 0.8);
+    border: 2px solid var(--dorado);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    padding: 24px;
+}
+
+.forever-roster__signup {
+    background-color: rgba(30, 41, 59, 0.8);
+    border: 2px solid var(--dorado);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    margin-bottom: 24px;
+    padding: 24px;
+}
+
+.forever-roster__signup-heading {
+    align-items: center;
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.forever-roster__signup-heading h2 {
+    color: var(--dorado);
+    font-size: 1.4em;
+    margin: 0 0 6px;
+}
+
+.forever-roster__signup-heading p,
+.forever-signup-form__hint {
+    color: #e5e7eb;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.forever-roster__button {
+    background: var(--dorado);
+    border: 1px solid #f4d77c;
+    border-radius: 4px;
+    color: #17100a;
+    cursor: pointer;
+    font: inherit;
+    font-weight: bold;
+    padding: 10px 16px;
+}
+
+.forever-roster__button:hover:not(:disabled),
+.forever-roster__button:focus-visible:not(:disabled) {
+    background: #f4d77c;
+}
+
+.forever-roster__button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.forever-roster__button--secondary {
+    background: transparent;
+    border-color: rgba(212, 175, 55, 0.7);
+    color: #f8fafc;
+}
+
+.forever-roster__button--danger {
+    background: #b91c1c;
+    border-color: #fca5a5;
+    color: #fff;
+}
+
+.forever-roster__button--danger:hover:not(:disabled),
+.forever-roster__button--danger:focus-visible:not(:disabled) {
+    background: #dc2626;
+}
+
+.forever-signup-form {
+    border-top: 1px solid rgba(212, 175, 55, 0.4);
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.forever-signup-form__progress,
+.forever-signup-form__rank {
+    color: var(--dorado);
+    font-weight: bold;
+    margin: 0 0 18px;
+}
+
+.forever-signup-form__message {
+    border-left: 3px solid #fca5a5;
+    color: #fecaca;
+    margin: 0 0 18px;
+    padding-left: 10px;
+}
+
+.forever-signup-form__message--success {
+    border-color: #86efac;
+    color: #bbf7d0;
+}
+
+.forever-signup-form__step {
+    border: 0;
+    margin: 0;
+    min-width: 0;
+    padding: 0;
+}
+
+.forever-signup-form__step legend {
+    color: #f8fafc;
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.forever-signup-form__grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.forever-signup-form__field {
+    display: grid;
+    gap: 7px;
+}
+
+.forever-signup-form__step > .forever-signup-form__field {
+    margin-bottom: 16px;
+}
+
+.forever-signup-form__field label,
+.forever-signup-form__label,
+.forever-signup-form__toggle {
+    color: #f8fafc;
+    font-weight: bold;
+}
+
+.forever-signup-form input[type="text"],
+.forever-signup-form select {
+    background: #0f172a;
+    border: 1px solid rgba(212, 175, 55, 0.65);
+    border-radius: 4px;
+    color: #f8fafc;
+    font: inherit;
+    min-height: 40px;
+    padding: 8px 10px;
+}
+
+.forever-signup-form input:focus-visible,
+.forever-signup-form select:focus-visible,
+.forever-roster__button:focus-visible {
+    outline: 2px solid #f4d77c;
+    outline-offset: 2px;
+}
+
+.forever-signup-form__checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-top: 4px;
+}
+
+.forever-signup-form__checkboxes label,
+.forever-signup-form__toggle {
+    align-items: center;
+    color: #e5e7eb;
+    display: flex;
+    font-weight: normal;
+    gap: 7px;
+}
+
+.forever-signup-form__secondary {
+    border-top: 1px solid rgba(212, 175, 55, 0.28);
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.forever-signup-form__secondary .forever-signup-form__grid {
+    margin-top: 16px;
+}
+
+.forever-signup-form__alters {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.forever-signup-form__alter {
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.forever-signup-form__alter-heading {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.forever-signup-form__alter-heading h3 {
+    color: var(--dorado);
+    font-size: 1em;
+    margin: 0;
+}
+
+.forever-signup-form__summary {
+    color: #e5e7eb;
+    display: grid;
+    gap: 10px;
+    line-height: 1.5;
+}
+
+.forever-signup-form__summary p {
+    margin: 0;
+}
+
+.forever-signup-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.forever-roster__status {
+    color: #f8fafc;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.forever-roster__status[hidden],
+.forever-roster__members[hidden] {
+    display: none;
+}
+
+.forever-roster__status--error {
+    color: #fca5a5;
+}
+
+.forever-roster__members {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.forever-roster__member {
+    --member-class-color: var(--dorado);
+
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(212, 175, 55, 0.48);
+    border-left: 4px solid var(--member-class-color);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 18px;
+}
+
+.forever-roster__member--druid,
+.forever-member__profile.forever-member__profile--druid,
+.forever-member__alter.forever-member__alter--druid { --member-class-color: #ff7c0a; }
+.forever-roster__member--hunter,
+.forever-member__profile.forever-member__profile--hunter,
+.forever-member__alter.forever-member__alter--hunter { --member-class-color: #aad372; }
+.forever-roster__member--mage,
+.forever-member__profile.forever-member__profile--mage,
+.forever-member__alter.forever-member__alter--mage { --member-class-color: #3fc7eb; }
+.forever-roster__member--paladin,
+.forever-member__profile.forever-member__profile--paladin,
+.forever-member__alter.forever-member__alter--paladin { --member-class-color: #f48cba; }
+.forever-roster__member--priest,
+.forever-member__profile.forever-member__profile--priest,
+.forever-member__alter.forever-member__alter--priest { --member-class-color: #f0ebe0; }
+.forever-roster__member--rogue,
+.forever-member__profile.forever-member__profile--rogue,
+.forever-member__alter.forever-member__alter--rogue { --member-class-color: #fff468; }
+.forever-roster__member--shaman,
+.forever-member__profile.forever-member__profile--shaman,
+.forever-member__alter.forever-member__alter--shaman { --member-class-color: #0070dd; }
+.forever-roster__member--warlock,
+.forever-member__profile.forever-member__profile--warlock,
+.forever-member__alter.forever-member__alter--warlock { --member-class-color: #8788ee; }
+.forever-roster__member--warrior,
+.forever-member__profile.forever-member__profile--warrior,
+.forever-member__alter.forever-member__alter--warrior { --member-class-color: #c69b6d; }
+
+.forever-roster__member-header,
+.forever-roster__member-footer {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.forever-roster__member-name {
+    color: #f8fafc;
+    font-size: 1.2em;
+    font-weight: bold;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.forever-roster__member-rank,
+.forever-roster__member-role {
+    border: 1px solid rgba(212, 175, 55, 0.55);
+    border-radius: 999px;
+    color: #f8fafc;
+    display: inline-flex;
+    font-size: 0.84em;
+    font-weight: bold;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+.forever-roster__member-rank {
+    background: rgba(212, 175, 55, 0.13);
+    color: var(--dorado);
+}
+
+.forever-roster__member-class-spec {
+    color: var(--member-class-color);
+    font-weight: bold;
+    margin: 6px 0 0;
+}
+
+.forever-roster__member-role {
+    align-self: flex-start;
+    margin-top: 12px;
+}
+
+.forever-roster__member-role[data-role="tank"] { border-color: #60a5fa; }
+.forever-roster__member-role[data-role="healer"] { border-color: #86efac; }
+.forever-roster__member-role[data-role="dps"] { border-color: #fca5a5; }
+
+.forever-roster__member-details {
+    flex: 1;
+    margin-top: 18px;
+}
+
+.forever-roster__member-professions {
+    border-top: 1px solid rgba(212, 175, 55, 0.24);
+    padding-top: 12px;
+}
+
+.forever-roster__member-detail-title,
+.forever-roster__member-detail-values {
+    margin: 0;
+}
+
+.forever-roster__member-detail-title {
+    color: #cbd5e1;
+    font-size: 0.82em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.forever-roster__member-detail-values {
+    color: #f8fafc;
+    margin-top: 4px;
+}
+
+.forever-roster__member-footer {
+    border-top: 1px solid rgba(212, 175, 55, 0.24);
+    margin-top: 18px;
+    padding-top: 14px;
+}
+
+.forever-roster__member-alters {
+    color: #cbd5e1;
+    font-size: 0.92em;
+}
+
+.forever-roster__profile-button {
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    color: var(--dorado);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9em;
+    padding: 0;
+    text-align: right;
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.forever-roster__profile-button:hover,
+.forever-roster__profile-button:focus-visible {
+    border-bottom-color: currentColor;
+    color: #f4d77c;
+}
+
+.forever-roster__profile-button:focus-visible {
+    outline: 2px solid #f4d77c;
+    outline-offset: 3px;
+}
+
+.forever-roster__member-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+    .forever-roster {
+        padding: 28px 16px;
+    }
+
+    .forever-roster__header h1 {
+        font-size: 2em;
+    }
+
+    .forever-roster__signup-heading,
+    .forever-signup-form__grid {
+        align-items: stretch;
+        flex-direction: column;
+        grid-template-columns: 1fr;
+    }
+
+    .forever-roster__signup-heading {
+        display: flex;
+    }
+
+    .forever-roster__signup-controls {
+        justify-content: stretch;
+    }
+
+    .forever-roster__signup-controls .forever-roster__button {
+        flex: 1 1 150px;
+    }
+
+    .forever-signup-form__actions {
+        justify-content: stretch;
+    }
+
+    .forever-signup-form__actions .forever-roster__button {
+        flex: 1 1 130px;
+    }
+
+    .forever-roster__members {
+        grid-template-columns: 1fr;
+    }
+}
