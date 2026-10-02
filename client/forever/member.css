@@ -4,6 +4,36 @@
     padding: 40px 20px;
 }
 
+.forever-member__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.forever-member__edit-button {
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.7);
+    border-radius: 6px;
+    color: #f8fafc;
+    cursor: pointer;
+    font: inherit;
+    font-weight: bold;
+    padding: 10px 16px;
+}
+
+.forever-member__edit-button:hover,
+.forever-member__edit-button:focus-visible {
+    border-color: #f4d77c;
+    color: #f4d77c;
+}
+
+.forever-member__edit-button:focus-visible {
+    outline: 2px solid #f4d77c;
+    outline-offset: 2px;
+}
+
 .forever-member__status,
 .forever-member__profile {
     background-color: rgba(30, 41, 59, 0.88);
@@ -218,6 +248,15 @@
     .forever-member__header {
         flex-direction: column;
         padding: 22px;
+    }
+
+    .forever-member__actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .forever-member__actions > * {
+        text-align: center;
     }
 
     .forever-member__badges {

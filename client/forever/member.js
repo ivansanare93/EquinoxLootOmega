@@ -1,10 +1,15 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 import { doc, getDoc, getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 import { FOREVER_CATALOG } from './forever-catalog.js';
 
+const ADMIN_UID = 'be0rjT0v6dPllWpjKNPcgqsxfTS2';
 const memberStatus = document.getElementById('forever-member-status');
 const memberProfile = document.getElementById('forever-member-profile');
+const editMemberButton = document.getElementById('forever-member-edit');
 const memberId = new URLSearchParams(window.location.search).get('id');
+let isAdmin = false;
+let hasLoadedMember = false;
 
 function labelFor(items, id, fallback) {
     return items.find((entry) => entry.id === id)?.label || fallback;
@@ -20,6 +25,17 @@ function specLabel(classId, specId) {
 
 function isValidMemberId(id) {
     return typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id);
+}
+
+function updateEditControl() {
+    editMemberButton.hidden = !(isAdmin && hasLoadedMember);
+}
+
+function openRosterEditor() {
+    if (!isAdmin || !hasLoadedMember || !isValidMemberId(memberId)) return;
+    const rosterUrl = new URL('roster.html', window.location.href);
+    rosterUrl.searchParams.set('edit', memberId);
+    window.location.assign(rosterUrl.href);
 }
 
 function createText(tagName, className, text) {
@@ -153,11 +169,15 @@ function renderProfile(member) {
     );
 
     memberProfile.replaceChildren(header, renderMain(main), renderProfessions(main.primaryProfessions), renderAlters(member.alts));
+    hasLoadedMember = true;
+    updateEditControl();
     memberProfile.hidden = false;
     memberStatus.hidden = true;
 }
 
 function showStatus(message) {
+    hasLoadedMember = false;
+    updateEditControl();
     memberProfile.hidden = true;
     memberStatus.textContent = message;
     memberStatus.hidden = false;
@@ -172,7 +192,12 @@ async function loadMember() {
     try {
         const { firebaseConfig } = await import('../firebase-config.js');
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
+        onAuthStateChanged(auth, (user) => {
+            isAdmin = Boolean(user && user.uid === ADMIN_UID);
+            updateEditControl();
+        });
         const memberRef = doc(db, 'gameVersions', 'forever', 'members', memberId);
         const memberSnapshot = await getDoc(memberRef);
         if (!memberSnapshot.exists()) {
@@ -186,4 +211,5 @@ async function loadMember() {
     }
 }
 
+editMemberButton.addEventListener('click', openRosterEditor);
 loadMember();

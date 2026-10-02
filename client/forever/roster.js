@@ -8,6 +8,7 @@ const MAX_NAME_LENGTH = 24;
 const MAX_ALTERS = 10;
 const FORM_MODES = Object.freeze({ PUBLIC_CREATE: 'public-create', ADMIN_CREATE: 'admin-create', ADMIN_EDIT: 'admin-edit' });
 const STEP_TITLES = ['Personaje principal', 'Configuracion', 'Alters', 'Revisar'];
+const requestedEditMemberId = new URLSearchParams(window.location.search).get('edit');
 
 const membersList = document.getElementById('forever-roster-members');
 const loadingState = document.getElementById('forever-roster-loading');
@@ -66,6 +67,10 @@ let editingMemberId = null;
 let deletingMemberId = null;
 let isSaving = false;
 let isDeleting = false;
+let authStateResolved = false;
+let rosterLoaded = false;
+let urlEditActive = requestedEditMemberId !== null;
+let editRequestProcessed = false;
 
 function showState(state) {
     loadingState.hidden = state !== 'loading';
@@ -88,6 +93,39 @@ function specFor(classId, specId) {
 
 function normalizeName(name) {
     return typeof name === 'string' ? name.trim().toLocaleLowerCase('es') : '';
+}
+
+function isValidMemberId(id) {
+    return typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id);
+}
+
+function clearEditParameter() {
+    if (!urlEditActive) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('edit');
+    history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    urlEditActive = false;
+}
+
+function processEditRequest() {
+    if (editRequestProcessed || !urlEditActive || !authStateResolved || !rosterLoaded) return;
+    editRequestProcessed = true;
+    if (!isAdmin) {
+        clearEditParameter();
+        return;
+    }
+    if (!isValidMemberId(requestedEditMemberId)) {
+        showMessage(signupResult, 'No se ha encontrado el miembro que quieres editar.');
+        clearEditParameter();
+        return;
+    }
+    const member = rosterMembers.find((entry) => entry.id === requestedEditMemberId);
+    if (!member) {
+        showMessage(signupResult, 'No se ha encontrado el miembro que quieres editar.');
+        clearEditParameter();
+        return;
+    }
+    loadMemberForEdit(member);
 }
 
 function createOption(value, label, selected = false) {
@@ -443,10 +481,12 @@ function openSignup(mode) {
 
 function closeSignup() {
     if (isSaving) return;
+    const wasUrlEdit = formMode === FORM_MODES.ADMIN_EDIT && urlEditActive;
     signupForm.hidden = true;
     signupOpenButton.hidden = false;
     clearMessage(signupMessage);
     if (formMode !== FORM_MODES.PUBLIC_CREATE) resetSignup();
+    if (wasUrlEdit) clearEditParameter();
     signupOpenButton.focus();
 }
 
@@ -587,12 +627,15 @@ function renderMembers() {
 
 function showRosterSnapshot(snapshot) {
     rosterMembers = snapshot.docs.map((memberSnapshot) => ({ id: memberSnapshot.id, ...memberSnapshot.data() }));
+    rosterLoaded = true;
     if (!rosterMembers.length) {
         showState('empty');
+        processEditRequest();
         return;
     }
     renderMembers();
     showState('members');
+    processEditRequest();
 }
 
 async function saveSignup() {
@@ -644,6 +687,7 @@ async function saveSignup() {
         resetSignup();
         signupForm.hidden = true;
         signupOpenButton.hidden = false;
+        if (wasEdit) clearEditParameter();
         showMessage(signupResult, wasEdit ? 'Cambios guardados correctamente.' : 'Bienvenido al roster de Equinox. Tu personaje ha sido registrado como Naciente.', true);
         signupOpenButton.focus();
     } catch (error) {
@@ -704,12 +748,15 @@ async function initializeFirebase() {
         onAuthStateChanged(auth, (user) => {
             const wasAdmin = isAdmin;
             isAdmin = Boolean(user && user.uid === ADMIN_UID);
+            authStateResolved = true;
             updateAdminUi();
             if (user && !isAdmin) showMessage(adminLoginMessage, 'Esta cuenta no tiene permisos administrativos.');
             if (wasAdmin && !isAdmin) {
                 closeDeleteConfirmation();
                 if (formMode !== FORM_MODES.PUBLIC_CREATE) closeSignup();
             }
+            if (!isAdmin) clearEditParameter();
+            processEditRequest();
         });
     } catch (error) {
         console.error('Unable to initialize the Forever roster:', error);
