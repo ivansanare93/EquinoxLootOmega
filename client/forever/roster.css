@@ -348,32 +348,32 @@
 }
 
 .forever-roster__member--druid,
-.forever-member__profile--druid,
-.forever-member__alter--druid { --member-class-color: #ff7c0a; }
+.forever-member__profile.forever-member__profile--druid,
+.forever-member__alter.forever-member__alter--druid { --member-class-color: #ff7c0a; }
 .forever-roster__member--hunter,
-.forever-member__profile--hunter,
-.forever-member__alter--hunter { --member-class-color: #aad372; }
+.forever-member__profile.forever-member__profile--hunter,
+.forever-member__alter.forever-member__alter--hunter { --member-class-color: #aad372; }
 .forever-roster__member--mage,
-.forever-member__profile--mage,
-.forever-member__alter--mage { --member-class-color: #3fc7eb; }
+.forever-member__profile.forever-member__profile--mage,
+.forever-member__alter.forever-member__alter--mage { --member-class-color: #3fc7eb; }
 .forever-roster__member--paladin,
-.forever-member__profile--paladin,
-.forever-member__alter--paladin { --member-class-color: #f48cba; }
+.forever-member__profile.forever-member__profile--paladin,
+.forever-member__alter.forever-member__alter--paladin { --member-class-color: #f48cba; }
 .forever-roster__member--priest,
-.forever-member__profile--priest,
-.forever-member__alter--priest { --member-class-color: #f0ebe0; }
+.forever-member__profile.forever-member__profile--priest,
+.forever-member__alter.forever-member__alter--priest { --member-class-color: #f0ebe0; }
 .forever-roster__member--rogue,
-.forever-member__profile--rogue,
-.forever-member__alter--rogue { --member-class-color: #fff468; }
+.forever-member__profile.forever-member__profile--rogue,
+.forever-member__alter.forever-member__alter--rogue { --member-class-color: #fff468; }
 .forever-roster__member--shaman,
-.forever-member__profile--shaman,
-.forever-member__alter--shaman { --member-class-color: #0070dd; }
+.forever-member__profile.forever-member__profile--shaman,
+.forever-member__alter.forever-member__alter--shaman { --member-class-color: #0070dd; }
 .forever-roster__member--warlock,
-.forever-member__profile--warlock,
-.forever-member__alter--warlock { --member-class-color: #8788ee; }
+.forever-member__profile.forever-member__profile--warlock,
+.forever-member__alter.forever-member__alter--warlock { --member-class-color: #8788ee; }
 .forever-roster__member--warrior,
-.forever-member__profile--warrior,
-.forever-member__alter--warrior { --member-class-color: #c69b6d; }
+.forever-member__profile.forever-member__profile--warrior,
+.forever-member__alter.forever-member__alter--warrior { --member-class-color: #c69b6d; }
 
 .forever-roster__member-header,
 .forever-roster__member-footer {
